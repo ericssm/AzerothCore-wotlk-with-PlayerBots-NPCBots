@@ -4197,7 +4197,7 @@ bool Creature::IsUpdateNeeded()
     if (IsInCombat())
         return true;
 
-    if (IsVisibilityOverridden())
+    if (!GetObjectVisibilityContainer().GetVisiblePlayersMap().empty())
         return true;
 
     if (ToTempSummon())

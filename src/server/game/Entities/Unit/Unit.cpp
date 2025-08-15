@@ -53,6 +53,7 @@
 #include "Player.h"
 #include "ReputationMgr.h"
 #include "ScriptMgr.h"
+#include "SmartAI.h"
 #include "Spell.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
@@ -4527,6 +4528,15 @@ void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool wi
         {
             m_currentSpells[spellType] = nullptr;
             spell->SetReferencedFromCurrent(false);
+        }
+
+        // SAI creatures only
+        // Start chasing victim if they are spell casters (at least one SMC spell) if interrupted/silenced.
+        if (IsCreature())
+        {
+            if (SmartAI* ai = dynamic_cast<SmartAI*>(ToCreature()->AI()))
+                if (ai->CanChaseOnInterrupt())
+                    ai->SetCombatMove(true);
         }
     }
 }
