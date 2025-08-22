@@ -34,9 +34,9 @@ ObjectVisibilityContainer::ObjectVisibilityContainer(WorldObject* selfObject) :
 
 ObjectVisibilityContainer::~ObjectVisibilityContainer()
 {
-    ASSERT(_visiblePlayersMap.empty());
+    _visiblePlayersMap.clear();
     if (_visibleWorldObjectsMap)
-        ASSERT((*_visibleWorldObjectsMap).empty());
+        (*_visibleWorldObjectsMap).clear();
 }
 
 void ObjectVisibilityContainer::InitForPlayer()
