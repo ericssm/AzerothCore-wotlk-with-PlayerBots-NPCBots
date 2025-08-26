@@ -2165,8 +2165,6 @@ void Creature::setDeathState(DeathState state, bool despawn)
 
         Dismount();     // if creature is mounted on a virtual mount, remove it at death
 
-        setActive(false);
-
         if (HasSearchedAssistance())
         {
             SetNoSearchAssistance(false);
@@ -3963,7 +3961,7 @@ bool Creature::IsMovementPreventedByCasting() const
 void Creature::SetCannotReachTarget(ObjectGuid const& cannotReach)
 {
     if (cannotReach == m_cannotReachTarget)
-{
+    {
         return;
     }
 

@@ -165,6 +165,13 @@ namespace WorldPackets
         class PetSpellAutocast;
         class RequestPetInfo;
     }
+
+    namespace Query
+    {
+        class NameQuery;
+        class TimeQuery;
+        class CorpseMapPositionQuery;
+    }
 }
 
 enum AccountDataType
@@ -403,7 +410,7 @@ public:
     }
 
     void SendSetPhaseShift(uint32 phaseShift);
-    void SendQueryTimeResponse();
+    void SendTimeQueryResponse();
 
     void SendAuthResponse(uint8 code, bool shortForm, uint32 queuePos = 0);
     void SendClientCacheVersion(uint32 version);
@@ -585,7 +592,6 @@ public:
     // Time Synchronisation
     void ResetTimeSync();
     void SendTimeSync();
-
 public:                                                 // opcodes handlers
     void Handle_NULL(WorldPacket& null);                // not used
     void Handle_EarlyProccess(WorldPacket& recvPacket); // just mark packets processed in WorldSocket::OnRead
@@ -694,9 +700,9 @@ public:                                                 // opcodes handlers
     void HandleGameObjectUseOpcode(WorldPacket& recPacket);
     void HandleGameobjectReportUse(WorldPacket& recvPacket);
 
-    void HandleNameQueryOpcode(WorldPacket& recvPacket);
+    void HandleNameQueryOpcode(WorldPackets::Query::NameQuery& packet);
 
-    void HandleQueryTimeOpcode(WorldPacket& recvPacket);
+    void HandleTimeQueryOpcode(WorldPackets::Query::TimeQuery& packet);
 
     void HandleCreatureQueryOpcode(WorldPacket& recvPacket);
 
@@ -896,7 +902,7 @@ public:                                                 // opcodes handlers
 
     void HandleReclaimCorpseOpcode(WorldPacket& recvPacket);
     void HandleCorpseQueryOpcode(WorldPacket& recvPacket);
-    void HandleCorpseMapPositionQuery(WorldPacket& recvPacket);
+    void HandleCorpseMapPositionQuery(WorldPackets::Query::CorpseMapPositionQuery& packet);
     void HandleResurrectResponseOpcode(WorldPacket& recvPacket);
     void HandleSummonResponseOpcode(WorldPacket& recvData);
 
