@@ -891,8 +891,6 @@ void World::SetInitialWorldSettings()
     _timers[WUPDATE_UPTIME].SetInterval(getIntConfig(CONFIG_UPTIME_UPDATE)*MINUTE * IN_MILLISECONDS);
     //Update "uptime" table based on configuration entry in minutes.
 
-    _timers[WUPDATE_CORPSES].SetInterval(20 * MINUTE * IN_MILLISECONDS);
-    //erase corpses every 20 minutes
     _timers[WUPDATE_CLEANDB].SetInterval(getIntConfig(CONFIG_LOGDB_CLEARINTERVAL)*MINUTE * IN_MILLISECONDS);
     // clean logs table every 14 days by default
     _timers[WUPDATE_AUTOBROADCAST].SetInterval(getIntConfig(CONFIG_AUTOBROADCAST_INTERVAL));
@@ -1285,18 +1283,6 @@ void World::Update(uint32 diff)
         LoginDatabase.Execute(stmt);
     }
 
-    ///- Erase corpses once every 20 minutes
-    if (_timers[WUPDATE_CORPSES].Passed())
-    {
-        METRIC_TIMER("world_update_time", METRIC_TAG("type", "Remove old corpses"));
-        _timers[WUPDATE_CORPSES].Reset();
-
-        sMapMgr->DoForAllMaps([](Map* map)
-        {
-            map->RemoveOldCorpses();
-        });
-    }
-
     ///- Process Game events when necessary
     if (_timers[WUPDATE_EVENTS].Passed())
     {
@@ -1485,7 +1471,6 @@ void World::_UpdateGameTime()
 void World::ShutdownServ(uint32 time, uint32 options, uint8 exitcode, std::string const& reason)
 {
     // ignore if server shutdown at next tick
-
     if (IsStopped())
         return;
 
@@ -1845,10 +1830,6 @@ SQLQueryHolderCallback& World::AddQueryHolderCallback(SQLQueryHolderCallback&& c
 }
 #endif
 
-void World::RemoveOldCorpses()
-{
-    _timers[WUPDATE_CORPSES].SetCurrent(_timers[WUPDATE_CORPSES].GetInterval());
-}
 
 bool World::IsPvPRealm() const
 {
