@@ -4504,8 +4504,8 @@ void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool wi
     //LOG_DEBUG("entities.unit", "Interrupt spell for unit {}.", GetEntry());
     Spell* spell = m_currentSpells[spellType];
     if (spell
-            && (withDelayed || spell->getState() != SPELL_STATE_DELAYED)
-            && (withInstant || spell->GetCastTime() > 0 || spell->getState() == SPELL_STATE_CASTING)) // xinef: or spell is in casting state (channeled spells only)
+        && (withDelayed || spell->getState() != SPELL_STATE_DELAYED)
+        && (withInstant || spell->GetCastTime() > 0 || spell->getState() == SPELL_STATE_CASTING)) // xinef: or spell is in casting state (channeled spells only)
     {
         // for example, do not let self-stun aura interrupt itself
         if (!spell->IsInterruptable())
@@ -11045,25 +11045,13 @@ ReputationRank Unit::GetFactionReactionTo(FactionTemplateEntry const* factionTem
 #endif
     // common faction based check
     if (factionTemplateEntry->IsHostileTo(*targetFactionTemplateEntry))
-    {
         return REP_HOSTILE;
-    }
-
     if (factionTemplateEntry->IsFriendlyTo(*targetFactionTemplateEntry))
-    {
         return REP_FRIENDLY;
-    }
-
     if (targetFactionTemplateEntry->IsFriendlyTo(*factionTemplateEntry))
-    {
         return REP_FRIENDLY;
-    }
-
     if (factionTemplateEntry->factionFlags & FACTION_TEMPLATE_FLAG_HATES_ALL_EXCEPT_FRIENDS)
-    {
         return REP_HOSTILE;
-    }
-
     // neutral by default
     return REP_NEUTRAL;
 }
@@ -22065,12 +22053,10 @@ void Unit::ExecuteDelayedUnitRelocationEvent()
                     //active->m_last_notify_position.Relocate(active->GetPositionX(), active->GetPositionY(), active->GetPositionZ());
                 }
 
-                Acore::PlayerRelocationNotifier relocateNoLarge(*player, false); // visit only objects which are not large; default distance
-                Cell::VisitObjects(viewPoint, relocateNoLarge, player->GetSightRange() + VISIBILITY_INC_FOR_GOBJECTS);
-                relocateNoLarge.SendToSelf();
-                Acore::PlayerRelocationNotifier relocateLarge(*player, true);    // visit only large objects; maximum distance
-                Cell::VisitObjects(viewPoint, relocateLarge, MAX_VISIBILITY_DISTANCE);
-                relocateLarge.SendToSelf();
+                Acore::PlayerRelocationNotifier notifier(*player);
+                Cell::VisitObjects(viewPoint, notifier, player->GetSightRange());
+                Cell::VisitFarVisibleObjects(viewPoint, notifier, VISIBILITY_DISTANCE_GIGANTIC);
+                notifier.SendToSelf();
             }
 
     if (Player* player = this->ToPlayer())
@@ -22104,16 +22090,10 @@ void Unit::ExecuteDelayedUnitRelocationEvent()
 
         GetMap()->LoadGridsInRange(*player, MAX_VISIBILITY_DISTANCE);
 
-        Acore::PlayerRelocationNotifier relocateNoLarge(*player, false); // visit only objects which are not large; default distance
-        Cell::VisitObjects(viewPoint, relocateNoLarge, player->GetSightRange() + VISIBILITY_INC_FOR_GOBJECTS);
-        relocateNoLarge.SendToSelf();
-
-        if (!player->GetFarSightDistance())
-        {
-            Acore::PlayerRelocationNotifier relocateLarge(*player, true); // visit only large objects; maximum distance
-            Cell::VisitObjects(viewPoint, relocateLarge, MAX_VISIBILITY_DISTANCE);
-            relocateLarge.SendToSelf();
-        }
+        Acore::PlayerRelocationNotifier notifier(*player);
+        Cell::VisitObjects(viewPoint, notifier, player->GetSightRange());
+        Cell::VisitFarVisibleObjects(viewPoint, notifier, VISIBILITY_DISTANCE_GIGANTIC);
+        notifier.SendToSelf();
 
         this->AddToNotify(NOTIFY_AI_RELOCATION);
     }
@@ -22133,7 +22113,7 @@ void Unit::ExecuteDelayedUnitRelocationEvent()
         unit->m_last_notify_position.Relocate(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ());
 
         Acore::CreatureRelocationNotifier relocate(*unit);
-        Cell::VisitObjects(unit, relocate, unit->GetVisibilityRange() + VISIBILITY_COMPENSATION);
+        Cell::VisitObjects(unit, relocate, unit->GetVisibilityRange());
 
         this->AddToNotify(NOTIFY_AI_RELOCATION);
     }

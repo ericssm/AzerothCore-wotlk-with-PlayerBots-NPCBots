@@ -31,6 +31,7 @@ else()
   set(BOOST_REQUIRED_VERSION 1.74)
 endif()
 
+# Boost.System is header-only since 1.69; do not require it explicitly.
 find_package(Boost ${BOOST_REQUIRED_VERSION} REQUIRED system filesystem program_options iostreams regex thread)
 
 if(NOT Boost_FOUND)
