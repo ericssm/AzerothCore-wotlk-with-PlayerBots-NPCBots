@@ -29,6 +29,7 @@ class Unit;
 class Creature;
 class Player;
 class SpellInfo;
+enum SpellFinishReason : uint8;
 
 typedef std::vector<AreaBoundary const*> CreatureBoundary;
 
@@ -146,6 +147,9 @@ public:
     // Called when spell hits a target
     virtual void SpellHitTarget(Unit* /*target*/, SpellInfo const* /*spell*/) {}
 
+    // Called when a spell either finishes, interrupts or cancels a spell cast
+    virtual void OnSpellCastFinished(SpellInfo const* /*spell*/, SpellFinishReason /*reason*/) {}
+    
 #ifdef MOD_NPCERBOTS    //npcbot
     // Called when a spell starts
     virtual void OnSpellStart(SpellInfo const* /*spell*/) { }
