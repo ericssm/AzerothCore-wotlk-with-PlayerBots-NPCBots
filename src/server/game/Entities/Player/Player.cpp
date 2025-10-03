@@ -3920,7 +3920,7 @@ bool Player::resetTalents(bool noResetCost)
     if (m_canTitanGrip)
         SetCanTitanGrip(false);
     // xinef: remove dual wield if player does not have dual wield spell (shamans)
-    if (!HasSpell(674) && m_canDualWield)
+    if (!HasSpell(674) && CanDualWield())
         SetCanDualWield(false);
 
     AutoUnequipOffhandIfNeed();
@@ -15482,7 +15482,7 @@ void Player::ActivateSpec(uint8 spec)
     if (!HasTalent(46917, GetActiveSpec()) && m_canTitanGrip)
         SetCanTitanGrip(false);
     // xinef: remove dual wield if player does not have dual wield spell (shamans)
-    if (!HasSpell(674) && m_canDualWield)
+    if (!HasSpell(674) && CanDualWield())
         SetCanDualWield(false);
 
     AutoUnequipOffhandIfNeed();
