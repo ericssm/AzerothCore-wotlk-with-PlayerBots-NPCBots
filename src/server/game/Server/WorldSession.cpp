@@ -148,9 +148,11 @@ WorldSession::WorldSession(uint32 id, std::string&& name, uint32 accountFlags, s
     _timeSyncClockDelta(0),
 #ifdef MOD_PLAYERBOTS
     _pendingTimeSyncRequests(),
+    _orderCounter(0),
     _isBot(isBot)
 #else
-    _pendingTimeSyncRequests()
+    _pendingTimeSyncRequests(),
+    _orderCounter(0)
 #endif
 {
     memset(m_Tutorials, 0, sizeof(m_Tutorials));
