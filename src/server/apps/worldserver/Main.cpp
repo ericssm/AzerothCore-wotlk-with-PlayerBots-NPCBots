@@ -590,7 +590,7 @@ void WorldUpdateLoop()
         if (diff < minUpdateDiff)
         {
             uint32 sleepTime = minUpdateDiff - diff;
-            if (sleepTime >= halfMaxCoreStuckTime)
+            if (maxCoreStuckTime > 0 && sleepTime >= halfMaxCoreStuckTime)
                 LOG_ERROR("server.worldserver", "WorldUpdateLoop() waiting for {} ms with MaxCoreStuckTime set to {} ms", sleepTime, maxCoreStuckTime);
             // sleep until enough time passes that we can update all timers
             std::this_thread::sleep_for(Milliseconds(sleepTime));
