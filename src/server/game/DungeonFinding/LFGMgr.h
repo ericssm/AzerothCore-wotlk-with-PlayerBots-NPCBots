@@ -568,7 +568,7 @@ namespace lfg
         /// Checks if all players are queued
         bool AllQueued(Lfg5Guids const& check);
         /// Checks if given roles match, modifies given roles map with new roles
-        static uint8 CheckGroupRoles(LfgRolesMap& groles, bool removeLeaderFlag = true);
+        static uint8 CheckGroupRoles(LfgRolesMap& groles);
         /// Checks if given players are ignoring each other
         static bool HasIgnore(ObjectGuid guid1, ObjectGuid guid2);
         /// Sends queue status to player
@@ -579,9 +579,7 @@ namespace lfg
         [[nodiscard]] bool IsTesting() const { return m_Testing; }
 
         void SetDungeon(ObjectGuid guid, uint32 dungeon);
-#ifdef MOD_PLAYERBOTS
         LFGDungeonData const* GetLFGDungeon(uint32 id);
-#endif
 
     private:
         TeamId GetTeam(ObjectGuid guid);
@@ -594,9 +592,6 @@ namespace lfg
         void SetCanOverrideRBState(ObjectGuid guid, bool val);
         void GetCompatibleDungeons(LfgDungeonSet& dungeons, LfgGuidSet const& players, LfgLockPartyMap& lockMap);
         void _SaveToDB(ObjectGuid guid);
-#ifndef MOD_PLAYERBOTS
-        LFGDungeonData const* GetLFGDungeon(uint32 id);
-#endif
 
         // Proposals
         void RemoveProposal(LfgProposalContainer::iterator itProposal, LfgUpdateType type);

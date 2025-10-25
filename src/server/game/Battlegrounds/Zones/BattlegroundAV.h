@@ -1810,11 +1810,9 @@ public:
 
     TeamId GetPrematureWinner() override;
 
-#ifdef MOD_PLAYERBOTS
     [[nodiscard]] BG_AV_NodeInfo const& GetAVNodeInfo(uint32 node) const { return m_Nodes[node]; }
     [[nodiscard]] bool IsCaptainAlive(uint8 index) const { return m_CaptainAlive[index]; }
     [[nodiscard]] TeamId GetMineOwner(uint8 index) const { return m_Mine_Owner[index]; }
-#endif
 
 private:
     void PostUpdateImpl(uint32 diff) override;
@@ -1877,6 +1875,7 @@ private:
     uint32 _reputationSurvivingCaptain = 0; // 125, 175
     uint32 _reputationSurvivingTower = 0; // 12, 18
     uint32 _reputationPerOwnedMine = 0; // 24, 36
+    float _avReputationRate;
 
     bool m_IsInformedNearVictory[2] {};
 };

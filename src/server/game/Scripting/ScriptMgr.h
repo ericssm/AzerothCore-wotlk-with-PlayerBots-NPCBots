@@ -109,7 +109,6 @@ namespace Acore::ChatCommands
 
 */
 
-#ifdef MOD_PLAYERBOTS
 class PlayerbotScript : public ScriptObject
 {
 protected:
@@ -129,9 +128,7 @@ public:
     virtual void OnPlayerbotLogout(Player* /*player*/) { }
     virtual void OnPlayerbotLogoutBots() { }
 };
-#endif
 
-// Manages registration, loading, and execution of scripts.
 class ScriptMgr
 {
     friend class ScriptObject;
@@ -184,9 +181,7 @@ public: /* ServerScript */
     void OnSocketOpen(std::shared_ptr<WorldSocket> socket);
     void OnSocketClose(std::shared_ptr<WorldSocket> socket);
     bool CanPacketReceive(WorldSession* session, WorldPacket const& packet);
-#ifdef MOD_PLAYERBOTS
     void OnPacketReceived(WorldSession* session, WorldPacket const& packet);
-#endif
     bool CanPacketSend(WorldSession* session, WorldPacket const& packet);
 
 public: /* WorldScript */
@@ -233,9 +228,6 @@ public: /* ItemScript */
     bool OnItemExpire(Player* player, ItemTemplate const* proto);
     bool OnItemRemove(Player* player, Item* item);
     bool OnCastItemCombatSpell(Player* player, Unit* victim, SpellInfo const* spellInfo, Item* item);
-#ifdef DIY_ADEN2008
-    bool OnGossipHello(Player* player, Item* item);
-#endif //DIY_ADEN2008
     void OnGossipSelect(Player* player, Item* item, uint32 sender, uint32 action);
     void OnGossipSelectCode(Player* player, Item* item, uint32 sender, uint32 action, const char* code);
 
@@ -330,9 +322,7 @@ public: /* PlayerScript */
     void OnPlayerReleasedGhost(Player* player);
     void OnPlayerSendInitialPacketsBeforeAddToMap(Player* player, WorldPacket& data);
     void OnPlayerBeforeUpdate(Player* player, uint32 p_time);
-#ifdef MOD_PLAYERBOTS
     void OnPlayerAfterUpdate(Player* player, uint32 diff);
-#endif
     void OnPlayerUpdate(Player* player, uint32 p_time);
     void OnPlayerPVPKill(Player* killer, Player* killed);
     void OnPlayerPVPFlagChange(Player* player, bool state);
@@ -723,18 +713,14 @@ public: /* CommandSC */
 
 public: /* DatabaseScript */
 
-#ifdef MOD_PLAYERBOTS
     bool OnDatabasesLoading();
-#endif
     void OnAfterDatabasesLoaded(uint32 updateFlags);
     void OnAfterDatabaseLoadCreatureTemplates(std::vector<CreatureTemplate*> creatureTemplateStore);
-#ifdef MOD_PLAYERBOTS
     void OnDatabasesKeepAlive();
     void OnDatabasesClosing();
     void OnDatabaseWarnAboutSyncQueries(bool apply);
     void OnDatabaseSelectIndexLogout(Player* player, uint32& statementIndex, uint32& statementParam);
     void OnDatabaseGetDBRevision(std::string& revision);
-#endif
 
 public: /* WorldObjectScript */
 
@@ -752,7 +738,6 @@ public: /* LootScript */
 
     void OnLootMoney(Player* player, uint32 gold);
 
-#ifdef MOD_PLAYERBOTS
 public: /* PlayerbotScript */
     
     bool OnPlayerbotCheckLFGQueue(lfg::Lfg5Guids const& guidsList);
@@ -764,7 +749,6 @@ public: /* PlayerbotScript */
     void OnPlayerbotUpdateSessions(Player* player);
     void OnPlayerbotLogout(Player* player);
     void OnPlayerbotLogoutBots();
-#endif
 
 public: /* TicketScript */
 

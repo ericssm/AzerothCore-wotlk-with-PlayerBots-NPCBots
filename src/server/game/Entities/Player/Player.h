@@ -41,6 +41,7 @@
 #include "TradeData.h"
 #include "Unit.h"
 #include "WorldSession.h"
+#include <set>
 #include <string>
 #include <vector>
 
@@ -840,18 +841,6 @@ enum EnviromentalDamage
     DAMAGE_FALL_TO_VOID = 6                                 // custom case for fall without durability loss
 };
 
-#ifndef MOD_PLAYERBOTS
-enum PlayerChatTag
-{
-    CHAT_TAG_NONE       = 0x00,
-    CHAT_TAG_AFK        = 0x01,
-    CHAT_TAG_DND        = 0x02,
-    CHAT_TAG_GM         = 0x04,
-    CHAT_TAG_COM        = 0x08, // Commentator tag. Do not exist in clean client
-    CHAT_TAG_DEV        = 0x10,
-};
-#endif
-
 enum PlayedTimeIndex
 {
     PLAYED_TIME_TOTAL = 0,
@@ -1135,8 +1124,8 @@ public:
     void SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time, bool onEnterMap);
 
     bool CanInteractWithQuestGiver(Object* questGiver);
-    Creature* GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask);
-    [[nodiscard]] GameObject* GetGameObjectIfCanInteractWith(ObjectGuid guid, GameobjectTypes type) const;
+    Creature* GetNPCIfCanInteractWith(ObjectGuid const& guid, uint32 npcflagmask);
+    [[nodiscard]] GameObject* GetGameObjectIfCanInteractWith(ObjectGuid const& guid, GameobjectTypes type) const;
 
     void ToggleAFK();
     void ToggleDND();
@@ -1162,6 +1151,7 @@ public:
     void SetCommentator(bool on) { ApplyModFlag(PLAYER_FLAGS, PLAYER_FLAGS_COMMENTATOR2, on); }
     [[nodiscard]] bool IsDeveloper() const { return HasPlayerFlag(PLAYER_FLAGS_DEVELOPER); }
     void SetDeveloper(bool on) { ApplyModFlag(PLAYER_FLAGS, PLAYER_FLAGS_DEVELOPER, on); }
+    void SetBeastMaster(bool on) { if (on) SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE); else RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE); }
     [[nodiscard]] bool isAcceptWhispers() const { return m_ExtraFlags & PLAYER_EXTRA_ACCEPT_WHISPERS; }
     void SetAcceptWhispers(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_ACCEPT_WHISPERS; else m_ExtraFlags &= ~PLAYER_EXTRA_ACCEPT_WHISPERS; }
     [[nodiscard]] bool IsGameMaster() const { return m_ExtraFlags & PLAYER_EXTRA_GM_ON; }
@@ -1216,7 +1206,7 @@ public:
     [[nodiscard]] PetStable const* GetPetStable() const { return m_petStable.get(); }
 
     [[nodiscard]] Pet* GetPet() const;
-    Pet* SummonPet(uint32 entry, float x, float y, float z, float ang, PetType petType, Milliseconds duration = 0s, uint32 healthPct = 0);
+    Pet* SummonPet(uint32 entry, float x, float y, float z, float ang, PetType petType, Milliseconds duration = 0ms, uint32 healthPct = 0);
     void RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent = false);
     bool CanPetResurrect();
     bool IsExistPet();
@@ -2040,7 +2030,7 @@ public:
     Corpse* CreateCorpse();
     void RemoveCorpse();
     void KillPlayer();
-    static void OfflineResurrect(ObjectGuid const guid, CharacterDatabaseTransaction trans);
+    static void OfflineResurrect(ObjectGuid const& guid, CharacterDatabaseTransaction trans);
     [[nodiscard]] bool HasCorpse() const { return _corpseLocation.GetMapId() != MAPID_INVALID; }
     [[nodiscard]] WorldLocation GetCorpseLocation() const { return _corpseLocation; }
     uint32 GetResurrectionSpellId();
@@ -2072,9 +2062,7 @@ public:
 
     void JoinedChannel(Channel* c);
     void LeftChannel(Channel* c);
-#ifdef MOD_PLAYERBOTS
     bool IsInChannel(const Channel* c);
-#endif
     void CleanupChannels();
     void ClearChannelWatch();
     void UpdateLFGChannel();
@@ -2361,6 +2349,7 @@ public:
     void SetMover(Unit* target);
 
     void SetSeer(WorldObject* target) { m_seer = target; }
+    WorldObject* GetSeer() const { return m_seer; }
     void SetViewpoint(WorldObject* target, bool apply);
     [[nodiscard]] WorldObject* GetViewpoint() const;
     void StopCastingCharm(Aura* except = nullptr);
@@ -2559,7 +2548,9 @@ public:
     //bool isActiveObject() const { return true; }
     bool CanSeeSpellClickOn(Creature const* creature) const;
     [[nodiscard]] bool CanSeeVendor(Creature const* creature) const;
-
+private:
+    [[nodiscard]] bool AnyVendorOptionAvailable(uint32 menuId, Creature const* creature) const;
+public:
     [[nodiscard]] uint32 GetChampioningFaction() const { return m_ChampioningFaction; }
     void SetChampioningFaction(uint32 faction) { m_ChampioningFaction = faction; }
     Spell* m_spellModTakingSpell;
@@ -2572,8 +2563,6 @@ public:
     void AddWhisperWhiteList(ObjectGuid guid) { WhisperList.push_back(guid); }
     bool IsInWhisperWhiteList(ObjectGuid guid);
     void RemoveFromWhisperWhiteList(ObjectGuid guid) { WhisperList.remove(guid); }
-
-    bool SetDisableGravity(bool disable, bool packetOnly = false, bool updateAnimationTier = true) override;
 
     [[nodiscard]] bool CanFly() const override { return m_movementInfo.HasMovementFlag(MOVEMENTFLAG_CAN_FLY); }
     [[nodiscard]] bool CanEnterWater() const override { return true; }
@@ -2640,9 +2629,7 @@ public:
 
     void SendSystemMessage(std::string_view msg, bool escapeCharacters = false);
 
-#ifdef MOD_PLAYERBOTS
     void ResetSpeakTimers();
-#endif
 
     std::string GetDebugInfo() const override;
 

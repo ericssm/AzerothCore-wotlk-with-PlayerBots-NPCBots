@@ -41,7 +41,7 @@
 
 #include "UpdateFields.h"
 
-class ElunaEventProcessor;
+class ALEEventProcessor;
 
 enum TempSummonType
 {
@@ -740,7 +740,7 @@ public:
     ObjectVisibilityContainer const& GetObjectVisibilityContainer() const { return _objectVisibilityContainer; }
 
     // Event handler
-    ElunaEventProcessor* elunaEvents;
+    ALEEventProcessor* ALEEvents;
     EventProcessor m_Events;
 
 protected:
@@ -792,6 +792,9 @@ private:
     bool CanDetectInvisibilityOf(WorldObject const* obj) const;
     //bool CanDetectStealthOf(WorldObject const* obj) const;
     bool CanDetectStealthOf(WorldObject const* obj, bool checkAlert = false) const;
+
+    void RemoveFromMapVisibilityOverrideContainers();
+    void AddToMapVisibilityOverrideContainers();
 
     GuidUnorderedSet _allowedLooters;
 

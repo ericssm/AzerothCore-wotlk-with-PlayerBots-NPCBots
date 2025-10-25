@@ -105,18 +105,18 @@ enum class CreatureFlightMovementType : uint8
 
 enum class CreatureChaseMovementType : uint8
 {
-    Run,
-    CanWalk,
-    AlwaysWalk,
+    Run         = 0,
+    CanWalk     = 1,
+    AlwaysWalk  = 2,
 
     Max
 };
 
 enum class CreatureRandomMovementType : uint8
 {
-    Walk,
-    CanRun,
-    AlwaysRun,
+    Walk        = 0,
+    CanRun      = 1,
+    AlwaysRun   = 2,
 
     Max
 };
@@ -392,9 +392,7 @@ typedef std::unordered_map<uint32, EquipmentInfoContainerInternal> EquipmentInfo
 struct CreatureData
 {
     CreatureData() = default;
-#ifdef MOD_PLAYERBOTS
     ObjectGuid::LowType spawnId{0};
-#endif
     uint32 id1{0};                                             // entry in creature_template
     uint32 id2{0};                                             // entry in creature_template
     uint32 id3{0};                                             // entry in creature_template

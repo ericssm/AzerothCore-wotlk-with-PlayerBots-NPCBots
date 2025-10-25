@@ -2405,7 +2405,7 @@ void BotMgr::RecallAllBots(bool teleport)
     {
         for (BotMap::const_iterator itr = _bots.begin(); itr != _bots.end(); ++itr)
             if (itr->second->IsInWorld() && itr->second->IsAlive() && !bot_ai::CCed(itr->second, true))
-                itr->second->GetMotionMaster()->MovePoint(_owner->GetMapId(), *_owner, false);
+                itr->second->GetMotionMaster()->MovePoint(_owner->GetMapId(), _owner->GetPositionX(), _owner->GetPositionY(), _owner->GetPositionZ(),FORCED_MOVEMENT_NONE,0.f,0.f, false);
     }
 }
 
@@ -2414,7 +2414,7 @@ void BotMgr::RecallBot(Creature* bot)
     ASSERT(GetBot(bot->GetGUID()));
 
     if (bot->IsInWorld() && bot->IsAlive() && !bot_ai::CCed(bot, true))
-        bot->GetMotionMaster()->MovePoint(_owner->GetMapId(), *_owner, false);
+        bot->GetMotionMaster()->MovePoint(_owner->GetMapId(), _owner->GetPositionX(), _owner->GetPositionY(), _owner->GetPositionZ(), FORCED_MOVEMENT_NONE, 0.f, 0.f, false);
 }
 
 void BotMgr::KillAllBots()

@@ -92,7 +92,6 @@ private:
     };
     ThreatMgr* iThreatMgr;
 public:
-#ifdef MOD_PLAYERBOTS
     ThreatRefStatusChangeEvent(uint32 pType) : UnitBaseEvent(pType), iFValue(0.f), iThreatMgr(nullptr)
     {
         iHostileReference = nullptr;
@@ -114,15 +113,6 @@ public:
         iHostileReference = pHostileReference;
         iBValue = pValue;
     }
-#else
-    ThreatRefStatusChangeEvent(uint32 pType) : UnitBaseEvent(pType), iThreatMgr(nullptr) { iHostileReference = nullptr; }
-
-    ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference) : UnitBaseEvent(pType), iThreatMgr(nullptr) { iHostileReference = pHostileReference; }
-
-    ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference, float pValue) : UnitBaseEvent(pType), iThreatMgr(nullptr) { iHostileReference = pHostileReference; iFValue = pValue; }
-
-    ThreatRefStatusChangeEvent(uint32 pType, HostileReference* pHostileReference, bool pValue) : UnitBaseEvent(pType), iThreatMgr(nullptr) { iHostileReference = pHostileReference; iBValue = pValue; }
-#endif
 
     [[nodiscard]] int32 getIValue() const { return iIValue; }
 

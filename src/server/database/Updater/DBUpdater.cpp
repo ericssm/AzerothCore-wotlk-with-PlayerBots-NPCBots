@@ -76,7 +76,6 @@ std::string DBUpdater<LoginDatabaseConnection>::GetTableName()
     return "Auth";
 }
 
-#ifdef MOD_PLAYERBOTS
 template<>
 std::string DBUpdater<LoginDatabaseConnection>::GetSourceDirectory()
 {
@@ -88,12 +87,6 @@ std::string DBUpdater<LoginDatabaseConnection>::GetBaseFilesDirectory()
 {
     return DBUpdater<LoginDatabaseConnection>::GetSourceDirectory() + "/data/sql/base/db_auth/";
 }
-#else
-std::string DBUpdater<LoginDatabaseConnection>::GetBaseFilesDirectory()
-{
-    return BuiltInConfig::GetSourceDirectory() + "/data/sql/base/db_auth/";
-}
-#endif
 
 template<>
 bool DBUpdater<LoginDatabaseConnection>::IsEnabled(uint32 const updateMask)
@@ -105,11 +98,7 @@ bool DBUpdater<LoginDatabaseConnection>::IsEnabled(uint32 const updateMask)
 template<>
 std::string DBUpdater<LoginDatabaseConnection>::GetDBModuleName()
 {
-#ifdef MOD_PLAYERBOTS
     return "auth";
-#else
-    return "db-auth";
-#endif
 }
 
 // World Database
@@ -125,7 +114,6 @@ std::string DBUpdater<WorldDatabaseConnection>::GetTableName()
     return "World";
 }
 
-#ifdef MOD_PLAYERBOTS
 template<>
 std::string DBUpdater<WorldDatabaseConnection>::GetSourceDirectory()
 {
@@ -137,12 +125,6 @@ std::string DBUpdater<WorldDatabaseConnection>::GetBaseFilesDirectory()
 {
     return DBUpdater<WorldDatabaseConnection>::GetSourceDirectory() + "/data/sql/base/db_world/";
 }
-#else
-std::string DBUpdater<WorldDatabaseConnection>::GetBaseFilesDirectory()
-{
-    return BuiltInConfig::GetSourceDirectory() + "/data/sql/base/db_world/";
-}
-#endif
 
 template<>
 bool DBUpdater<WorldDatabaseConnection>::IsEnabled(uint32 const updateMask)
@@ -154,11 +136,7 @@ bool DBUpdater<WorldDatabaseConnection>::IsEnabled(uint32 const updateMask)
 template<>
 std::string DBUpdater<WorldDatabaseConnection>::GetDBModuleName()
 {
-#ifdef MOD_PLAYERBOTS
     return "world";
-#else
-    return "db-world";
-#endif
 }
 
 // Character Database
@@ -174,7 +152,6 @@ std::string DBUpdater<CharacterDatabaseConnection>::GetTableName()
     return "Character";
 }
 
-#ifdef MOD_PLAYERBOTS
 template<>
 std::string DBUpdater<CharacterDatabaseConnection>::GetSourceDirectory()
 {
@@ -186,13 +163,6 @@ std::string DBUpdater<CharacterDatabaseConnection>::GetBaseFilesDirectory()
 {
     return DBUpdater<CharacterDatabaseConnection>::GetSourceDirectory() + "/data/sql/base/db_characters/";
 }
-#else
-template<>
-std::string DBUpdater<CharacterDatabaseConnection>::GetBaseFilesDirectory()
-{
-    return DBUpdater<CharacterDatabaseConnection>::GetSourceDirectory() + "/data/sql/base/db_characters/";
-}
-#endif
 
 template<>
 bool DBUpdater<CharacterDatabaseConnection>::IsEnabled(uint32 const updateMask)
@@ -204,11 +174,7 @@ bool DBUpdater<CharacterDatabaseConnection>::IsEnabled(uint32 const updateMask)
 template<>
 std::string DBUpdater<CharacterDatabaseConnection>::GetDBModuleName()
 {
-#ifdef MOD_PLAYERBOTS
     return "characters";
-#else
-    return "db-characters";
-#endif
 }
 
 #ifdef MOD_PLAYERBOTS
@@ -316,11 +282,8 @@ bool DBUpdater<T>::Update(DatabaseWorkerPool<T>& pool, std::string_view modulesL
 
     LOG_INFO("sql.updates", "Updating {} database...", DBUpdater<T>::GetTableName());
 
-#ifdef MOD_PLAYERBOTS
     Path const sourceDirectory(DBUpdater<T>::GetSourceDirectory());
-#else
-    Path const sourceDirectory(BuiltInConfig::GetSourceDirectory());
-#endif
+
     if (!is_directory(sourceDirectory))
     {
         LOG_ERROR("sql.updates", "DBUpdater: The given source directory {} does not exist, change the path to the directory where your sql directory exists (for example c:\\source\\azerothcore). Shutting down.",
@@ -394,11 +357,7 @@ bool DBUpdater<T>::Update(DatabaseWorkerPool<T>& pool, std::vector<std::string> 
         return false;
     }
 
-#ifdef MOD_PLAYERBOTS
     Path const sourceDirectory(DBUpdater<T>::GetSourceDirectory());
-#else
-    Path const sourceDirectory(BuiltInConfig::GetSourceDirectory());
-#endif
     if (!is_directory(sourceDirectory))
     {
         return false;
@@ -595,17 +554,13 @@ void DBUpdater<T>::ApplyFile(DatabaseWorkerPool<T>& pool, std::string const& hos
     if (ssl == "ssl")
         args.emplace_back("--ssl-mode=REQUIRED");
 
-    // Execute sql file
-    args.emplace_back("-e");
-    args.emplace_back(Acore::StringFormat("BEGIN; SOURCE {}; COMMIT;", path.generic_string()));
-
     // Database
     if (!database.empty())
         args.emplace_back(database);
 
     // Invokes a mysql process which doesn't leak credentials to logs
     int const ret = Acore::StartProcess(DBUpdaterUtil::GetCorrectedMySQLExecutable(), args,
-        "sql.updates", "", true);
+        "sql.updates", path.generic_string(), true);
 
     if (ret != EXIT_SUCCESS)
     {

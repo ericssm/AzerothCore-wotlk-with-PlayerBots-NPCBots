@@ -650,7 +650,6 @@ struct CharStartOutfitEntry
     //int32 ItemInventorySlot[MAX_OUTFIT_ITEMS];            // 53-76 not required at server side
 };
 
-#ifdef MOD_PLAYERBOTS
 enum CharSectionFlags
 {
 	SECTION_FLAG_PLAYER         = 0x01,
@@ -677,7 +676,6 @@ struct CharSectionsEntry
 	uint32 Type;
 	uint32 Color;
 };
-#endif
 
 struct CharTitlesEntry
 {
@@ -954,7 +952,6 @@ struct EmotesTextEntry
     uint32  textid;
 };
 
-#ifdef MOD_PLAYERBOTS
 struct EmotesTextSoundEntry
 {
 	uint32 Id;                                              // 0
@@ -963,7 +960,6 @@ struct EmotesTextSoundEntry
 	uint32 SexId;                                           // 3, 0 male / 1 female
 	uint32 SoundId;                                         // 4
 };
-#endif
 
 struct FactionEntry
 {

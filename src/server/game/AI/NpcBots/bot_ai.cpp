@@ -1171,7 +1171,7 @@ void bot_ai::BotMovement(BotMovementType type, Position const* pos, Unit* target
             mover->GetMotionMaster()->MoveChase(target, {}, ChaseAngle(target->GetRelativeAngle(me), float(target->IsPlayer() ? M_PI * 2.0 : M_PI / 8.0)));
             break;
         case BOT_MOVE_POINT:
-            mover->GetMotionMaster()->Add(new PointMovementGenerator<Creature>(1, pos->m_positionX, pos->m_positionY, pos->m_positionZ, speed, 0.0f, nullptr, generatePath));
+            mover->GetMotionMaster()->Add(new PointMovementGenerator<Creature>(1, pos->m_positionX, pos->m_positionY, pos->m_positionZ, FORCED_MOVEMENT_NONE, speed, 0.0f, nullptr, generatePath));
             break;
         case BOT_MOVE_JUMP:
             mover->GetMotionMaster()->MoveJump(pos->m_positionX, pos->m_positionY, pos->m_positionZ,
@@ -1201,7 +1201,7 @@ void bot_ai::MoveToSendPosition(Position const& mpos)
         {
             botPet->GetBotPetAI()->SetBotCommandState(BOT_COMMAND_STAY);
             botPet->InterruptNonMeleeSpells(true);
-            botPet->GetMotionMaster()->MovePoint(me->GetMapId(), mpos, false);
+            botPet->GetMotionMaster()->MovePoint(me->GetMapId(), mpos.GetPositionX(),mpos.GetPositionY(),mpos.GetPositionZ(),FORCED_MOVEMENT_NONE,0.f,0.f,false);
         }
         sendlastpos.Relocate(me);
         BotWhisper("Moving to position!");
@@ -5073,7 +5073,7 @@ bool bot_ai::ProcessImmediateNonAttackTarget()
 #elif defined(AC_COMPILER)
                 Creature* cre = get_shield_creature(go, cList);
                 ASSERT(cre);
-                cre->DespawnOrUnsummon(1);
+                cre->DespawnOrUnsummon(1ms);
                 player->DestroyItemCount(31088, 1, true); // Tainted Core
 #endif
                 return true;
@@ -20744,7 +20744,7 @@ void bot_ai::OnBotExitVehicle(Vehicle const* vehicle)
 
             curVehStrat = BOT_VEH_STRAT_NONE;
             if (vehicle->GetBase()->IsSummon())
-                vehicle->GetBase()->ToCreature()->DespawnOrUnsummon(1);
+                vehicle->GetBase()->ToCreature()->DespawnOrUnsummon(1ms);
         }
     }
 }

@@ -432,12 +432,10 @@ bool StartDB()
     if (!loader.Load())
         return false;
 
-#ifdef MOD_PLAYERBOTS
     if (!sScriptMgr->OnDatabasesLoading())
     {
         return false;
     }
-#endif
 
     ///- Get the realm Id from the configuration file
     realm.Id.Realm = sConfigMgr->GetOption<uint32>("RealmID", 0);
@@ -484,9 +482,7 @@ void StopDB()
     WorldDatabase.Close();
     LoginDatabase.Close();
 
-#ifdef MOD_PLAYERBOTS
     sScriptMgr->OnDatabasesClosing();
-#endif
 
     MySQL::Library_End();
 }
@@ -577,9 +573,9 @@ void WorldUpdateLoop()
     LoginDatabase.WarnAboutSyncQueries(true);
     CharacterDatabase.WarnAboutSyncQueries(true);
     WorldDatabase.WarnAboutSyncQueries(true);
-#ifdef MOD_PLAYERBOTS
+
     sScriptMgr->OnDatabaseWarnAboutSyncQueries(true);
-#endif
+
     ///- While we have not World::m_stopEvent, update the world
     while (!World::IsStopped())
     {
@@ -590,7 +586,7 @@ void WorldUpdateLoop()
         if (diff < minUpdateDiff)
         {
             uint32 sleepTime = minUpdateDiff - diff;
-            if (maxCoreStuckTime > 0 && sleepTime >= halfMaxCoreStuckTime)
+            if (sleepTime >= halfMaxCoreStuckTime)
                 LOG_ERROR("server.worldserver", "WorldUpdateLoop() waiting for {} ms with MaxCoreStuckTime set to {} ms", sleepTime, maxCoreStuckTime);
             // sleep until enough time passes that we can update all timers
             std::this_thread::sleep_for(Milliseconds(sleepTime));
@@ -608,9 +604,9 @@ void WorldUpdateLoop()
             Sleep(1000);
 #endif
     }
-#ifdef MOD_PLAYERBOTS
+
     sScriptMgr->OnDatabaseWarnAboutSyncQueries(false);
-#endif
+
     LoginDatabase.WarnAboutSyncQueries(false);
     CharacterDatabase.WarnAboutSyncQueries(false);
     WorldDatabase.WarnAboutSyncQueries(false);

@@ -396,7 +396,7 @@ public:
             }
             else
             {
-                me->DespawnOrUnsummon(2050);
+                me->DespawnOrUnsummon(2050ms);
                 me->SetOrientation(2.5f);
                 me->SetSpeedRate(MOVE_FLIGHT, 1.0f);
                 Position pos = me->GetPosition();
@@ -461,7 +461,7 @@ public:
                     }
                     else
                     {
-                        me->DespawnOrUnsummon(2050);
+                        me->DespawnOrUnsummon(2050ms);
                         me->SetOrientation(2.5f);
                         me->SetSpeedRate(MOVE_FLIGHT, 1.0f);
                         Position pos = me->GetPosition();
@@ -478,7 +478,7 @@ public:
             {
                 if (despawnTimer >= 5000)
                 {
-                    me->DespawnOrUnsummon(2050);
+                    me->DespawnOrUnsummon(2050ms);
                     me->SetOrientation(2.5f);
                     Position pos = me->GetPosition();
                     Position offset = { 10.0f, 10.0f, 12.0f, 0.0f };

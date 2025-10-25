@@ -175,7 +175,7 @@ struct boss_viscidus : public BossAI
                 {
                     DoCastSelf(SPELL_EXPLODE_TRIGGER, true);
                 })
-                .Schedule(3000ms, [this](TaskContext /*context*/)
+                .Schedule(3s, [this](TaskContext /*context*/)
                 {
                     DoCastSelf(SPELL_INVIS_SELF, true);
                     me->SetAuraStack(SPELL_VISCIDUS_SHRINKS, me, 20);
@@ -204,16 +204,6 @@ struct boss_viscidus : public BossAI
         SpellSchoolMask spellSchoolMask = spellInfo->GetSchoolMask();
         if (spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON && spellInfo->EquippedItemSubClassMask & (1 << ITEM_SUBCLASS_WEAPON_WAND))
         {
-#ifdef MOD_NPCERBOTS
-            //npcbot: get bot's wand
-            if (caster->GetTypeId() == TYPEID_UNIT)
-            {
-                if (Item const* pItem = caster->ToCreature()->GetBotEquips(2/*BOT_SLOT_RANGED*/))
-                    spellSchoolMask = SpellSchoolMask(uint32(spellSchoolMask) | (1ul << pItem->GetTemplate()->Damage[0].DamageType));
-            }
-            else
-            //end npcbot
-#endif
             if (Item* pItem = caster->ToPlayer()->GetWeaponForAttack(RANGED_ATTACK))
             {
                 spellSchoolMask = SpellSchoolMask(1 << pItem->GetTemplate()->Damage[0].DamageType);

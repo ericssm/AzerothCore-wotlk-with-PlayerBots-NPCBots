@@ -19,7 +19,6 @@
 #include "ScriptMgr.h"
 #include "ScriptMgrMacros.h"
 
-#ifdef MOD_PLAYERBOTS
 bool ScriptMgr::OnDatabasesLoading()
 {
     auto ret = IsValidBoolScript<DatabaseScript>([&](DatabaseScript* script)
@@ -34,7 +33,6 @@ bool ScriptMgr::OnDatabasesLoading()
 
     return true;
 }
-#endif
 
 void ScriptMgr::OnAfterDatabasesLoaded(uint32 updateFlags)
 {
@@ -46,7 +44,6 @@ void ScriptMgr::OnAfterDatabaseLoadCreatureTemplates(std::vector<CreatureTemplat
     CALL_ENABLED_HOOKS(DatabaseScript, DATABASEHOOK_ON_AFTER_DATABASE_LOAD_CREATURETEMPLATES, script->OnAfterDatabaseLoadCreatureTemplates(creatureTemplates));
 }
 
-#ifdef MOD_PLAYERBOTS
 void ScriptMgr::OnDatabasesKeepAlive()
 {
     ExecuteScript<DatabaseScript>([&](DatabaseScript* script)
@@ -86,7 +83,6 @@ void ScriptMgr::OnDatabaseGetDBRevision(std::string& revision)
         script->OnDatabaseGetDBRevision(revision);
     });
 }
-#endif
 
 DatabaseScript::DatabaseScript(const char* name, std::vector<uint16> enabledHooks)
     : ScriptObject(name, DATABASEHOOK_END)
