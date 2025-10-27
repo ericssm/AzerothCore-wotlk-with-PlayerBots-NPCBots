@@ -1,12 +1,15 @@
 name: windows-build
 on:
   push:
-    branches: [ "Playerbot" ]
+    branches:
+      - 'master'
   pull_request:
-    branches: [ "Playerbot" ]
+    types:
+      - labeled
+      - synchronize
 
 concurrency:
-  group: ${{ github.head_ref }} || concat(${{ github.ref }}, ${{ github.workflow }})
+  group: ${{ github.head_ref }} || concat(${{ github.ref_name }}, ${{ github.workflow }})
   cancel-in-progress: true
 
 jobs:
@@ -19,6 +22,10 @@ jobs:
     name: ${{ matrix.os }}
     env:
       BOOST_ROOT: C:\local\boost_1_82_0
+    if: |
+      github.repository == 'azerothcore/azerothcore-wotlk'
+      && !github.event.pull_request.draft
+      && (github.ref == 'refs/heads/master' || contains(github.event.pull_request.labels.*.name, 'run-build') || github.event.label.name == 'run-build')
     steps:
       - uses: actions/checkout@v4
       - name: ccache

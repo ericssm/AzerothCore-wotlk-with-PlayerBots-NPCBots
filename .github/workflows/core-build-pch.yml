@@ -10,8 +10,12 @@ on:
       - synchronize
 
 concurrency:
-  group: ${{ github.head_ref }} || concat(${{ github.ref }}, ${{ github.workflow }})
+  group: ${{ github.head_ref }} || concat(${{ github.ref_name }}, ${{ github.workflow }})
   cancel-in-progress: true
+
+permissions:
+  actions: write
+  contents: read
 
 jobs:
   build:
@@ -28,10 +32,8 @@ jobs:
               CC: clang-18
               CXX: clang++-18
     runs-on: ${{ matrix.os }}
-    name: ${{ matrix.os }}-${{ matrix.compiler }}-pch
-    env:
-      COMPILER: ${{ matrix.compiler }}
-    if: github.repository == 'mod-playerbots/azerothcore-wotlk' && !github.event.pull_request.draft
+    name: ${{ matrix.os }}-${{ matrix.compiler.CC }}-pch
+    if: github.repository == 'azerothcore/azerothcore-wotlk' && !github.event.pull_request.draft
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/linux-build

@@ -9,20 +9,20 @@ on:
       - synchronize
 
 concurrency:
-  group: ${{ github.head_ref }} || concat(${{ github.ref }}, ${{ github.workflow }})
+  group: ${{ github.head_ref }} || concat(${{ github.ref_name }}, ${{ github.workflow }})
   cancel-in-progress: true
 
 env:
   COMPOSE_DOCKER_CLI_BUILD: 1
   DOCKER_BUILDKIT: 1
   RUNNING_ON_PRIMARY_BRANCH: |
-    ${{ (github.repository == 'mod-playerbots/azerothcore-wotlk' && github.ref_name == 'master') && 'true' || 'false' }}
+    ${{ (github.repository == 'azerothcore/azerothcore-wotlk' && github.ref_name == 'master') && 'true' || 'false' }}
 
 jobs:
   build-containers:
     runs-on: "ubuntu-latest"
     if: |
-      github.repository == 'mod-playerbots/azerothcore-wotlk'
+      github.repository == 'azerothcore/azerothcore-wotlk'
       && !github.event.pull_request.draft
       && (github.ref_name == 'master' || contains(github.event.pull_request.labels.*.name, 'run-build') || github.event.label.name == 'run-build')
     steps:
@@ -115,6 +115,6 @@ jobs:
           event-type: azerothcore-new-images
           client-payload: >
             {
-              "ref": "${{ github.ref }}",
+              "ref": "${{ github.ref_name }}",
               "sha": "${{ github.sha }}"
             }
