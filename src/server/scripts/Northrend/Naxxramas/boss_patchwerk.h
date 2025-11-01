@@ -1,6 +1,7 @@
 #ifndef BOSS_PATCHWERK_H_
 #define BOSS_PATCHWERK_H_
 
+#include "CreatureScript.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellInfo.h"
@@ -19,8 +20,7 @@ enum Yells
 
 enum Spells
 {
-    SPELL_HATEFUL_STRIKE_10         = 41926,
-    SPELL_HATEFUL_STRIKE_25         = 59192,
+    SPELL_HATEFUL_STRIKE            = 41926,
     SPELL_FRENZY                    = 28131,
     SPELL_BERSERK                   = 26662,
     SPELL_SLIME_BOLT                = 32309
@@ -144,7 +144,7 @@ public:
                         }
                         if (finalTarget)
                         {
-                            me->CastSpell(finalTarget, RAID_MODE(SPELL_HATEFUL_STRIKE_10, SPELL_HATEFUL_STRIKE_25), false);
+                            me->CastSpell(finalTarget, SPELL_HATEFUL_STRIKE, false);
                         }
                         events.Repeat(1s);
                         break;

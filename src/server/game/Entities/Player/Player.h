@@ -2633,8 +2633,15 @@ public:
 
     std::string GetDebugInfo() const override;
 
-    bool IsExpectingChangeTransport() const { return m_expectingChangeTransport; }
-    void SetExpectingChangeTransport(bool state) { m_expectingChangeTransport = state; }
+    bool IsExpectingChangeTransport() const { return _expectingChangeTransport; }
+    void SetExpectingChangeTransport(bool state) { _expectingChangeTransport = state; }
+
+    uint32 GetPendingFlightChange() const { return _pendingFlightChangeCounter; }
+    void SetPendingFlightChange(uint32 counter) { _pendingFlightChangeCounter = counter; }
+
+    void SetMapChangeOrderCounter() { _mapChangeOrderCounter = GetSession()->GetOrderCounter(); }
+    uint32 GetMapChangeOrderCounter() { return _mapChangeOrderCounter; }
+
 #ifdef MOD_NPCERBOTS
     /*****************************************************************/
     /***                        NPCBOT SYSTEM                      ***/
@@ -3040,7 +3047,9 @@ private:
 
     Seconds m_creationTime;
 
-    bool m_expectingChangeTransport;
+    bool _expectingChangeTransport;
+    uint32 _pendingFlightChangeCounter;
+    uint32 _mapChangeOrderCounter;
 };
 
 void AddItemsSetItem(Player* player, Item* item);

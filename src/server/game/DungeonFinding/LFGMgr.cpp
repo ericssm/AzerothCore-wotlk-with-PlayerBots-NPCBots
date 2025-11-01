@@ -1066,7 +1066,7 @@ namespace lfg
         RBCacheMap::iterator itr = RBCacheStore[player->GetTeamId()].find(dungeonId);
         if (itr != RBCacheStore[player->GetTeamId()].end())
         {
-            player->GetSession()->SendPacket(&(itr->second));
+            player->SendDirectMessage(&(itr->second));
             return;
         }
         // send empty packet if cache not found
@@ -1078,7 +1078,7 @@ namespace lfg
         data << (uint32)0;
         data << (uint32)0;
         data << (uint32)0;
-        player->GetSession()->SendPacket(&data);
+        player->SendDirectMessage(&data);
     }
 
     void LFGMgr::UpdateRaidBrowser(uint32 diff)
@@ -1325,7 +1325,7 @@ namespace lfg
                 for (RBSearchersMap::const_iterator sitr = RBSearchersStore[team].begin(); sitr != RBSearchersStore[team].end(); ++sitr)
                     if (sitr->second == dungeonId)
                         if (Player* p = ObjectAccessor::FindConnectedPlayer(sitr->first))
-                            p->GetSession()->SendPacket(&differencePacket);
+                            p->SendDirectMessage(&differencePacket);
 
                 break; // one dungeon updated in one LFGMgr::UpdateRaidBrowser
             }

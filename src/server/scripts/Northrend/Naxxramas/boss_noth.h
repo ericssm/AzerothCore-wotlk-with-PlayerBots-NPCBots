@@ -1,6 +1,7 @@
 #ifndef BOSS_NOTH_H_
 #define BOSS_NOTH_H_
 
+#include "CreatureScript.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellInfo.h"
@@ -23,10 +24,8 @@ enum Says
 
 enum Spells
 {
-    SPELL_CURSE_OF_THE_PLAGUEBRINGER_10     = 29213,
-    SPELL_CURSE_OF_THE_PLAGUEBRINGER_25     = 54835,
-    SPELL_CRIPPLE_10                        = 29212,
-    SPELL_CRIPPLE_25                        = 54814,
+    SPELL_CURSE_OF_THE_PLAGUEBRINGER        = 29213,
+    SPELL_CRIPPLE                           = 29212,
     SPELL_SUMMON_PLAGUED_WARRIORS           = 29237,
     SPELL_TELEPORT                          = 29216,
     SPELL_TELEPORT_BACK                     = 29231,
@@ -196,7 +195,7 @@ public:
                 case EVENT_CURSE:
                     if (events.GetPhaseMask() == 0)
                     {
-                        me->CastCustomSpell(RAID_MODE(SPELL_CURSE_OF_THE_PLAGUEBRINGER_10, SPELL_CURSE_OF_THE_PLAGUEBRINGER_25), SPELLVALUE_MAX_TARGETS, RAID_MODE(3, 10), me, false);
+                        me->CastCustomSpell(SPELL_CURSE_OF_THE_PLAGUEBRINGER, SPELLVALUE_MAX_TARGETS, RAID_MODE(3, 10), me, false);
                     }
                     events.Repeat(25s);
                     break;
@@ -217,7 +216,7 @@ public:
                     break;
                 case EVENT_BLINK:
                     DoResetThreatList();
-                    me->CastSpell(me, RAID_MODE(SPELL_CRIPPLE_10, SPELL_CRIPPLE_25), false);
+                    me->CastSpell(me, SPELL_CRIPPLE, false);
                     me->CastSpell(me, SPELL_BLINK, true);
                     Talk(EMOTE_BLINK);
                     events.Repeat(30s);

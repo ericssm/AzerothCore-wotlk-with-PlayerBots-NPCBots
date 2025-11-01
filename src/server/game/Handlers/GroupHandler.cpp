@@ -157,7 +157,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
             data << uint32(0);                                      // unk
             data << uint8(0);                                       // count
             data << uint32(0);                                      // unk
-            invitedPlayer->GetSession()->SendPacket(&data);
+            invitedPlayer->SendDirectMessage(&data);
         }
 
         return;
@@ -217,7 +217,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recvData)
     data << uint32(0);                                      // unk
     data << uint8(0);                                       // count
     data << uint32(0);                                      // unk
-    invitedPlayer->GetSession()->SendPacket(&data);
+    invitedPlayer->SendDirectMessage(&data);
 
     SendPartyResult(PARTY_OP_INVITE, membername, ERR_PARTY_RESULT_OK);
 }
@@ -300,7 +300,7 @@ void WorldSession::HandleGroupDeclineOpcode(WorldPacket& /*recvData*/)
     // report
     WorldPacket data(SMSG_GROUP_DECLINE, GetPlayer()->GetName().length());
     data << GetPlayer()->GetName();
-    leader->GetSession()->SendPacket(&data);
+    leader->SendDirectMessage(&data);
 }
 
 void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket& recvData)

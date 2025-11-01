@@ -2,11 +2,13 @@
 #define BOSSGOTHIK_H_
 
 #include "CombatAI.h"
+#include "CreatureScript.h"
 #include "GridNotifiers.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellScript.h"
 #include "SpellInfo.h"
+#include "SpellScriptLoader.h"
 #include "naxxramas.h"
 
 namespace Gothik {
@@ -29,8 +31,7 @@ enum Spells
 {
     // Gothik
     SPELL_HARVEST_SOUL              = 28679,
-    SPELL_SHADOW_BOLT_10            = 29317,
-    SPELL_SHADOW_BOLT_25            = 56405,
+    SPELL_SHADOW_BOLT               = 29317,
     // Teleport spells
     SPELL_TELEPORT_DEAD             = 28025,
     SPELL_TELEPORT_LIVE             = 28026,
@@ -255,7 +256,7 @@ public:
                 std::vector<Player*> tList;
                 for(Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
                 {
-                    if (!me->IsWithinDistInMap(itr->GetSource(), 200.0f, true, false) || !itr->GetSource()->IsAlive() || itr->GetSource()->IsGameMaster())
+                    if (!me->IsWithinDistInMap(itr->GetSource(), 200.0f, true, false, false) || !itr->GetSource()->IsAlive() || itr->GetSource()->IsGameMaster())
                     {
                         continue;
                     }
@@ -388,7 +389,7 @@ public:
                     Talk(SAY_INTRO_4);
                     break;
                 case EVENT_SHADOW_BOLT:
-                    me->CastSpell(me->GetVictim(), RAID_MODE(SPELL_SHADOW_BOLT_10, SPELL_SHADOW_BOLT_25), false);
+                    me->CastSpell(me->GetVictim(), SPELL_SHADOW_BOLT, false);
                     events.Repeat(1s);
                     break;
                 case EVENT_HARVEST_SOUL:

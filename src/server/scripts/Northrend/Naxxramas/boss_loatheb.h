@@ -1,6 +1,7 @@
 #ifndef BOSS_LOATHEB_H_
 #define BOSS_LOATHEB_H_
 
+#include "CreatureScript.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellInfo.h"
@@ -12,10 +13,8 @@ enum Spells
 {
     SPELL_NECROTIC_AURA                         = 55593,
     SPELL_SUMMON_SPORE                          = 29234,
-    SPELL_DEATHBLOOM_10                         = 29865,
-    SPELL_DEATHBLOOM_25                         = 55053,
-    SPELL_INEVITABLE_DOOM_10                    = 29204,
-    SPELL_INEVITABLE_DOOM_25                    = 55052,
+    SPELL_DEATHBLOOM                            = 29865,
+    SPELL_INEVITABLE_DOOM                       = 29204,
     SPELL_BERSERK                               = 26662
 };
 
@@ -123,11 +122,11 @@ public:
                     events.Repeat(20s);
                     break;
                 case EVENT_DEATHBLOOM:
-                    me->CastSpell(me, RAID_MODE(SPELL_DEATHBLOOM_10, SPELL_DEATHBLOOM_25), false);
+                    me->CastSpell(me, SPELL_DEATHBLOOM, false);
                     events.Repeat(30s);
                     break;
                 case EVENT_INEVITABLE_DOOM:
-                    me->CastSpell(me, RAID_MODE(SPELL_INEVITABLE_DOOM_10, SPELL_INEVITABLE_DOOM_25), false);
+                    me->CastSpell(me, SPELL_INEVITABLE_DOOM, false);
                     doomCounter++;
                     events.Repeat(doomCounter < 6 ? 30s : 15s);
                     break;
@@ -148,8 +147,8 @@ public:
         {
             // Calculate the distance between his home position to the gate
             if (me->GetExactDist(me->GetHomePosition().GetPositionX(),
-                                    me->GetHomePosition().GetPositionY(),
-                                    me->GetHomePosition().GetPositionZ()) > 50.0f)
+                                 me->GetHomePosition().GetPositionY(),
+                                 me->GetHomePosition().GetPositionZ()) > 50.0f)
             {
                 EnterEvadeMode();
                 return false;
