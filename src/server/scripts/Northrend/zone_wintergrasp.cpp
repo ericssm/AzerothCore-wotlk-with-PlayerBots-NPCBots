@@ -804,12 +804,6 @@ public:
 
         bool CanControlVehicle(Unit* passenger)
         {
-#ifdef MOD_NPCERBOTS
-            //npcbot
-            if (passenger->IsNPCBot())
-                return true;
-            //end npcbot
-#endif
             if (passenger->HasAura(SPELL_LIEUTENANT))
                 return true;
 

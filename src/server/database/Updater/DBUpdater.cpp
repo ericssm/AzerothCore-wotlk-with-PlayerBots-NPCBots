@@ -585,6 +585,4 @@ template class AC_DATABASE_API DBUpdater<LoginDatabaseConnection>;
 template class AC_DATABASE_API DBUpdater<WorldDatabaseConnection>;
 template class AC_DATABASE_API DBUpdater<CharacterDatabaseConnection>;
 
-#ifdef MOD_PLAYERBOTS
 template class AC_DATABASE_API DBUpdater<PlayerbotsDatabaseConnection>;
-#endif
