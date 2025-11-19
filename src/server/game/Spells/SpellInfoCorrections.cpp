@@ -2251,12 +2251,6 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(1);
     });
 
-    // Halls of Lightning, Arcing Burn
-    ApplySpellFix({ 52671, 59834 }, [](SpellInfo* spellInfo)
-    {
-        spellInfo->AttributesEx3 |= SPELL_ATTR3_DOT_STACKING_RULE;
-    });
-
     // Trial of the Champion, Death's Respite
     ApplySpellFix({ 68306 }, [](SpellInfo* spellInfo)
     {
@@ -5199,6 +5193,13 @@ void SpellMgr::LoadSpellInfoCorrections()
     ApplySpellFix({ 34367 }, [](SpellInfo* spellInfo)
     {
         spellInfo->ChannelInterruptFlags &= ~AURA_INTERRUPT_FLAG_TURNING;
+    });
+
+    // Summon Scourged Captive
+    ApplySpellFix({ 51597 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->Effects[EFFECT_0].BasePoints = 1;
+        spellInfo->Effects[EFFECT_0].DieSides = 0;
     });
 
     // The Green Tower
