@@ -5226,6 +5226,14 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->ProcCharges = 1;
     });
 
+    ApplySpellFix({
+        56917, // To Icecrown Airship - Teleport to Airship (A)
+        57417, // To Icecrown Airship - Teleport to Airship (H)
+        }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->RangeEntry = sSpellRangeStore.LookupEntry(6); // 100 yards
+    });
+
     for (uint32 i = 0; i < GetSpellInfoStoreSize(); ++i)
     {
         SpellInfo* spellInfo = mSpellInfoMap[i];
