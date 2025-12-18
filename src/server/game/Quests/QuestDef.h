@@ -231,9 +231,9 @@ public:
     [[nodiscard]] uint32 GetMinLevel() const { return MinLevel; }
     [[nodiscard]] uint32 GetMaxLevel() const { return MaxLevel; }
     [[nodiscard]] int32  GetQuestLevel() const { return Level; }
-    [[nodiscard]] uint32 GetType() const { return Type; }
+    [[nodiscard]] int32 GetType() const { return Type; }
     [[nodiscard]] uint32 GetRequiredClasses() const { return RequiredClasses; }
-    [[nodiscard]] uint32 GetAllowableRaces() const { return AllowableRaces; }
+    [[nodiscard]] int32 GetAllowableRaces() const { return AllowableRaces; }
     [[nodiscard]] uint32 GetRequiredSkill() const { return RequiredSkillId; }
     [[nodiscard]] uint32 GetRequiredSkillValue() const { return RequiredSkillPoints; }
     [[nodiscard]] uint32 GetRepObjectiveFaction() const { return RequiredFactionId1; }
@@ -347,8 +347,8 @@ protected:
     int32  ZoneOrSort;
     uint32 MinLevel;
     int32  Level;
-    uint32 Type;
-    uint32 AllowableRaces;
+    int32 Type;
+    int32 AllowableRaces;
     uint32 RequiredFactionId1;
     int32  RequiredFactionValue1;
     uint32 RequiredFactionId2;
