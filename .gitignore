@@ -109,3 +109,6 @@ compile_commands.json
 
 # Include mod-playerbots module
 !/modules/mod-playerbots
+
+# Include mod-ale module
+!/modules/mod-ale
