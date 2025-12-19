@@ -1,3 +1,6 @@
 [submodule "modules/mod-playerbots"]
 	path = modules/mod-playerbots
 	url = https://github.com/mod-playerbots/mod-playerbots.git
+[submodule "modules/mod-ale"]
+	path = modules/mod-ale
+	url = https://github.com/azerothcore/mod-ale.git
