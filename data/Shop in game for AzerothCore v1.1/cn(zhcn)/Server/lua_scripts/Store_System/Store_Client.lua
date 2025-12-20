@@ -5,7 +5,7 @@
 local CONFIG = {
 	maxCategories = 11,
 	strings = {
-		categoryAccessDenied = "No tienes acceso a esta categoría!",
+		categoryAccessDenied = "你没有权限访问此分类！",
 	}
 }
 
@@ -144,7 +144,7 @@ function SHOP_UI.MainFrame_Create()
 	shopFrame.Title:SetFont("Fonts\\FRIZQT__.TTF", 14)
 	shopFrame.Title:SetShadowOffset(1, -1)
 	shopFrame.Title:SetPoint("TOP", shopFrame, "TOP", 0, -3)
-	shopFrame.Title:SetText("|cffedd100Artículos|r")
+	shopFrame.Title:SetText("|cffedd100商店|r")
 	
 	-- create navigation button placeholders, pass parent as arg
 	SHOP_UI.NavButtons_Create(shopFrame)
@@ -333,9 +333,9 @@ function SHOP_UI.OnPurchaseConfirm(data)
 end
 
 StaticPopupDialogs["CONFIRM_STORE_PURCHASE"] = {
-	text = "¿Está seguro de que desea comprar? %s?",
-	button1 = "Si",
-	button2 = "No",
+	text = "您确定要购买 %s 吗？",
+	button1 = "确定",
+	button2 = "取消",
 	OnAccept = function(self, data)
 		SHOP_UI.OnPurchaseConfirm(data)
 	end,
@@ -454,7 +454,7 @@ function SHOP_UI.ServiceBoxes_Create(parent)
 		service.buyButton.ButtonText = service.buyButton:CreateFontString()
 		service.buyButton.ButtonText:SetFont("Fonts\\FRIZQT__.TTF", 11, "OUTLINE")
 		service.buyButton.ButtonText:SetPoint("CENTER", service.buyButton, 0, 0)
-		service.buyButton.ButtonText:SetText("Comprar!")
+		service.buyButton.ButtonText:SetText("购买！")
 		
 		service.buyButton:SetScript(
 			"OnClick",
@@ -635,7 +635,7 @@ function SHOP_UI.ServiceBoxes_Update()
 			
 			-- calculate discount percentage
 			local discountPct = math.floor(((service.Price - service.Discount) - service.Price) / service.Price * 100)
-			service.BannerText:SetFormattedText("|cffffffffOferta: %i%%|r", discountPct)
+			service.BannerText:SetFormattedText("|cffffffff折扣: %i%%|r", discountPct)
 			
 			-- if service is discounted, then show all the discount frames and override the price text. otherwise hide.
 			if service.Discount > 1 then
@@ -1193,7 +1193,7 @@ local function ModifyGameMenuFrame()
 	storeButton.Text:SetFont("Fonts\\FRIZQT__.TTF", 13, "OUTLINE")
 	storeButton.Text:SetShadowOffset(1, -1)
 	storeButton.Text:SetPoint("CENTER", storeButton, "CENTER", 0, 1)
-	storeButton.Text:SetText("|cffdbe005Tienda");
+	storeButton.Text:SetText("|cffdbe005商店");
 	
 	-- on click open the shop frame and hide the escape menu
 	storeButton:SetScript("OnClick", function()

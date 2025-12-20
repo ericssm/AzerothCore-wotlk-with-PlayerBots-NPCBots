@@ -33,14 +33,14 @@ CREATE TABLE `store_categories` (
 /*Data for the table `store_categories` */
 
 insert  into `store_categories`(`id`,`name`,`icon`,`requiredRank`,`flags`,`enabled`) values 
-(1,'Destacados','inv_helmet_96',0,2,1),
-(2,'Titulos','inv_scroll_11',0,1,1),
-(3,'Items','ability_warrior_challange',0,1,1),
-(4,'Monturas ','inv_box_petcarrier_01',0,1,1),
-(5,'Boosts','spell_holy_surgeoflight',0,1,1),
-(6,'Servicio','vas_charactertransfer',0,1,1),
-(7,'Buffs','spell_holy_holynova',0,1,1),
-(8,'Mascotas','inv_misc_toy_07',0,1,1),
+(1,'精选','inv_helmet_96',0,2,1),
+(2,'称号','inv_scroll_11',0,1,1),
+(3,'物品','ability_warrior_challange',0,1,1),
+(4,'坐骑','inv_box_petcarrier_01',0,1,1),
+(5,'升级','spell_holy_surgeoflight',0,1,1),
+(6,'服务','vas_charactertransfer',0,1,1),
+(7,'增益','spell_holy_holynova',0,1,1),
+(8,'宠物','inv_misc_toy_07',0,1,1),
 (9,'VIP','inv_misc_note_03',0,1,1);
 
 /*Table structure for table `store_category_service_link` */
@@ -87,8 +87,8 @@ CREATE TABLE `store_currencies` (
 /*Data for the table `store_currencies` */
 
 insert  into `store_currencies`(`id`,`type`,`name`,`icon`,`data`,`tooltip`) values 
-(1,1,'Oro','Gold',0,'Esto es oro normal.'),
-(2,2,'Item Token','Token',4540,'Esta es una moneda de artículo.');
+(1,1,'金币','Gold',0,'这是普通金币。'),
+(2,2,'物品代币','Token',4540,'这是物品货币。');
 
 /*Table structure for table `store_logs` */
 
@@ -185,19 +185,19 @@ CREATE TABLE `store_services` (
 /*Data for the table `store_services` */
 -- Dumping data for table store.store_services: ~13 rows (approximately)
 INSERT INTO `store_services` (`id`, `type`, `name`, `tooltipName`, `tooltipType`, `tooltipText`, `icon`, `price`, `currency`, `hyperlinkId`, `creatureEntry`, `discountAmount`, `flags`, `reward_1`, `reward_2`, `reward_3`, `reward_4`, `reward_5`, `reward_6`, `reward_7`, `reward_8`, `rewardcount_1`, `rewardcount_2`, `rewardcount_3`, `rewardcount_4`, `rewardcount_5`, `rewardcount_6`, `rewardcount_7`, `rewardcount_8`, `new`, `enabled`) VALUES
-	(1,8,'Aumento de nivel\r\n+10 niveles','Level Boost','','Aumenta el nivel de tus personajes en 10.','achievement_level_10',10,1,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1),
-	(2,7,'Cambio de Faccion','Faction Change','','Te permite cambiar la facción de tus personajes. Disponible tras reiniciar sesión.','vas_factionchange',5,1,0,0,0,0,64,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1),
-	(3,7,'Cambio de Raza','Race Change','','Te permite cambiar la raza de tus personajes. Disponible tras reiniciar sesión.','vas_racechange',10,1,0,0,5,0,128,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1),
-	(4,7,'Cambio de Nombre','Name Change','','Te permite cambiar el nombre de tu personaje. Disponible después de reiniciar sesión.','vas_namechange',5,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1),
-	(5,1,'Espada de espuma\r\n(Espada de dos manos)','','item','|cff00FFFFHaga clic para obtener una vista previa!|r','inv_sword_22',10,1,45061,45061,0,1,45061,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1),
-	(8,3,'Tigre Espectral Veloz\r\n(Montura)','','spell','|cff00FFFFHaga clic para obtener una vista previa!|r','ability_mount_spectraltiger',30,1,42777,24004,0,0,42777,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1),
-	(12,1,'Camisa Morada Épica\r\n(Camiseta)','','item','|cff00FFFFHaga clic para obtener una vista previa!|r','inv_shirt_purple_01',10,1,45037,45037,5,1,45037,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1),
-	(13,4,'Gallina de las praderas\r\n(Mascota)','','spell','|cff00FFFFHaga clic para obtener una vista previa!|r','spell_magic_polymorphchicken',10,1,10686,7392,0,0,10686,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1),
-	(14,8,'Aumento de nivel\r\n+20 niveles','Level Boost','','Aumenta el nivel de tus personajes en 20.','achievement_level_20',20,1,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1),
-	(15,5,'Bendición del Poder','Buff','','Te beneficia con Bendición de poder.','spell_holy_fistofjustice',1,1,0,0,0,0,27140,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1),
-	(16,9,'Título\r\nCampeón de los Naaru','Title','','Te otorga el título de Campeón de los Naaru.','inv_mace_51',10,1,0,0,0,0,53,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1),
-	(17,8,'Aumento de nivel 60','Level Boost','','¡Aumenta el nivel de tus personajes al nivel 60!','achievement_level_60',40,1,0,0,0,1,60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1),
-	(18,1,'Conjunto de esmoquin','Tuxedo Set','','¡Expresa tu estilo con este conjunto completo de esmoquin!\r\n\r\nContiene:\r\n\r\n1 chaqueta de esmoquin\r\n1 camisa de esmoquin\r\n1 pantalón de esmoquin','inv_shirt_black_01',50,1,0,0,0,1,10036,10035,10034,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1);
+	(1,8,'等级提升\r\n+10级','等级提升','','提升你的角色10级。','achievement_level_10',10,1,0,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1),
+	(2,7,'阵营转换','阵营转换','','允许你更改角色的阵营。重新登录后可用。','vas_factionchange',5,1,0,0,0,0,64,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1),
+	(3,7,'种族更改','种族更改','','允许你更改角色的种族。重新登录后可用。','vas_racechange',10,1,0,0,5,0,128,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1),
+	(4,7,'改名服务','改名服务','','允许你更改角色名称。重新登录后可用。','vas_namechange',5,1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1),
+	(5,1,'泡沫之剑\r\n(双手剑)','','item','|cff00FFFF点击预览！|r','inv_sword_22',10,1,45061,45061,0,1,45061,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1),
+	(8,3,'迅捷幽灵虎\r\n(坐骑)','','spell','|cff00FFFF点击预览！|r','ability_mount_spectraltiger',30,1,42777,24004,0,0,42777,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1),
+	(12,1,'史诗紫色衬衫\r\n(衬衫)','','item','|cff00FFFF点击预览！|r','inv_shirt_purple_01',10,1,45037,45037,5,1,45037,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1),
+	(13,4,'草原鸡\r\n(宠物)','','spell','|cff00FFFF点击预览！|r','spell_magic_polymorphchicken',10,1,10686,7392,0,0,10686,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1),
+	(14,8,'等级提升\r\n+20级','等级提升','','提升你的角色20级。','achievement_level_20',20,1,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1),
+	(15,5,'力量祝福','增益','','为你施加力量祝福。','spell_holy_fistofjustice',1,1,0,0,0,0,27140,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1),
+	(16,9,'称号\r\n纳鲁勇士','称号','','授予你纳鲁勇士称号。','inv_mace_51',10,1,0,0,0,0,53,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1),
+	(17,8,'等级提升至60级','等级提升','','将你的角色等级提升到60级！','achievement_level_60',40,1,0,0,0,1,60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1),
+	(18,1,'燕尾服套装','燕尾服套装','','用这套完整的燕尾服展现你的风格！\r\n\r\n包含：\r\n\r\n1件燕尾服上衣\r\n1件燕尾服衬衫\r\n1件燕尾服裤子','inv_shirt_black_01',50,1,0,0,0,1,10036,10035,10034,0,0,0,0,0,1,1,1,0,0,0,0,0,1,1);
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
