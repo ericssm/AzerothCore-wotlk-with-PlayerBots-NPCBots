@@ -112,3 +112,6 @@ compile_commands.json
 
 # Include mod-ale module
 !/modules/mod-ale
+
+# Include mod-ah-bot module
+!/modules/mod-ah-bot

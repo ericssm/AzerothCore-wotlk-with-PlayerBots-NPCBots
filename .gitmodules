@@ -4,3 +4,6 @@
 [submodule "modules/mod-ale"]
 	path = modules/mod-ale
 	url = https://github.com/azerothcore/mod-ale.git
+[submodule "modules/mod-ah-bot"]
+	path = modules/mod-ah-bot
+	url = https://github.com/azerothcore/mod-ah-bot.git
