@@ -1,0 +1,7 @@
+## Interface: 30300
+## Title: Custom XP Bar for 255 Level
+## Notes: Shows XP bar for levels beyond 80
+## Author: Custom
+## Version: 1.0
+
+CustomXPBar.lua
