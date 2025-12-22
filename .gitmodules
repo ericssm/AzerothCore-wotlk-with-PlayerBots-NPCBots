@@ -7,3 +7,6 @@
 [submodule "modules/mod-ah-bot-plus"]
 	path = modules/mod-ah-bot-plus
 	url = https://github.com/wowshub/mod-ah-bot-plus.git
+[submodule "modules/mod-dungeon-scale"]
+	path = modules/mod-dungeon-scale
+	url = https://github.com/NathanHandley/mod-dungeon-scale.git

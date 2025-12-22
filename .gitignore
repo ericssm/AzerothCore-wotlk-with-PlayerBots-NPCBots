@@ -115,3 +115,6 @@ compile_commands.json
 
 # Include mod-ah-bot-plus module
 !/modules/mod-ah-bot-plus
+
+# Include mod-dungeon-scale module
+!/modules/mod-dungeon-scale
