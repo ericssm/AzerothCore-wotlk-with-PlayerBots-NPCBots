@@ -3133,9 +3133,9 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
             if (proto->HasFlag(ITEM_FLAG_HAS_LOOT))
                 sLootItemStorage->RemoveStoredLoot(pItem->GetGUID());
 
+        pItem->RemoveFromWorld();
         if (IsInWorld() && update)
         {
-            pItem->RemoveFromWorld();
             pItem->DestroyForPlayer(this);
         }
 
