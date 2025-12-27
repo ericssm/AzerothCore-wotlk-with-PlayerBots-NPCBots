@@ -1733,6 +1733,7 @@ namespace lfg
         }
 
         ObjectGuid oldGroupGUID;
+        bool hasRandomLfgMember = proposal.group.IsEmpty();
         for (LfgGuidList::const_iterator it = players.begin(); it != players.end(); ++it)
         {
             ObjectGuid pguid = (*it);
@@ -1820,8 +1821,16 @@ namespace lfg
                 SetState(grp->GetGUID(), LFG_STATE_PROPOSAL);
             }
 
+            if (auto const proposalPlayer = proposal.players.find(pguid); proposalPlayer != proposal.players.end())
+            {
+                if (!hasRandomLfgMember && (proposalPlayer->second.group.IsEmpty() || proposalPlayer->second.group != proposal.group))
+                    hasRandomLfgMember = true;
+            }
+            else
+                hasRandomLfgMember = true;
+
             // Xinef: Apply Random Buff
-            if (grp && !grp->IsLfgWithBuff())
+            if (grp && !grp->IsLfgWithBuff() && hasRandomLfgMember)
             {
                 if (!group || group->GetGUID() != oldGroupGUID)
                     grp->AddLfgBuffFlag();
