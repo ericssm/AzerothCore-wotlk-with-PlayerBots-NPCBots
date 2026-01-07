@@ -4542,6 +4542,7 @@ void SmartScript::ProcessEvent(SmartScriptHolder& e, Unit* unit, uint32 var0, ui
             {
                 if (e.event.doAction.eventId != var0)
                     return;
+                RecalcTimer(e, e.event.doAction.cooldownMin, e.event.doAction.cooldownMax);
                 ProcessAction(e, unit, var0);
                 break;
             }
