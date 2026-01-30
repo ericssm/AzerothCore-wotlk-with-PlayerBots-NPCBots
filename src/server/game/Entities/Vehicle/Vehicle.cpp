@@ -26,7 +26,7 @@
 #include "TemporarySummon.h"
 #include "Unit.h"
 #include "Util.h"
-
+#include <algorithm>
 #ifdef MOD_NPCERBOTS
 //npcbot
 #include "botmgr.h"
@@ -610,6 +610,11 @@ bool Vehicle::IsVehicleInUse()
         }
 
     return false;
+}
+
+bool Vehicle::IsControllableVehicle() const
+{
+    return std::ranges::any_of(Seats, [](auto const& seat) { return seat.second.SeatInfo->CanControl(); });
 }
 
 void Vehicle::TeleportVehicle(float x, float y, float z, float ang)
