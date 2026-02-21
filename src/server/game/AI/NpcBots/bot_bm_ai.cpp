@@ -683,7 +683,7 @@ public:
                 SPELL_SCHOOL_MASK_NORMAL, dinfo.GetAbsorb(), dinfo.GetResist(), false, dinfo.GetBlock(), true);
             CleanDamage cl(0, 0, BASE_ATTACK, MELEE_HIT_CRIT);
             Unit::DealDamage(me, target, dinfo.GetDamage(), &cl);
-            Unit::ProcDamageAndSpell(me, dinfo.GetVictim(), calcdinfo->procAttacker, calcdinfo->procVictim, calcdinfo->procEx, dinfo.GetDamage(), calcdinfo->attackType);
+            Unit::ProcSkillsAndAuras(me, dinfo.GetVictim(), calcdinfo->procAttacker, calcdinfo->procVictim, (PROC_EX_CRITICAL_HIT | PROC_EX_INTERNAL_DOT), dinfo.GetDamage(), calcdinfo->attackType);
             me->CombatStart(target);
 
             me->resetAttackTimer(BASE_ATTACK);
