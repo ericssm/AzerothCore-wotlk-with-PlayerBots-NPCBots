@@ -67,15 +67,14 @@ enum HunterSpells
     SPELL_HUNTER_GLYPH_OF_ARCANE_SHOT               = 61389,
     SPELL_LOCK_AND_LOAD_TRIGGER                     = 56453,
     SPELL_LOCK_AND_LOAD_MARKER                      = 67544,
+    SPELL_FROST_TRAP_SLOW                           = 67035,
     SPELL_HUNTER_PET_LEGGINGS_OF_BEAST_MASTERY      = 38297, // Leggings of Beast Mastery
 
     // Proc system spells
     SPELL_HUNTER_THRILL_OF_THE_HUNT_MANA            = 34720,
     SPELL_HUNTER_REPLENISHMENT                      = 57669,
-    SPELL_HUNTER_RAPID_RECUPERATION_R1              = 56654,
-    SPELL_HUNTER_RAPID_RECUPERATION_R2              = 58882,
     SPELL_HUNTER_GLYPH_OF_MEND_PET_HAPPINESS        = 57894,
-    SPELL_HUNTER_KILL_COMMAND_HUNTER                = 34026,
+    SPELL_HUNTER_KILL_COMMAND_HUNTER                = 34027,
     SPELL_HUNTER_RAPID_RECUPERATION_MANA_R1         = 56654,
     SPELL_HUNTER_RAPID_RECUPERATION_MANA_R2         = 58882,
     SPELL_HUNTER_PIERCING_SHOTS                     = 63468,
@@ -1195,7 +1194,8 @@ class spell_hun_lock_and_load : public AuraScript
         return ValidateSpellInfo(
         {
             SPELL_LOCK_AND_LOAD_TRIGGER,
-            SPELL_LOCK_AND_LOAD_MARKER
+            SPELL_LOCK_AND_LOAD_MARKER,
+            SPELL_FROST_TRAP_SLOW
         });
     }
 
@@ -1211,9 +1211,17 @@ class spell_hun_lock_and_load : public AuraScript
         if (!(eventInfo.GetTypeMask() & PROC_FLAG_DONE_TRAP_ACTIVATION))
             return false;
 
+        // Patch 3.3.3: Lock and Load no longer triggers from Explosive Trap activation,
+        // only from frost trap activation. Fire traps proc via CheckPeriodicProc instead.
         SpellInfo const* spellInfo = eventInfo.GetSpellInfo();
-        if (!spellInfo || !(spellInfo->GetSchoolMask() & (SPELL_SCHOOL_MASK_FROST | SPELL_SCHOOL_MASK_FIRE)))
+        if (!spellInfo || !(spellInfo->GetSchoolMask() & SPELL_SCHOOL_MASK_FROST))
             return false;
+
+        // immune to Frost Trap slow (bosses) in WotLK patch 3.2.0
+        if (Spell const* procSpell = eventInfo.GetProcSpell())
+             if (Unit* target = procSpell->GetOriginalTarget())
+                 if (target->IsImmunedToSpell(sSpellMgr->GetSpellInfo(SPELL_FROST_TRAP_SLOW)))
+                     return false;
 
         return roll_chance_i(aurEff->GetAmount());
     }
@@ -1411,48 +1419,29 @@ class spell_hun_hunting_party : public AuraScript
     }
 };
 
-// -53228 - Rapid Recuperation
+// 56654, 58882 - Rapid Recuperation
 class spell_hun_rapid_recuperation : public AuraScript
 {
     PrepareAuraScript(spell_hun_rapid_recuperation);
 
-    bool Validate(SpellInfo const* /*spellInfo*/) override
+    bool Validate(SpellInfo const* spellInfo) override
     {
-        return ValidateSpellInfo({ SPELL_HUNTER_RAPID_RECUPERATION_R1, SPELL_HUNTER_RAPID_RECUPERATION_R2 });
+        return ValidateSpellInfo({ spellInfo->Effects[EFFECT_0].TriggerSpell });
     }
 
-    bool CheckProc(ProcEventInfo& eventInfo)
-    {
-        SpellInfo const* procSpell = eventInfo.GetSpellInfo();
-        if (!procSpell)
-            return false;
-
-        // This effect only from Rapid Killing (mana regen)
-        return (procSpell->SpellFamilyFlags[1] & 0x01000000) != 0;
-    }
-
-    void HandleProc(ProcEventInfo& /*eventInfo*/)
+    void HandlePeriodic(AuraEffect const* aurEff)
     {
         PreventDefaultAction();
-        uint32 triggeredSpell = 0;
-        switch (GetSpellInfo()->Id)
-        {
-            case 53228: // Rank 1
-                triggeredSpell = SPELL_HUNTER_RAPID_RECUPERATION_R1;
-                break;
-            case 53232: // Rank 2
-                triggeredSpell = SPELL_HUNTER_RAPID_RECUPERATION_R2;
-                break;
-            default:
-                return;
-        }
-        GetTarget()->CastSpell(GetTarget(), triggeredSpell, true);
+
+        Unit* target = GetTarget();
+        uint32 triggerSpellId = GetSpellInfo()->Effects[aurEff->GetEffIndex()].TriggerSpell;
+        int32 amount = CalculatePct(static_cast<int32>(target->GetMaxPower(POWER_MANA)), aurEff->GetAmount());
+        target->CastCustomSpell(target, triggerSpellId, &amount, nullptr, nullptr, true, nullptr, aurEff);
     }
 
     void Register() override
     {
-        DoCheckProc += AuraCheckProcFn(spell_hun_rapid_recuperation::CheckProc);
-        OnProc += AuraProcFn(spell_hun_rapid_recuperation::HandleProc);
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_hun_rapid_recuperation::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
     }
 };
 
@@ -1530,7 +1519,7 @@ class spell_hun_kill_command_pet : public AuraScript
     }
 };
 
-// -53228 - Rapid Recuperation (trigger)
+// -53228 - Rapid Recuperation (talent aura)
 class spell_hun_rapid_recuperation_trigger : public AuraScript
 {
     PrepareAuraScript(spell_hun_rapid_recuperation_trigger);
@@ -1567,8 +1556,8 @@ class spell_hun_rapid_recuperation_trigger : public AuraScript
             return;
 
         uint8 rank = GetSpellInfo()->GetRank();
-        if (rank > 0 && rank <= 2)
-            GetTarget()->CastSpell(GetTarget(), triggerSpells[rank - 1], true, nullptr, aurEff);
+        uint32 spellId = triggerSpells[rank - 1];
+        eventInfo.GetActor()->CastSpell(eventInfo.GetActor(), spellId, true, nullptr, aurEff);
     }
 
     void Register() override
@@ -1684,9 +1673,9 @@ void AddSC_hunter_spell_scripts()
     RegisterSpellScript(spell_hun_explosive_shot);
     RegisterSpellScript(spell_hun_thrill_of_the_hunt);
     RegisterSpellScript(spell_hun_hunting_party);
-    RegisterSpellScript(spell_hun_rapid_recuperation);
     RegisterSpellScript(spell_hun_glyph_of_mend_pet);
     // Proc system scripts
+    RegisterSpellScript(spell_hun_rapid_recuperation);
     RegisterSpellScript(spell_hun_kill_command_pet);
     RegisterSpellScript(spell_hun_piercing_shots);
     RegisterSpellScript(spell_hun_rapid_recuperation_trigger);

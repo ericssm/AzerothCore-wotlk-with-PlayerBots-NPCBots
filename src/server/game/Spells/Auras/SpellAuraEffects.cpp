@@ -1286,6 +1286,29 @@ bool AuraEffect::CheckEffectProc(AuraApplication* aurApp, ProcEventInfo& eventIn
             if (GetCasterGUID() != eventInfo.GetActor()->GetGUID())
                 return false;
             break;
+        case SPELL_AURA_PROC_TRIGGER_SPELL:
+        case SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE:
+        {
+            // Don't proc extra attacks while already processing extra attack spell
+            uint32 triggerSpellId = m_spellInfo->Effects[GetEffIndex()].TriggerSpell;
+            if (SpellInfo const* triggeredSpellInfo = sSpellMgr->GetSpellInfo(triggerSpellId))
+            {
+                if (triggeredSpellInfo->HasEffect(SPELL_EFFECT_ADD_EXTRA_ATTACKS))
+                {
+                    uint32 lastExtraAttackSpell = eventInfo.GetActor()->GetLastExtraAttackSpell();
+
+                    // Patch 1.12.0(?) extra attack abilities can no longer chain proc themselves
+                    if (lastExtraAttackSpell == triggerSpellId)
+                        return false;
+
+                    // Patch 2.2.0 Sword Specialization (Warrior, Rogue) extra attack can no longer proc additional extra attacks
+                    // 3.3.5 Sword Specialization (Warrior), Hack and Slash (Rogue)
+                    if (lastExtraAttackSpell == SPELL_SWORD_SPECIALIZATION || lastExtraAttackSpell == SPELL_HACK_AND_SLASH)
+                        return false;
+                }
+            }
+            break;
+        }
         default:
             break;
     }
@@ -5413,11 +5436,10 @@ void AuraEffect::HandleModDamageDone(AuraApplication const* aurApp, uint8 mode, 
     // This information for client side use only
     if (target->IsPlayer())
     {
-
         uint16 baseField = GetAmount() >= 0 ? PLAYER_FIELD_MOD_DAMAGE_DONE_POS : PLAYER_FIELD_MOD_DAMAGE_DONE_NEG;
         for (uint16 i = 0; i < MAX_SPELL_SCHOOL; ++i)
             if (GetMiscValue() & (1 << i))
-                target->ApplyModUInt32Value(baseField + i, GetAmount(), apply);
+                target->ApplyModInt32Value(baseField + i, GetAmount(), apply);
 
         if (Guardian* pet = target->ToPlayer()->GetGuardianPet())
             pet->UpdateAttackPowerAndDamage();
@@ -6636,12 +6658,6 @@ void AuraEffect::HandlePeriodicTriggerSpellAuraTick(Unit* target, Unit* caster) 
                         caster->CastSpell(target, triggerSpellId, false);
                     return;
                 }
-            // Hunter - Rapid Recuperation
-            case 56654:
-            case 58882:
-                int32 amount = int32(target->GetMaxPower(POWER_MANA) * GetAmount() / 100.0f);
-                target->CastCustomSpell(target, triggerSpellId, &amount, nullptr, nullptr, true, nullptr, this);
-                return;
         }
     }
 
@@ -7522,6 +7538,12 @@ void AuraEffect::HandleRaidProcFromChargeAuraProc(AuraApplication* aurApp, ProcE
 
 void AuraEffect::HandleRaidProcFromChargeWithValueAuraProc(AuraApplication* aurApp, ProcEventInfo& /*eventInfo*/)
 {
+    enum
+    {
+        SPELL_PRAYER_OF_MENDING_HEAL   = 33110,
+        SPELL_PRAYER_OF_MENDING_VISUAL = 41637
+    };
+
     Unit* target = aurApp->GetTarget();
 
     // Currently only Prayer of Mending
@@ -7530,7 +7552,6 @@ void AuraEffect::HandleRaidProcFromChargeWithValueAuraProc(AuraApplication* aurA
         LOG_DEBUG("spells.aura", "AuraEffect::HandleRaidProcFromChargeWithValueAuraProc: received not handled spell: {}", GetId());
         return;
     }
-    uint32 triggerSpellId = 33110;
 
     int32 value = GetAmount();
 
@@ -7554,6 +7575,7 @@ void AuraEffect::HandleRaidProcFromChargeWithValueAuraProc(AuraApplication* aurA
 
             if (triggerTarget)
             {
+                target->CastSpell(triggerTarget, SPELL_PRAYER_OF_MENDING_VISUAL, true);
                 target->CastCustomSpell(triggerTarget, GetId(), &value, nullptr, nullptr, true, nullptr, this, GetCasterGUID());
                 if (Aura* aura = triggerTarget->GetAura(GetId(), GetCasterGUID()))
                     aura->SetCharges(jumps);
@@ -7561,8 +7583,7 @@ void AuraEffect::HandleRaidProcFromChargeWithValueAuraProc(AuraApplication* aurA
         }
     }
 
-    LOG_DEBUG("spells.aura", "AuraEffect::HandleRaidProcFromChargeWithValueAuraProc: Triggering spell {} from aura {} proc", triggerSpellId, GetId());
-    target->CastCustomSpell(target, triggerSpellId, &value, nullptr, nullptr, true, nullptr, this, GetCasterGUID());
+    target->CastCustomSpell(target, SPELL_PRAYER_OF_MENDING_HEAL, &value, nullptr, nullptr, true, nullptr, this, GetCasterGUID());
 }
 
 int32 AuraEffect::GetTotalTicks() const
