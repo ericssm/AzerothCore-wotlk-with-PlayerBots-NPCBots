@@ -111,6 +111,7 @@ enum Races
 
 #define RACEMASK_HORDE RACEMASK_ALL_PLAYABLE & ~RACEMASK_ALLIANCE
 
+
 // DisplayRace values from CreatureDisplayInfoExtra.dbc
 enum class DisplayRace : uint8
 {
@@ -166,21 +167,7 @@ enum Classes
     (1<<(CLASS_DEATH_KNIGHT-1)))
 
 // valid classes for creature_template.unit_class
-enum UnitClass
-{
-    UNIT_CLASS_WARRIOR                  = 1,
-    UNIT_CLASS_PALADIN                  = 2,
-    UNIT_CLASS_ROGUE                    = 4,
-    UNIT_CLASS_MAGE                     = 8,
-};
-
-#ifdef MOD_NPCERBOTS
-//npcbot
-#define CLASSMASK_ALL_CREATURES CLASSMASK_ALL_PLAYABLE
-//end npcbot#else
-#else
-#define CLASSMASK_ALL_CREATURES ((1<<(UNIT_CLASS_WARRIOR-1)) | (1<<(UNIT_CLASS_PALADIN-1)) | (1<<(UNIT_CLASS_ROGUE-1)) | (1<<(UNIT_CLASS_MAGE-1)))
-#endif
+#define CLASSMASK_ALL_CREATURES ((1<<(CLASS_WARRIOR-1)) | (1<<(CLASS_PALADIN-1)) | (1<<(CLASS_ROGUE-1)) | (1<<(CLASS_MAGE-1)))
 
 #define CLASSMASK_WAND_USERS ((1<<(CLASS_PRIEST-1))|(1<<(CLASS_MAGE-1))|(1<<(CLASS_WARLOCK-1)))
 
@@ -3707,6 +3694,13 @@ enum PvPTeamId
     PVP_TEAM_HORDE       = 0, // Battleground: Horde,    Arena: Green
     PVP_TEAM_ALLIANCE    = 1, // Battleground: Alliance, Arena: Gold
     PVP_TEAM_NEUTRAL     = 2  // Battleground: Neutral,  Arena: None
+};
+
+enum AllianceId
+{
+    ALLIANCE_ALLIANCE = 0,
+    ALLIANCE_HORDE    = 1,
+    ALLIANCE_NEUTRAL  = 2
 };
 
 uint8 constexpr PVP_TEAMS_COUNT = 2;

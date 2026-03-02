@@ -5500,7 +5500,10 @@ void Player::SetSkill(uint16 id, uint16 step, uint16 newVal, uint16 maxVal)
 
             // remove all spells that related to this skill
             for (SkillLineAbilityEntry const* pAbility : GetSkillLineAbilitiesBySkillLine(id))
+            {
                 removeSpell(sSpellMgr->GetFirstSpellInChain(pAbility->Spell), SPEC_MASK_ALL, false);
+                RemoveAurasDueToSpell(pAbility->Spell);
+            }
         }
     }
     else if (newVal)                                        //add
@@ -7638,6 +7641,10 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
 
         if (HasSpellCooldown(spellInfo->Id))
         {
+            // Notify client so it can clean up the pending spell cast.
+            // Without this the client orphans the cast and blocks auto-attack.
+            Spell::SendCastResult(ToPlayer(), spellInfo, cast_count,
+                SPELL_FAILED_NOT_READY);
             continue;
         }
 
@@ -7684,7 +7691,11 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets const& targets, uint8
             }
 
             if (HasSpellCooldown(spellInfo->Id))
+            {
+                Spell::SendCastResult(ToPlayer(), spellInfo, cast_count,
+                    SPELL_FAILED_NOT_READY);
                 continue;
+            }
 
             Spell* spell = new Spell(this, spellInfo, (count > 0) ? TRIGGERED_FULL_MASK : TRIGGERED_NONE);
             spell->m_CastItem = item;
@@ -10179,14 +10190,6 @@ void Player::RemoveSpellMods(Spell* spell)
                         if (roll_chance_i(aurEff->GetAmount()))
                             continue; // don't consume charge
             }
-            // ROGUE MUTILATE WITH COLD BLOOD
-            if (spellInfo->Id == 5374)
-            {
-                SpellInfo const* sp = mod->ownerAura->GetSpellInfo();
-                if (sp->Id == 14177) // Cold Blood
-                    continue; // don't consume charge
-            }
-
             if (mod->ownerAura->DropCharge(AURA_REMOVE_BY_EXPIRE))
                 itr = m_spellMods[i].begin();
         }
@@ -10216,9 +10219,10 @@ bool Player::HasSpellModApplied(SpellModifier* mod, Spell* spell)
 
 void Player::SetSpellModTakingSpell(Spell* spell, bool apply)
 {
-    if (apply && m_spellModTakingSpell && m_spellModTakingSpell != spell)
+    if (apply && m_spellModTakingSpell != nullptr)
         return;
-    else if (!apply && m_spellModTakingSpell != spell)
+
+    if (!apply && (!m_spellModTakingSpell || m_spellModTakingSpell != spell))
         return;
 
     m_spellModTakingSpell = apply ? spell : nullptr;

@@ -2249,7 +2249,7 @@ uint8 Aura::GetProcEffectMask(AuraApplication* aurApp, ProcEventInfo& eventInfo,
     if (m_spellInfo->HasAura(SPELL_AURA_MOD_STEALTH))
     {
         if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
-            if (spellInfo->IsPositive() || !eventInfo.GetActor()->IsHostileTo(aurApp->GetTarget()))
+            if (spellInfo->IsPositive() || !eventInfo.GetActor()->IsHostileTo(aurApp->GetTarget()) || spellInfo->HasAttribute(SPELL_ATTR0_CU_DONT_BREAK_STEALTH))
                 return 0;
     }
 
@@ -2419,7 +2419,20 @@ void Aura::ConsumeProcCharges(SpellProcEntry const* procEntry)
     else if (IsUsingCharges())
     {
         if (!GetCharges())
+        {
+            // Defer removal while spell mods are being consumed,
+            // cleaned up in Spell::_cast() after handle_immediate()
+            if (GetType() == UNIT_AURA_TYPE
+                && (HasEffectType(SPELL_AURA_ADD_FLAT_MODIFIER)
+                    || HasEffectType(SPELL_AURA_ADD_PCT_MODIFIER)))
+            {
+                if (Player* player = GetUnitOwner()->ToPlayer())
+                    if (player->m_spellModTakingSpell)
+                        return;
+            }
+
             Remove();
+        }
     }
 }
 
