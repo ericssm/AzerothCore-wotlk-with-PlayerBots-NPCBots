@@ -121,3 +121,6 @@ compile_commands.json
 
 # Ignore Release directory
 Release/
+
+# Ignore RC compiler build log
+rc_head.log
