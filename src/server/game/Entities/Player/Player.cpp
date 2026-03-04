@@ -41,6 +41,7 @@
 #include "Config.h"
 #include "CreatureAI.h"
 #include "DatabaseEnv.h"
+#include "DBCStores.h"
 #include "DisableMgr.h"
 #include "Formulas.h"
 #include "GameEventMgr.h"
@@ -3218,10 +3219,10 @@ bool Player::CheckSkillLearnedBySpell(uint32 spellId)
 
     if (errorSkill)
     {
-        LOG_ERROR("entities.player", "Player {} (GUID: {}), has spell ({}) that teach skill ({}) which is invalid for the race/class combination (Race: {}, Class: {}). Will be deleted.",
+        LOG_DEBUG("entities.player", "Player {} (GUID: {}), has spell ({}) that teach skill ({}) which is invalid for the race/class combination (Race: {}, Class: {}). Kept for Bots.",
             GetName(), GetGUID().GetCounter(), spellId, errorSkill, getRace(), getClass());
 
-        return false;
+        return true;
     }
     return true;
 }
@@ -13889,12 +13890,27 @@ void Player::_LoadSkills(PreparedQueryResult result)
             SkillRaceClassInfoEntry const* rcEntry = GetSkillRaceClassInfo(skill, getRace(), getClass());
             if (!rcEntry)
             {
-                LOG_ERROR("entities.player", "Player {} (GUID: {}), has skill ({}) that is invalid for the race/class combination (Race: {}, Class: {}). Will be deleted.",
+                LOG_DEBUG("entities.player", "Player {} (GUID: {}), has skill ({}) that is invalid for the race/class combination (Race: {}, Class: {}). Kept for Bots.",
                     GetName(), GetGUID().GetCounter(), skill, getRace(), getClass());
 
-                // Mark skill for deletion in the database
-                mSkillStatus.insert(SkillStatusMap::value_type(skill, SkillStatusData(0, SKILL_DELETED)));
-                continue;
+                for (uint32 i = 0; i < sSkillRaceClassInfoStore.GetNumRows(); ++i)
+                {
+                    if (SkillRaceClassInfoEntry const* entry = sSkillRaceClassInfoStore.LookupEntry(i))
+                    {
+                        if (entry->SkillID == skill)
+                        {
+                            rcEntry = entry;
+                            break;
+                        }
+                    }
+                }
+
+                if (!rcEntry)
+                {
+                    // Mark skill for deletion in the database
+                    mSkillStatus.insert(SkillStatusMap::value_type(skill, SkillStatusData(0, SKILL_DELETED)));
+                    continue;
+                }
             }
 
             // set fixed skill ranges
