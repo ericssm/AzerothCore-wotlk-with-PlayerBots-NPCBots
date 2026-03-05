@@ -68,27 +68,27 @@ enum Gender
 enum Races
 {
     RACE_NONE               = 0,  // SKIP
-    RACE_HUMAN              = 1,  // TITLE Human
-    RACE_ORC                = 2,  // TITLE Orc
-    RACE_DWARF              = 3,  // TITLE Dwarf
-    RACE_NIGHTELF           = 4,  // TITLE Night Elf
-    RACE_UNDEAD_PLAYER      = 5,  // TITLE Undead
-    RACE_TAUREN             = 6,  // TITLE Tauren
-    RACE_GNOME              = 7,  // TITLE Gnome
-    RACE_TROLL              = 8,  // TITLE Troll
-    RACE_GOBLIN             = 9,  // TITLE Goblin
-    RACE_BLOODELF           = 10, // TITLE Blood Elf
-    RACE_DRAENEI            = 11, // TITLE Draenei
-    RACE_FEL_ORC            = 12, // TITLE Void Elf
-    RACE_NAGA               = 13, // TITLE Vulpera
-    RACE_BROKEN             = 14, // TITLE Nightborne
-    RACE_SKELETON           = 15, // TITLE Pandaren Horde
-    RACE_VRYKUL             = 16, // TITLE Worgen
-    RACE_TUSKARR            = 17, // TITLE Pandaren Alliance
-    RACE_FOREST_TROLL       = 18, // TITLE Troll Zandalari
-    RACE_TAUNKA             = 19, // TITLE Lightforged Draenei
-    RACE_NORTHREND_SKELETON = 20, // TITLE Demon Hunter Alliance
-    RACE_ICE_TROLL          = 21  // TITLE Demon Hunter Horde
+    RACE_HUMAN              = 1,  // TITLE 人类
+    RACE_ORC                = 2,  // TITLE 兽人
+    RACE_DWARF              = 3,  // TITLE 矮人
+    RACE_NIGHTELF           = 4,  // TITLE 暗夜精灵
+    RACE_UNDEAD_PLAYER      = 5,  // TITLE 亡灵
+    RACE_TAUREN             = 6,  // TITLE 牛头人
+    RACE_GNOME              = 7,  // TITLE 侏儒
+    RACE_TROLL              = 8,  // TITLE 巨魔
+    RACE_GOBLIN             = 9,  // TITLE 地精
+    RACE_BLOODELF           = 10, // TITLE 血精灵
+    RACE_DRAENEI            = 11, // TITLE 德莱尼
+    RACE_VOIDELF            = 12, // TITLE 虚空精灵 VoidElf
+    RACE_VULPERA            = 13, // TITLE 狐人 Vulpera
+    RACE_HIGH_ELF           = 14, // TITLE 高等精灵 High Elf
+    RACE_PANDAREN           = 15, // TITLE 熊猫人|cffc41f3b|r   Pandaren
+    RACE_WOLGEN             = 16, // TITLE 狼人
+    RACE_EREDAR             = 17, // TITLE 曼阿里·艾瑞达 Man'ari Eredar
+    RACE_FOREST_TROLL       = 18, // TITLE 赞达拉巨魔 Zandalari Troll
+    RACE_LIGHTFORGED        = 19, // TITLE 光铸德莱尼  Lightforged
+    RACE_DH_A               = 20, // TITLE 恶魔猎手|cff0070de|r   联盟  Deme
+    RACE_DH_H               = 21  // TITLE 恶魔猎手|cffc41f3b|r   部落
 };
 
 // max+1 for player race
@@ -98,16 +98,17 @@ enum Races
     ((1<<(RACE_HUMAN-1))   |(1<<(RACE_ORC-1))          |(1<<(RACE_DWARF-1))   | \
      (1<<(RACE_NIGHTELF-1))|(1<<(RACE_UNDEAD_PLAYER-1))|(1<<(RACE_TAUREN-1))  | \
      (1<<(RACE_GNOME-1))   |(1<<(RACE_TROLL-1))        |(1<<(RACE_GOBLIN-1))| \
-     (1<<(RACE_BLOODELF-1))|(1<<(RACE_DRAENEI-1))      |(1<<(RACE_FEL_ORC-1))| \
-     (1<<(RACE_NAGA-1))    |(1<<(RACE_BROKEN-1))       |(1<<(RACE_SKELETON-1))| \
-     (1<<(RACE_VRYKUL-1))  |(1<<(RACE_TUSKARR-1))      |(1<<(RACE_FOREST_TROLL-1))| \
-     (1<<(RACE_TAUNKA-1))  |(1<<(RACE_NORTHREND_SKELETON-1))|(1<<(RACE_ICE_TROLL-1)))
+     (1<<(RACE_BLOODELF-1))|(1<<(RACE_DRAENEI-1))      |(1<<(RACE_VOIDELF-1))| \
+     (1<<(RACE_VULPERA-1)) |(1<<(RACE_HIGH_ELF-1))     |(1<<(RACE_PANDAREN-1))| \
+     (1<<(RACE_WOLGEN-1))  |(1<<(RACE_EREDAR-1))      |(1<<(RACE_FOREST_TROLL-1))| \
+     (1<<(RACE_LIGHTFORGED-1))  |(1<<(RACE_DH_A-1))|(1<<(RACE_DH_H-1)))
 
+// Added (1<<(RACE_HIGH_ELF-1)) to RACEMASK_ALLIANCE
 #define RACEMASK_ALLIANCE \
     ((1<<(RACE_HUMAN-1)) | (1<<(RACE_DWARF-1))  | (1<<(RACE_NIGHTELF-1)) | \
-     (1<<(RACE_GNOME-1)) | (1<<(RACE_DRAENEI-1))| (1<<(RACE_FEL_ORC-1)) | \
-     (1<<(RACE_VRYKUL-1))| (1<<(RACE_TUSKARR-1))| (1<<(RACE_TAUNKA-1)) | \
-     (1<<(RACE_NORTHREND_SKELETON-1)))
+     (1<<(RACE_GNOME-1)) | (1<<(RACE_DRAENEI-1))| (1<<(RACE_VOIDELF-1))  | \
+     (1<<(RACE_WOLGEN-1))| (1<<(RACE_LIGHTFORGED-1)) | (1<<(RACE_DH_A-1)) | \
+     (1<<(RACE_HIGH_ELF-1)))
 
 #define RACEMASK_HORDE RACEMASK_ALL_PLAYABLE & ~RACEMASK_ALLIANCE
 
