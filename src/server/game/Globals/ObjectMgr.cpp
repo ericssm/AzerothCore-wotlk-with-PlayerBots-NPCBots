@@ -1840,6 +1840,41 @@ uint32 ObjectMgr::GetModelForTotem(SummonSlot totemSlot, Races race) const
     if (itr != _playerTotemModel.end())
         return itr->second;
 
+    // Fallback for custom races: map to a base race's totem model to prevent client crash (DisplayID=0)
+    Races fallbackRace = RACE_NONE;
+    switch (race)
+    {
+        // Alliance custom races -> fallback to Draenei(11) totems
+        case RACE_VOIDELF:      // 12
+        case RACE_HIGH_ELF:     // 14
+        case RACE_WOLGEN:       // 16
+        case RACE_LIGHTFORGED:  // 19
+        case RACE_DH_A:         // 20
+            fallbackRace = RACE_DRAENEI;
+            break;
+        // Horde custom races -> fallback to Orc(2) totems
+        case RACE_GOBLIN:       // 9
+        case RACE_VULPERA:      // 13
+        case RACE_PANDAREN:     // 15
+        case RACE_EREDAR:       // 17
+        case RACE_FOREST_TROLL: // 18
+        case RACE_DH_H:         // 21
+            fallbackRace = RACE_ORC;
+            break;
+        default:
+            break;
+    }
+
+    if (fallbackRace != RACE_NONE)
+    {
+        auto fallbackItr = _playerTotemModel.find(std::make_pair(totemSlot, fallbackRace));
+        if (fallbackItr != _playerTotemModel.end())
+        {
+            LOG_DEBUG("misc", "TotemSlot {} with custom RaceID ({}) using fallback RaceID ({}) totem model.", totemSlot, race, fallbackRace);
+            return fallbackItr->second;
+        }
+    }
+
     LOG_ERROR("misc", "TotemSlot {} with RaceID ({}) have no totem model data defined, set to default model.", totemSlot, race);
     return 0;
 }
