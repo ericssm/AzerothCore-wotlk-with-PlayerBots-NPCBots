@@ -1855,8 +1855,18 @@ bool BotDataMgr::GenerateBattlegroundBots(Player const* groupLeader, [[maybe_unu
         uint32 seconds_delay = 5;
         for (Creature const* bot : *registry3)
         {
-            bot->GetBotAI()->SetBotCommandState(BOT_COMMAND_STAY);
-            bot->GetBotAI()->canUpdate = false;
+            //npcbot: safety check - bot_AI may be null if AIM_Initialize() failed or AI was not set up properly
+            bot_ai* botAI = bot->GetBotAI();
+            if (!botAI)
+            {
+                BOT_LOG_ERROR("npcbots", "GenerateBattlegroundBots: bot {} '{}' has no bot_AI after spawn! Despawning and skipping.",
+                    bot->GetEntry(), bot->GetName().c_str());
+                DespawnWandererBot(bot->GetEntry());
+                continue;
+            }
+
+            botAI->SetBotCommandState(BOT_COMMAND_STAY);
+            botAI->canUpdate = false;
 
             const_cast<Creature*>(bot)->SetPvP(true);
             if (maxlevel && bot->GetLevel() > maxlevel)
