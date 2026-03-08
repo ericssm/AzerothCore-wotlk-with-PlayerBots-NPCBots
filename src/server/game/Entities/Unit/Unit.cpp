@@ -14346,8 +14346,14 @@ void Unit::SetDisplayId(uint32 modelId, float displayScale /*=1.f*/)
     SetUInt32Value(UNIT_FIELD_DISPLAYID, modelId);
 
     // Set Gender by modelId
-    if (CreatureModelInfo const* minfo = sObjectMgr->GetCreatureModelInfo(modelId))
+    if (IsPlayer() && modelId == GetNativeDisplayId())
+    {
+        SetByteValue(UNIT_FIELD_BYTES_0, 2, ToPlayer()->GetByteValue(PLAYER_BYTES_3, 0));
+    }
+    else if (CreatureModelInfo const* minfo = sObjectMgr->GetCreatureModelInfo(modelId))
+    {
         SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
+    }
 
     SetObjectScale(displayScale);
 
