@@ -82,4 +82,24 @@ AiPlayerbot.MaxRandomBots = 150
 3. **判空跳过操作：** 在 `Blizzard_Wardrobe.lua` 第 748 行和 755 行添加 `if (WardrobeTransmogFrame.Model.controlFrame) then ... end` 的防空崩溃检测。
 
 ---
+## 问题 5：自定义种族 Playerbot 在出生点扎堆、不移动、不打怪、不传送 (Playerbot Custom Race Spawn Stacking)
+
+**问题表现：**
+配置了随机机器人（Random Bots）后，所有自定义种族（如狼人、狐人等）的机器人不论等级多少，全都扎堆在出生点（如北郡修道院）发呆，重合在一起，不会自动传送去主城或是练级区打怪。
+
+**根本原因：**
+因为使用了自定义种族扩展（Custom Races），而在 Playerbot 模块源码中的硬编码函数 `IsAlliance() ` 仅包含了魔兽世界最早最初的 5 个联盟种族（人类、矮人、暗夜、侏儒、德莱尼）。
+当 Playerbot 根据自己阵营去选取出生练级点（HordeStarterCache 或 AllianceStarterCache）时，所有非最初 5 个联盟种族的机器人都会被 `IsAlliance()` 强制返回 `false` 从而被系统分配到了部落缓存区去寻找点位。紧接着这名带着联盟身份的机器人匹配到了部落领地时，安全检查触发，过滤掉了所有的传送合法目的地，导致最终 `可用目的地 = 0`，机器人就彻底在创建位置原地罚站。
+
+**修复方案：**
+在服务端 `modules/mod-playerbots/src/Bot/PlayerbotAI.cpp` 中的 `IsAlliance()` 方法里，将写死的种族比对改为基于动态掩码的判定：
+```cpp
+bool IsAlliance(uint8 race)
+{
+    return (1 << (race - 1)) & RACEMASK_ALLIANCE;
+}
+```
+这样可以完美吃透 `SharedDefines.h` 中针对联盟种族掩码的配置扩展。所有自定义联盟种族都能获得合法缓存地点，上线瞬间就会自动飞到对应的等级区域打怪。**注意需要重新编译核心才能生效。**
+
+---
 ## End of Documentation
