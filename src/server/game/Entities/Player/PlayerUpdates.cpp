@@ -2278,13 +2278,40 @@ void Player::ProcessTerrainStatusUpdate()
         // Fatigue bar state (if not on flight path or transport)
         if ((liquidData.Flags & MAP_LIQUID_TYPE_DARK_WATER) && !IsInFlight() && !GetTransport())
         {
-            // Exclude also uncontrollable vehicles
-            Vehicle*                vehicle     = GetVehicle();
-            VehicleSeatEntry const* vehicleSeat = vehicle ? vehicle->GetSeatForPassenger(this) : nullptr;
-            if (!vehicleSeat || vehicleSeat->CanControl())
-                m_MirrorTimerFlags |= UNDERWATER_INDARKWATER;
+            // CUSTOM: Skip fatigue in Gilneas zones (custom race Worgen starting area)
+            uint32 currentZone = GetZoneId();
+            uint32 currentArea = GetAreaId();
+            // Check all known Gilneas zone and area IDs
+            bool isGilneas = (currentZone == 4714 || currentZone == 4755 || currentZone == 4756 || currentZone == 4757
+                           || currentArea == 4714 || currentArea == 4755 || currentArea == 4756 || currentArea == 4757
+                           || currentArea == 4758 || currentArea == 4759 || currentArea == 4760 || currentArea == 4761
+                           || currentArea == 4762 || currentArea == 4763 || currentArea == 4764 || currentArea == 4765
+                           || currentArea == 4766 || currentArea == 4767 || currentArea == 4768 || currentArea == 4769
+                           || currentArea == 4770 || currentArea == 4771 || currentArea == 4772 || currentArea == 4773
+                           || currentArea == 4774 || currentArea == 4775 || currentArea == 4776 || currentArea == 4777
+                           || currentArea == 4778 || currentArea == 4779 || currentArea == 4780 || currentArea == 4781);
+            // Fallback: coordinate-based check on Eastern Kingdoms (map 0), Gilneas peninsula area
+            if (!isGilneas && GetMapId() == 0)
+            {
+                float px = GetPositionX();
+                float py = GetPositionY();
+                // Gilneas peninsula is roughly at X: -2500 to -1000, Y: 1200 to 3000
+                if (px >= -2500.0f && px <= -1000.0f && py >= 1200.0f && py <= 3000.0f)
+                    isGilneas = true;
+            }
+
+            if (!isGilneas)
+            {
+                // Exclude also uncontrollable vehicles
+                Vehicle*                vehicle     = GetVehicle();
+                VehicleSeatEntry const* vehicleSeat = vehicle ? vehicle->GetSeatForPassenger(this) : nullptr;
+                if (!vehicleSeat || vehicleSeat->CanControl())
+                    m_MirrorTimerFlags |= UNDERWATER_INDARKWATER;
+                else
+                    m_MirrorTimerFlags &= ~UNDERWATER_INDARKWATER;
+            }
             else
-                m_MirrorTimerFlags &= ~UNDERWATER_INDARKWATER;
+                m_MirrorTimerFlags &= ~UNDERWATER_INDARKWATER; // Gilneas: no fatigue
         }
         else
             m_MirrorTimerFlags &= ~UNDERWATER_INDARKWATER;

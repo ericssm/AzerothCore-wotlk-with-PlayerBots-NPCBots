@@ -1845,20 +1845,20 @@ uint32 ObjectMgr::GetModelForTotem(SummonSlot totemSlot, Races race) const
     switch (race)
     {
         // Alliance custom races -> fallback to Draenei(11) totems
-        case RACE_FEL_ORC:            // 12 (Void Elf)
-        case RACE_VRYKUL:             // 16 (Worgen)
-        case RACE_TUSKARR:            // 17 (Pandaren Alliance)
-        case RACE_TAUNKA:             // 19 (Lightforged Draenei)
-        case RACE_NORTHREND_SKELETON: // 20 (Demon Hunter Alliance)
+        case RACE_VOIDELF:      // 12
+        case RACE_HIGH_ELF:     // 14
+        case RACE_WOLGEN:       // 16
+        case RACE_LIGHTFORGED:  // 19
+        case RACE_DH_A:         // 20
             fallbackRace = RACE_DRAENEI;
             break;
         // Horde custom races -> fallback to Orc(2) totems
-        case RACE_GOBLIN:             // 9  (Goblin)
-        case RACE_NAGA:               // 13 (Vulpera)
-        case RACE_BROKEN:             // 14 (Nightborne)
-        case RACE_SKELETON:           // 15 (Pandaren Horde)
-        case RACE_FOREST_TROLL:       // 18 (Zandalari Troll)
-        case RACE_ICE_TROLL:          // 21 (Demon Hunter Horde)
+        case RACE_GOBLIN:       // 9
+        case RACE_VULPERA:      // 13
+        case RACE_PANDAREN:     // 15
+        case RACE_EREDAR:       // 17
+        case RACE_FOREST_TROLL: // 18
+        case RACE_DH_H:         // 21
             fallbackRace = RACE_ORC;
             break;
         default:
