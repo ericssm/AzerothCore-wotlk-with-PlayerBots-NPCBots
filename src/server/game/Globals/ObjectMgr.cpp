@@ -2981,6 +2981,13 @@ void ObjectMgr::LoadGameobjects()
             continue;
         }
 
+        if (fabs(data.rotation.x * data.rotation.x + data.rotation.y * data.rotation.y +
+                 data.rotation.z * data.rotation.z + data.rotation.w * data.rotation.w - 1.0f) >= 1e-5f)
+        {
+            LOG_ERROR("sql.sql", "Table `gameobject` has gameobject (GUID: {} Entry: {}) with invalid rotation quaternion (non-unit), defaulting to orientation on Z axis only", guid, data.id);
+            data.rotation = G3D::Quat(G3D::Matrix3::fromEulerAnglesZYX(data.orientation, 0.0f, 0.0f));
+        }
+
         if (!MapMgr::IsValidMapCoord(data.mapid, data.posX, data.posY, data.posZ, data.orientation))
         {
             LOG_ERROR("sql.sql", "Table `gameobject` has gameobject (GUID: {} Entry: {}) with invalid coordinates, skip", guid, data.id);
@@ -3119,6 +3126,13 @@ GameObjectData const* ObjectMgr::LoadGameObjectDataFromDB(ObjectGuid::LowType sp
         LOG_ERROR("sql.sql", "Table `gameobject` has gameobject (GUID: {} Entry: {}) with invalid rotationW ({}) value, skipped.", spawnId, entry, goData.rotation.w);
         _gameObjectDataStore.erase(spawnId);
         return nullptr;
+    }
+
+    if (fabs(goData.rotation.x * goData.rotation.x + goData.rotation.y * goData.rotation.y +
+             goData.rotation.z * goData.rotation.z + goData.rotation.w * goData.rotation.w - 1.0f) >= 1e-5f)
+    {
+        LOG_ERROR("sql.sql", "Table `gameobject` has gameobject (GUID: {} Entry: {}) with invalid rotation quaternion (non-unit), defaulting to orientation on Z axis only", spawnId, entry);
+        goData.rotation = G3D::Quat(G3D::Matrix3::fromEulerAnglesZYX(goData.orientation, 0.0f, 0.0f));
     }
 
     if (!MapMgr::IsValidMapCoord(goData.mapid, goData.posX, goData.posY, goData.posZ, goData.orientation))
@@ -10507,6 +10521,11 @@ CreatureBaseStats const* ObjectMgr::GetCreatureBaseStats(uint8 level, uint8 unit
             BaseMana = 0;
             AttackPower = 0;
             RangedAttackPower = 0;
+            Strength = 0;
+            Agility = 0;
+            Stamina = 0;
+            Intellect = 0;
+            Spirit = 0;
         }
     };
     static const DefaultCreatureBaseStats defStats;
@@ -10517,7 +10536,7 @@ void ObjectMgr::LoadCreatureClassLevelStats()
 {
     uint32 oldMSTime = getMSTime();
 
-    QueryResult result = WorldDatabase.Query("SELECT level, class, basehp0, basehp1, basehp2, basemana, basearmor, attackpower, rangedattackpower, damage_base, damage_exp1, damage_exp2 FROM creature_classlevelstats");
+    QueryResult result = WorldDatabase.Query("SELECT level, class, basehp0, basehp1, basehp2, basemana, basearmor, attackpower, rangedattackpower, damage_base, damage_exp1, damage_exp2, Strength, Agility, Stamina, Intellect, Spirit FROM creature_classlevelstats");
 
     if (!result)
     {
@@ -10576,6 +10595,18 @@ void ObjectMgr::LoadCreatureClassLevelStats()
 
         stats.AttackPower = fields[7].Get<uint32>();
         stats.RangedAttackPower = fields[8].Get<uint32>();
+
+        stats.Strength = fields[12].Get<uint32>();
+        stats.Agility = fields[13].Get<uint32>();
+        stats.Stamina = fields[14].Get<uint32>();
+        stats.Intellect = fields[15].Get<uint32>();
+        stats.Spirit = fields[16].Get<uint32>();
+
+        if (!stats.Strength || !stats.Agility || !stats.Stamina || !stats.Intellect || !stats.Spirit)
+        {
+            // Once these attributes are implemented, this should probably be uncommented.
+            // LOG_WARN("server.loading", "Creature base attributes for class {}, level {} are missing!", Class, Level);
+        }
 
         _creatureBaseStatsStore[MAKE_PAIR16(Level, Class)] = stats;
 

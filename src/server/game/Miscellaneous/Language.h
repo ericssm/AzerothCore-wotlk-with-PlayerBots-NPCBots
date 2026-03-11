@@ -1192,7 +1192,9 @@ enum AcoreStrings
     LANG_BF_ENABLED                     = 5116,
     LANG_BF_DISABLED                    = 5117,
 
-    // Room for more strings    5118-9999
+    LANG_RESETALL_HONOR                 = 5118,
+    LANG_RESETALL_ARENA                 = 5119,
+    // Room for more strings    5120-9999
 
     // Level requirement notifications
     LANG_SAY_REQ                        = 6604,
