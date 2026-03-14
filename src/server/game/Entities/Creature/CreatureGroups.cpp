@@ -186,7 +186,6 @@ void CreatureGroup::RemoveMember(Creature* member)
 {
     if (m_leader == member)
     {
-        RemoveFormationMovement();
         m_leader = nullptr;
     }
 
@@ -334,7 +333,7 @@ void CreatureGroup::FormationReset(bool dismiss, bool initMotionMaster)
             if (initMotionMaster)
             {
                 if (dismiss)
-                    member->GetMotionMaster()->MovementExpiredOnSlot(MOTION_SLOT_IDLE, false);
+                    member->GetMotionMaster()->Initialize();
                 else
                     member->GetMotionMaster()->MoveIdle();
 
@@ -345,10 +344,15 @@ void CreatureGroup::FormationReset(bool dismiss, bool initMotionMaster)
     m_Formed = !dismiss;
 }
 
-void CreatureGroup::LeaderStartedMoving()
+void CreatureGroup::LeaderMoveTo(float x, float y, float z, uint32 move_type)
 {
+    //! To do: This should probably get its own movement generator or use WaypointMovementGenerator.
+    //! If the leader's path is known, member's path can be plotted as well using formation offsets.
     if (!m_leader)
         return;
+
+    float pathDist = m_leader->GetExactDist(x, y, z);
+    float pathAngle = std::atan2(m_leader->GetPositionY() - y, m_leader->GetPositionX() - x);
 
     for (auto const& itr : m_members)
     {
@@ -357,39 +361,59 @@ void CreatureGroup::LeaderStartedMoving()
         if (member == m_leader || !member->IsAlive() || member->GetVictim() || !pFormationInfo.HasGroupFlag(std::underlying_type_t<GroupAIFlags>(GroupAIFlags::GROUP_AI_FLAG_FOLLOW_LEADER)))
             continue;
 
+        // If member is stunned / rooted etc don't allow to move him
+        // Or if charmed/controlled
         if (member->HasUnitState(UNIT_STATE_NOT_MOVE) || member->isPossessed() || member->HasUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED))
             continue;
 
-        float const followAngle = pFormationInfo.follow_angle;
+        // Xinef: this should be automatized, if turn angle is greater than PI/2 (90�) we should swap formation angle
+        float followAngle = pFormationInfo.follow_angle;
+        if (static_cast<float>(M_PI) - std::fabs(std::fabs(m_leader->GetOrientation() - pathAngle) - static_cast<float>(M_PI)) > static_cast<float>(M_PI)* 0.5f)
+        {
+            // pussywizard: in both cases should be 2*M_PI - follow_angle
+            // pussywizard: also, GetCurrentWaypointID() returns 0..n-1, while point_1 must be > 0, so +1
+            // pussywizard: db table waypoint_data shouldn't have point id 0 and shouldn't have any gaps for this to work!
+            // if (m_leader->GetCurrentWaypointID()+1 == pFormationInfo->point_1 || m_leader->GetCurrentWaypointID()+1 == itr->second->point_2)
+            followAngle = Position::NormalizeOrientation(pFormationInfo.follow_angle + static_cast<float>(M_PI)); //(2 * M_PI) - itr->second->follow_angle;
+        }
+
         float const followDist = pFormationInfo.follow_dist;
 
-        if (!member->HasUnitState(UNIT_STATE_FOLLOW_MOVE))
-            member->GetMotionMaster()->MoveFormation(m_leader, followDist, followAngle, pFormationInfo.point_1, pFormationInfo.point_2);
-    }
-}
+        float dx = x + std::cos(followAngle + pathAngle) * followDist;
+        float dy = y + std::sin(followAngle + pathAngle) * followDist;
+        float dz = z;
 
-bool CreatureGroup::CanLeaderStartMoving() const
-{
-    for (auto const& itr : m_members)
-    {
-        if (itr.first && itr.first != m_leader && itr.first->IsAlive())
-            if (itr.first->IsEngaged() || itr.first->IsInEvadeMode())
-                return false;
-    }
+        Acore::NormalizeMapCoord(dx);
+        Acore::NormalizeMapCoord(dy);
+        if (move_type < 2)
+            member->UpdateGroundPositionZ(dx, dy, dz);
 
-    return true;
-}
+        // pussywizard: setting the same movementflags is not enough, spline decides whether leader walks/runs, so spline param is now passed as "run" parameter to this function
+        member->SetUnitMovementFlags(m_leader->GetUnitMovementFlags());
+        switch (move_type)
+        {
+        case WAYPOINT_MOVE_TYPE_WALK:
+            member->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
+            break;
+        case WAYPOINT_MOVE_TYPE_RUN:
+            member->RemoveUnitMovementFlag(MOVEMENTFLAG_WALKING);
+            break;
+        case WAYPOINT_MOVE_TYPE_LAND:
+            member->AddUnitMovementFlag(MOVEMENTFLAG_DISABLE_GRAVITY);
+            break;
+        }
 
-void CreatureGroup::RemoveFormationMovement()
-{
-    for (auto const& itr : m_members)
-    {
-        Creature* member = itr.first;
-        if (!member || member == m_leader)
-            continue;
+        // xinef: if we move members to position without taking care of sizes, we should compare distance without sizes
+        // xinef: change members speed basing on distance - if too far speed up, if too close slow down
+        UnitMoveType const mtype = Movement::SelectSpeedType(member->GetUnitMovementFlags());
+        float const speedRate = m_leader->GetSpeedRate(mtype) * member->GetExactDist(dx, dy, dz) / pathDist;
 
-        if (member->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_IDLE) == FORMATION_MOTION_TYPE)
-            member->GetMotionMaster()->MovementExpiredOnSlot(MOTION_SLOT_IDLE, false);
+        if (speedRate > 0.01f) // don't move if speed rate is too low
+        {
+            member->SetSpeedRate(mtype, speedRate);
+            member->GetMotionMaster()->MovePoint(0, dx, dy, dz);
+            member->SetHomePosition(dx, dy, dz, pathAngle);
+        }
     }
 }
 

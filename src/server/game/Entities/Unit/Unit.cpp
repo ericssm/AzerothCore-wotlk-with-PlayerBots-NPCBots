@@ -44,7 +44,6 @@
 #include "MoveSpline.h"
 #include "MoveSplineInit.h"
 #include "MovementGenerator.h"
-#include "AbstractFollower.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "OutdoorPvP.h"
@@ -785,7 +784,8 @@ void Unit::DisableSpline()
 
 void Unit::resetAttackTimer(WeaponAttackType type)
 {
-    m_attackTimer[type] = int32(GetAttackTime(type) * m_modAttackSpeedPct[type]);
+    int32 time = int32(GetAttackTime(type) * m_modAttackSpeedPct[type]);
+    m_attackTimer[type] = std::min(m_attackTimer[type] + time, time);
 }
 
 bool Unit::IsWithinCombatRange(Unit const* obj, float dist2compare) const
@@ -1060,7 +1060,7 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
             if (attacker && damagetype != DOT && spellProto->DmgClass == SPELL_DAMAGE_CLASS_MELEE && !(spellProto->GetSchoolMask() & SPELL_SCHOOL_MASK_HOLY))
                 attacker->DealDamageShieldDamage(victim);
 
-            if (!spellProto->HasAttribute(SPELL_ATTR4_DAMAGE_DOESNT_BREAK_AURAS))
+            if (!spellProto->HasAttribute(SPELL_ATTR4_REACTIVE_DAMAGE_PROC))
                 victim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TAKE_DAMAGE, spellProto->Id);
         }
         else
@@ -4600,7 +4600,7 @@ void Unit::InterruptSpell(CurrentSpellTypes spellType, bool withDelayed, bool wi
         }
 
         if (IsCreature() && IsAIEnabled)
-            ToCreature()->AI()->OnSpellFailed(spell->GetSpellInfo());
+            ToCreature()->AI()->OnSpellCastFinished(spell->GetSpellInfo(), SPELL_FINISHED_CANCELED);
     }
 }
 
@@ -5922,16 +5922,6 @@ void Unit::RemoveAreaAurasDueToLeaveWorld()
         }
         else
             ++iter;
-    }
-}
-
-void Unit::RemoveAllFollowers()
-{
-    while (auto* ref = m_FollowingRefMgr.getFirst())
-    {
-        auto* source = ref->GetSource();
-        ref->delink();
-        source->SetTarget(nullptr);
     }
 }
 
@@ -13755,8 +13745,6 @@ void Unit::RemoveFromWorld()
 
         RemoveAreaAurasDueToLeaveWorld();
 
-        RemoveAllFollowers();
-
         if (GetCharmerGUID())
         {
             LOG_FATAL("entities.unit", "Unit {} has charmer guid when removed from world", GetEntry());
@@ -16577,7 +16565,11 @@ void Unit::SendPlaySpellImpact(ObjectGuid guid, uint32 id)
     WorldPacket data(SMSG_PLAY_SPELL_IMPACT, 8 + 4);
     data << guid;       // target
     data << uint32(id); // SpellVisualKit.dbc index
-    SendMessageToSet(&data, true);
+
+    if (IsPlayer())
+        ToPlayer()->SendDirectMessage(&data);
+    else
+    	SendMessageToSet(&data, true);
 }
 
 #ifdef MOD_NPCERBOTS

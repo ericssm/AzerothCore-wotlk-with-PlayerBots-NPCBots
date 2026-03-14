@@ -19,6 +19,10 @@
 #include "Player.h"
 #include "ScriptedCreature.h"
 
+/*#####
+# Support for Quest 925: Cairne's Hoofprint
+######*/
+
 // NPC 3057: Cairne Bloodhoof <High Chieftain>
 enum CairneBloodhoof
 {
@@ -30,7 +34,7 @@ enum CairneBloodhoof
     SPELL_CAIRNES_HOOFPRINT = 23123
 };
 
-/// @todo verify abilities/timers
+// @todo verify abilities/timers
 class npc_cairne_bloodhoof : public CreatureScript
 {
 public:
@@ -57,15 +61,12 @@ public:
             }
         }
 
-        void JustDied(Unit* /*killer*/) override
-        {
-            DoRewardPlayersInArea();
-        }
-
         void UpdateAI(uint32 diff) override
         {
             if (!UpdateVictim())
+            {
                 return;
+            }
 
             if (_berserkerChargeTimer <= diff)
             {

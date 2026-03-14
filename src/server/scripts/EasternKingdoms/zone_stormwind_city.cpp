@@ -464,26 +464,13 @@ enum KingVarianWrynn : uint32
     // Deathknight Starting Zone End
     QUEST_WHERE_KINGS_WALK       = 13188,
 };
-// 29611 - King Varian Wryn
-/// @todo add abilities/timers
-struct npc_king_varian_wrynn : public ScriptedAI
+
+class npc_king_varian_wrynn : public CreatureScript
 {
-    npc_king_varian_wrynn(Creature* creature) : ScriptedAI(creature) { }
+public:
+    npc_king_varian_wrynn() : CreatureScript("npc_king_varian_wrynn") { }
 
-    void JustDied(Unit* /*killer*/) override
-    {
-        DoRewardPlayersInArea();
-    }
-
-    void UpdateAI(uint32 /*diff*/) override
-    {
-        if (!UpdateVictim())
-            return;
-
-        DoMeleeAttackIfReady();
-    }
-
-    bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*item*/)
+    bool OnQuestReward(Player* player, Creature* /*creature*/, Quest const* quest, uint32 /*item*/) override
     {
 
         if (quest->GetQuestId() == QUEST_WHERE_KINGS_WALK)
@@ -499,6 +486,5 @@ void AddSC_stormwind_city()
     new npc_tyrion_spybot();
     new npc_lord_gregor_lescovar();
     new npc_marzon_silent_blade();
-    RegisterCreatureAI(npc_king_varian_wrynn);
-
+    new npc_king_varian_wrynn();
 }

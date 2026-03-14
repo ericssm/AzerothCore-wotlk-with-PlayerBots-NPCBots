@@ -16,17 +16,17 @@
  */
 
 #include "FollowerReference.h"
-#include "AbstractFollower.h"
+#include "TargetedMovementGenerator.h"
 #include "Unit.h"
 
 void FollowerReference::targetObjectBuildLink()
 {
-    getTarget()->AddFollower(this);
+    getTarget()->addFollower(this);
 }
 
 void FollowerReference::targetObjectDestroyLink()
 {
-    getTarget()->RemoveFollower(this);
+    getTarget()->removeFollower(this);
 }
 
 void FollowerReference::sourceObjectDestroyLink()

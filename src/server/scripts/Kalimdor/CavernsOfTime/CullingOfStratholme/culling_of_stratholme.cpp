@@ -1402,10 +1402,7 @@ enum chromie
     ITEM_ARCANE_DISRUPTOR               = 37888,
     QUEST_DISPELLING_ILLUSIONS          = 13149,
     QUEST_A_ROYAL_ESCORT                = 13151,
-    SPELL_SUMMON_ARCANE_DISRUPTOR       = 49591,
-    GOSSIP_MENU_START                   = 9586,
-    GOSSIP_MENU_ACTION_MENU_SKIP        = 11277,
-    GOSSIP_MENU_ACTION_INTERFERE        = 9595
+    SPELL_SUMMON_ARCANE_DISRUPTOR       = 49591
 };
 
 class npc_cos_chromie_start : public CreatureScript
@@ -1413,55 +1410,55 @@ class npc_cos_chromie_start : public CreatureScript
 public:
     npc_cos_chromie_start() : CreatureScript("npc_cos_chromie_start") { }
 
-    bool OnQuestAccept(Player* /*player*/, Creature* creature, const Quest* quest) override
+    bool OnQuestAccept(Player*, Creature* creature, const Quest* pQuest)
     {
-        if (quest->GetQuestId() == QUEST_DISPELLING_ILLUSIONS)
-            if (InstanceScript* instance = creature->GetInstanceScript())
-                instance->SetData(DATA_SHOW_CRATES, 1);
+        if (pQuest->GetQuestId() == QUEST_DISPELLING_ILLUSIONS)
+        {
+            if (InstanceScript* pInstance = creature->GetInstanceScript())
+            {
+                pInstance->SetData(DATA_SHOW_CRATES, 1);
+            }
+        }
 
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 /*action*/) override
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 /*action*/)
     {
-        switch (player->PlayerTalkClass->GetGossipMenu().GetMenuId())
+        // final menu id, show crates if hidden and add item if missing
+        if (player->PlayerTalkClass->GetGossipMenu().GetMenuId() == 9595)
         {
-            case GOSSIP_MENU_START:
+            if (InstanceScript* pInstance = creature->GetInstanceScript())
             {
-                if (InstanceScript* instance = creature->GetInstanceScript())
-                    if (instance->GetData(DATA_ARTHAS_EVENT) == COS_PROGRESS_NOT_STARTED)
-                        instance->SetData(DATA_SHOW_CRATES, 1);
-
-                break;
-            }
-            case GOSSIP_MENU_ACTION_INTERFERE:
-            {
-                if (!player->HasItemCount(ITEM_ARCANE_DISRUPTOR))
-                    creature->CastSpell(player, SPELL_SUMMON_ARCANE_DISRUPTOR);
-
-                break;
-            }
-            // Since 3.3.3: "Players may now skip the initial introduction dialog to this dungeon once they have completed it at least once."
-            case GOSSIP_MENU_ACTION_MENU_SKIP:
-            {
-                if (InstanceScript* instance = creature->GetInstanceScript())
+                if (pInstance->GetData(DATA_ARTHAS_EVENT) == COS_PROGRESS_NOT_STARTED)
                 {
-                    if (instance->GetData(DATA_ARTHAS_EVENT) == COS_PROGRESS_NOT_STARTED)
-                    {
-                        instance->SetData(DATA_ARTHAS_EVENT, COS_PROGRESS_FINISHED_INTRO);
-
-                        if (Creature* arthas = ObjectAccessor::GetCreature(*creature, instance->GetGuidData(DATA_ARTHAS)))
-                            arthas->AI()->Reset();
-                    }
-
-                    player->NearTeleportTo(LeaderIntroPos2.GetPositionX(), LeaderIntroPos2.GetPositionY(), LeaderIntroPos2.GetPositionZ(), LeaderIntroPos2.GetOrientation());
+                    pInstance->SetData(DATA_SHOW_CRATES, 1);
                 }
-                break;
             }
-            default:
-                break;
+
+            if (!player->HasItemCount(ITEM_ARCANE_DISRUPTOR))
+            {
+                creature->CastSpell(player, SPELL_SUMMON_ARCANE_DISRUPTOR);
+            }
+        }
+        // Skip Event
+        else if (player->PlayerTalkClass->GetGossipMenu().GetMenuId() == 11277)
+        {
+            if (InstanceScript* pInstance = creature->GetInstanceScript())
+            {
+                if (pInstance->GetData(DATA_ARTHAS_EVENT) == COS_PROGRESS_NOT_STARTED)
+                {
+                    pInstance->SetData(DATA_ARTHAS_EVENT, COS_PROGRESS_FINISHED_INTRO);
+                    if (Creature* arthas = ObjectAccessor::GetCreature(*creature, pInstance->GetGuidData(DATA_ARTHAS)))
+                    {
+                        arthas->AI()->Reset();
+                    }
+                }
+                player->NearTeleportTo(LeaderIntroPos2.GetPositionX(), LeaderIntroPos2.GetPositionY(), LeaderIntroPos2.GetPositionZ(), LeaderIntroPos2.GetOrientation());
+            }
         }
 
+        // return false to display last windows
         return false;
     }
 };
@@ -1486,7 +1483,7 @@ public:
         if (!creature->GetInstanceScript() || creature->GetInstanceScript()->GetData(DATA_ARTHAS_EVENT) != COS_PROGRESS_CRATES_FOUND)
             return true;
 
-        // "Well, you're not going to sign recruitment papers or anything, but you are going to fight alongside him. ..."
+        // We can start event:)
         if (player->PlayerTalkClass->GetGossipMenu().GetMenuId() == 9612)
             creature->GetInstanceScript()->SetData(DATA_ARTHAS_EVENT, COS_PROGRESS_START_INTRO);
 

@@ -778,7 +778,6 @@ public:
     void LoadSpellInfoCustomAttributes();
     void LoadSpellInfoCorrections();
     void LoadSpellSpecificAndAuraState();
-    void LoadSpellJumpDistances();
 
 private:
     SpellDifficultySearcherMap mSpellDifficultySearcherMap;

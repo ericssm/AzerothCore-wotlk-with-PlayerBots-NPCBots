@@ -40,8 +40,6 @@ enum GameObjects
     GO_DOOR_LEVER_2             = 101833,
     GO_DOOR_LEVER_3             = 101834,
     GO_CANNON                   = 16398,
-    GO_FOUNDRY_DOOR             = 16399,
-    GO_MAST_ROOM_DOOR           = 16400,
 };
 
 template <class AI, class T>

@@ -46,8 +46,6 @@ public:
                 case GO_DOOR_LEVER_2:
                 case GO_DOOR_LEVER_3:
                 case GO_CANNON:
-                case GO_FOUNDRY_DOOR:
-                case GO_MAST_ROOM_DOOR:
                     gameobject->AllowSaveToDB(true);
                     break;
                 case GO_FACTORY_DOOR:
@@ -59,8 +57,9 @@ public:
                 case GO_IRON_CLAD_DOOR:
                     gameobject->AllowSaveToDB(true);
                     if (GetStoredGameObjectState(gameobject->GetSpawnId()) == GO_STATE_ACTIVE)
+                    {
                         gameobject->DespawnOrUnsummon();
-
+                    }
                     break;
             }
         }

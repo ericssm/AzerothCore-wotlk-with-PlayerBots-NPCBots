@@ -234,11 +234,6 @@ public:
 
         void JustEngagedWith(Unit* /*who*/) override { }
 
-        void JustDied(Unit* /*killer*/) override
-        {
-            DoRewardPlayersInArea();
-        }
-
         void DoAction(int32 action) override
         {
             if (action == ACTION_START_TALKING)

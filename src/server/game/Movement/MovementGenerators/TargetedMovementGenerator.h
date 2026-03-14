@@ -18,14 +18,21 @@
 #ifndef ACORE_TARGETEDMOVEMENTGENERATOR_H
 #define ACORE_TARGETEDMOVEMENTGENERATOR_H
 
-#include "AbstractFollower.h"
+#include "FollowerReference.h"
 #include "MovementGenerator.h"
 #include "Optional.h"
 #include "PathGenerator.h"
 #include "Timer.h"
 #include "Unit.h"
 
-using TargetedMovementGeneratorBase = AbstractFollower;
+class TargetedMovementGeneratorBase
+{
+public:
+    TargetedMovementGeneratorBase(Unit* target) { i_target.link(target, this); }
+    void stopFollowing() { }
+protected:
+    FollowerReference i_target;
+};
 
 enum ChaseMovementMode
 {
@@ -36,11 +43,11 @@ enum ChaseMovementMode
 };
 
 template<class T>
-class ChaseMovementGenerator : public MovementGeneratorMedium<T, ChaseMovementGenerator<T>>, public AbstractFollower
+class ChaseMovementGenerator : public MovementGeneratorMedium<T, ChaseMovementGenerator<T>>, public TargetedMovementGeneratorBase
 {
 public:
     ChaseMovementGenerator(Unit* target, Optional<ChaseRange> range = {}, Optional<ChaseAngle> angle = {})
-        : AbstractFollower(target), i_leashExtensionTimer(5000), i_path(nullptr), i_recheckDistance(0), i_recalculateTravel(true), _range(range), _angle(angle), m_currentMode(CHASE_MODE_NORMAL) {}
+        : TargetedMovementGeneratorBase(target), i_leashExtensionTimer(5000), i_path(nullptr), i_recheckDistance(0), i_recalculateTravel(true), _range(range), _angle(angle), m_currentMode(CHASE_MODE_NORMAL) {}
     ~ChaseMovementGenerator() { }
 
     MovementGeneratorType GetMovementGeneratorType() { return CHASE_MOTION_TYPE; }
@@ -54,7 +61,7 @@ public:
     bool PositionOkay(T* owner, Unit* target, Optional<float> maxDistance, Optional<ChaseAngle> angle);
 
     void unitSpeedChanged() { _lastTargetPosition.reset(); }
-    Unit* GetTarget() const { return AbstractFollower::GetTarget(); }
+    Unit* GetTarget() const { return i_target.getTarget(); }
 
     bool EnableWalking() const { return false; }
     bool HasLostTarget(Unit* unit) const { return unit->GetVictim() != this->GetTarget(); }
@@ -80,11 +87,11 @@ private:
 };
 
 template<class T>
-class FollowMovementGenerator : public MovementGeneratorMedium<T, FollowMovementGenerator<T>>, public AbstractFollower
+class FollowMovementGenerator : public MovementGeneratorMedium<T, FollowMovementGenerator<T>>, public TargetedMovementGeneratorBase
 {
 public:
     FollowMovementGenerator(Unit* target, float range, ChaseAngle angle, bool inheritWalkState, bool inheritSpeed)
-        : AbstractFollower(target), i_path(nullptr), i_recheckPredictedDistanceTimer(0), i_recheckPredictedDistance(false), _range(range), _angle(angle), _inheritWalkState(inheritWalkState), _inheritSpeed(inheritSpeed) {}
+        : TargetedMovementGeneratorBase(target), i_path(nullptr), i_recheckPredictedDistanceTimer(0), i_recheckPredictedDistance(false), _range(range), _angle(angle), _inheritWalkState(inheritWalkState), _inheritSpeed(inheritSpeed) {}
     ~FollowMovementGenerator() { }
 
     MovementGeneratorType GetMovementGeneratorType() { return FOLLOW_MOTION_TYPE; }
@@ -95,7 +102,7 @@ public:
     void DoReset(T*);
     void MovementInform(T*);
 
-    Unit* GetTarget() const { return AbstractFollower::GetTarget(); }
+    Unit* GetTarget() const { return i_target.getTarget(); }
 
     void unitSpeedChanged() { _lastTargetPosition.reset(); }
 

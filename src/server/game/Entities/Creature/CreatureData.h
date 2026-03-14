@@ -326,11 +326,6 @@ struct CreatureBaseStats
     uint32 AttackPower;
     uint32 RangedAttackPower;
     float BaseDamage[MAX_EXPANSIONS];
-    uint32 Strength;
-    uint32 Agility;
-    uint32 Stamina;
-    uint32 Intellect;
-    uint32 Spirit;
 
     // Helpers
 
@@ -393,7 +388,7 @@ typedef std::unordered_map<uint32, EquipmentInfoContainerInternal> EquipmentInfo
 struct CreatureData
 {
     CreatureData() = default;
-    ObjectGuid::LowType spawnId{0};
+    ObjectGuid::LowType spawnId{ 0 };                          // mod_playerbots
     uint32 id1{0};                                             // entry in creature_template
     uint32 id2{0};                                             // entry in creature_template
     uint32 id3{0};                                             // entry in creature_template

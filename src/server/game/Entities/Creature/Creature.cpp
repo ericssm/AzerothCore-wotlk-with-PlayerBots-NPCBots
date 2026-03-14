@@ -22,7 +22,6 @@
 #include "CreatureAI.h"
 #include "CreatureAISelector.h"
 #include "CreatureGroups.h"
-#include "MoveSpline.h"
 #include "DatabaseEnv.h"
 #include "Formulas.h"
 #include "GameEventMgr.h"
@@ -1181,7 +1180,8 @@ bool Creature::AIM_Initialize(CreatureAI* ai)
 
     UnitAI* oldAI = i_AI;
 
-    Motion_Initialize();
+    // Xinef: called in add to world
+    //Motion_Initialize();
 
 #ifdef MOD_NPCERBOTS
     //npcbot: prevent overriding bot_AI
@@ -1211,19 +1211,7 @@ void Creature::Motion_Initialize()
         GetMotionMaster()->Initialize();
     }
     else if (m_formation->IsFormed())
-    {
-        // If the leader is already moving, start following immediately
-        // instead of waiting for the next waypoint signal.
-        if (Creature* leader = m_formation->GetLeader())
-        {
-            if (leader->IsAlive() && !leader->movespline->Finalized())
-            {
-                m_formation->LeaderStartedMoving();
-                return;
-            }
-        }
         GetMotionMaster()->MoveIdle(); //wait the order of leader
-    }
     else
         GetMotionMaster()->Initialize();
 }
@@ -1508,8 +1496,7 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
         m_spawnId = sObjectMgr->GenerateCreatureSpawnId();
 
     CreatureData& data = sObjectMgr->NewOrExistCreatureData(m_spawnId);
-    data.spawnId = m_spawnId;
-
+    data.spawnId = m_spawnId;  // mod_playerbots
     uint32 displayId = GetNativeDisplayId();
     uint32 npcflag = GetNpcFlags();
     uint32 unit_flags = GetUnitFlags();
@@ -3795,7 +3782,7 @@ bool Creature::IsMovementPreventedByCasting() const
 void Creature::SetCannotReachTarget(ObjectGuid const& cannotReach)
 {
     if (cannotReach == m_cannotReachTarget)
-{
+    {
         return;
     }
 
