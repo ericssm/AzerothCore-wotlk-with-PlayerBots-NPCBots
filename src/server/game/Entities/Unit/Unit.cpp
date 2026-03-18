@@ -8613,14 +8613,10 @@ void Unit::RemoveAllControlled(bool onDeath /*= false*/)
             if (onDeath)
                 if (TempSummon* ts = target->ToTempSummon())
                     if (ts->m_Properties && ts->m_Properties->Type == SUMMON_TYPE_LIGHTWELL)
-                    {
                         continue;
-                    }
 
             if (!(onDeath && !IsPlayer() && target->IsGuardian()))
-            {
                 target->ToTempSummon()->UnSummon();
-            }
         }
         else
         {
