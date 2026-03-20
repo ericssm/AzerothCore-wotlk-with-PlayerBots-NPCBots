@@ -18040,7 +18040,7 @@ bool bot_ai::GlobalUpdate(uint32 diff)
         //Long-timed updates
 
         if (me->IsInWorld() && me->IsAlive() && me->IsInCombat() && !me->GetMap()->IsDungeon() && (IAmFree() || !master->IsInCombat()))
-            me->getHostileRefMgr().deleteReferencesOutOfRange(me->GetMap()->GetVisibilityRange());
+            me->GetCombatManager().EndCombatBeyondRange(me->GetMap()->GetVisibilityRange(), true);
     }
 
     if (_updateTimerMedium <= diff)

@@ -688,6 +688,20 @@ class spell_dk_dancing_rune_weapon : public AuraScript
 {
     PrepareAuraScript(spell_dk_dancing_rune_weapon);
 
+    void HandleApply(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+    {
+        Unit* caster = GetCaster();
+        if (!caster)
+            return;
+
+        // Redirect 100% of the DRW's threat to the DK player
+        uint32 npcEntry = GetSpellInfo()->Effects[EFFECT_0].MiscValue;
+        std::list<Creature*> runeWeapons;
+        caster->GetAllMinionsByEntry(runeWeapons, npcEntry);
+        for (Creature* temp : runeWeapons)
+            temp->GetThreatMgr().RegisterRedirectThreat(GetId(), caster->GetGUID(), 100);
+    }
+
     bool CheckProc(ProcEventInfo& eventInfo)
     {
 #ifdef MOD_NPCERBOTS
@@ -782,6 +796,7 @@ class spell_dk_dancing_rune_weapon : public AuraScript
 
     void Register() override
     {
+        AfterEffectApply += AuraEffectApplyFn(spell_dk_dancing_rune_weapon::HandleApply, EFFECT_2, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
         DoCheckProc += AuraCheckProcFn(spell_dk_dancing_rune_weapon::CheckProc);
         OnEffectProc += AuraEffectProcFn(spell_dk_dancing_rune_weapon::HandleProc, EFFECT_1, SPELL_AURA_DUMMY);
     }

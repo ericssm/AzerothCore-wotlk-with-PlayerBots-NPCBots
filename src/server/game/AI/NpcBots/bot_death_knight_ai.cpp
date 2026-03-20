@@ -1505,7 +1505,7 @@ public:
                     baseThreat += threatEntry->flatMod;
 
                     if (baseThreat)
-                        target->GetThreatMgr().AddThreat(me, baseThreat * 6.f, spell->GetSchoolMask(), spell);
+                        target->GetThreatMgr().AddThreat(me, baseThreat * 6.f, spell);
                 }
             }
 

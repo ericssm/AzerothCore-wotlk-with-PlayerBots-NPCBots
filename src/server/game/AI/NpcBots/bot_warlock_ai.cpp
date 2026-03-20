@@ -460,7 +460,7 @@ public:
                 return;
 
             Unit* u = *(me->getAttackers().begin());
-            if (u->GetThreatMgr().GetThreatList().size() < 3 || u->GetThreatMgr().GetThreat(me) < 100.f)
+            if (u->GetThreatMgr().GetThreatListSize() < 3 || u->GetThreatMgr().GetThreat(me) < 100.f)
                 return;
 
             if (doCast(me, GetSpell(SOULSHATTER_1)))
