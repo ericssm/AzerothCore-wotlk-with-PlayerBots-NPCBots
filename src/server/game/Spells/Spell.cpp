@@ -2951,16 +2951,9 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             if (!m_triggeredByAuraSpell.spellInfo || m_damage || (!(m_triggeredByAuraSpell.spellInfo->Effects[m_triggeredByAuraSpell.effectIndex].TriggerSpell == m_spellInfo->Id) && !(m_triggeredByAuraSpell.spellInfo->IsAuraEffectEqual(m_spellInfo))))
                 m_caster->AtTargetAttacked(effectUnit, !(m_spellInfo->HasAttribute(SPELL_ATTR1_NO_THREAT) || m_spellInfo->HasAttribute(SPELL_ATTR3_SUPPRESS_TARGET_PROCS)));
 
-            // Unsure if there are more spells that are not supposed to stop enemy from
-            // regenerating HP from food, so for now it stays as an ID.
-            const uint32 SPELL_PREMEDITATION = 14183;
-            if (m_spellInfo->Id != SPELL_PREMEDITATION)
-            {
-                if (!effectUnit->IsStandState())
-                {
-                    effectUnit->SetStandState(UNIT_STAND_STATE_STAND);
-                }
-            }
+            // Spells that don't initiate combat shouldn't affect stand state (e.g. Premeditation, Storm Giant/Felreaver Passive)
+            if (m_spellInfo->HasInitialAggro() && !effectUnit->IsStandState())
+                effectUnit->SetStandState(UNIT_STAND_STATE_STAND);
         }
     }
 
@@ -9443,7 +9436,7 @@ namespace Acore
     {
         if (target->IsGameObject())
         {
-            if (!target->ToGameObject()->IsInRange(_position->GetPositionX(), _position->GetPositionY(), _position->GetPositionZ(), _range))
+            if (!target->ToGameObject()->IsInRange3d(_position->GetPositionX(), _position->GetPositionY(), _position->GetPositionZ(), _range))
                 return false;
         }
         else if (!target->IsWithinDist3d(_position, _range))
