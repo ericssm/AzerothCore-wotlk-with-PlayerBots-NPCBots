@@ -1759,12 +1759,6 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[0].TargetB = SpellImplicitTargetInfo();
     });
 
-    // Flame Breath
-    ApplySpellFix({ 47592 }, [](SpellInfo* spellInfo)
-    {
-        spellInfo->Effects[EFFECT_0].Amplitude = 200;
-    });
-
     // Skarvald, Charge
     ApplySpellFix({ 43651 }, [](SpellInfo* spellInfo)
     {
