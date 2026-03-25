@@ -285,7 +285,7 @@ public:
             {
                 //Frost Arrow / Autoshot
                 if (IsSpellReady(FROST_ARROW_1, diff) && me->GetPower(POWER_MANA) >= FROSTARROW_COST &&
-                    !mytar->IsImmunedToDamage(AssertBotSpellInfoOverride(FROST_ARROW_1)))
+                    !mytar->IsImmunedToDamage(mytar,AssertBotSpellInfoOverride(FROST_ARROW_1)))
                 {
                     if (doCast(mytar, GetSpell(FROST_ARROW_1)))
                         return;

@@ -6,6 +6,7 @@
 #include "Creature.h"
 #include "Log.h"
 #include "SpellAuraEffects.h"
+#include "SpellMgr.h"
 
 #include <array>
 #include <tuple>
@@ -90,7 +91,16 @@ CanAffectVictimSchools(Unit const* target, Schools... schools)
 
     if (Creature const* creature = target->ToCreature())
     {
-        if (SpellSchoolMask immune_mask = SpellSchoolMask(creature->GetCreatureTemplate()->SpellSchoolImmuneMask))
+        uint32 spellSchoolImmuneMask = 0;
+
+        if (CreatureImmunities const* immunities = sSpellMgr->GetCreatureImmunities(creature->GetCreatureTemplate()->CreatureImmunitiesId))
+        {
+            for (std::size_t j = 0; j < immunities->School.size(); ++j)
+                if (immunities->School[j])
+                    spellSchoolImmuneMask |= (1u << j);
+        }
+
+        if (SpellSchoolMask immune_mask = SpellSchoolMask(spellSchoolImmuneMask))
         {
             for (uint8 i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
             {

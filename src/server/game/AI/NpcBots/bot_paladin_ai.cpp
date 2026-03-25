@@ -867,7 +867,7 @@ public:
                 {
                     Creature const* cre = victim->ToCreature();
                     if (cre && cre->GetCreatureTemplate()->rank != CREATURE_ELITE_NORMAL &&
-                        (cre->GetCreatureTemplate()->MechanicImmuneMask & (1<<(MECHANIC_STUN-1))))
+                        (cre->HasMechanicTemplateImmunity(UI64LIT(1) << MECHANIC_STUN)))
                         JUSTICE = 0;
                 }
                 SEAL = COMMAND ? COMMAND : JUSTICE ? JUSTICE : RIGHT;
