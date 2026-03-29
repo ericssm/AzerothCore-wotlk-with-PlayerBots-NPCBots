@@ -1215,7 +1215,18 @@ enum AcoreStrings
     LANG_AUTOBROADCAST_LOCALE_ENTRY     = 5133,
     LANG_AUTOBROADCAST_INVALID_LOCALE   = 5134,
 
-    // Room for more strings    5135-9999
+    // Mail commands
+    LANG_MAIL_LIST_HEADER               = 5135,
+    LANG_MAIL_LIST_ENTRY                = 5136,
+    LANG_MAIL_LIST_EMPTY                = 5137,
+    LANG_MAIL_RETURN_SUCCESS            = 5138,
+    LANG_MAIL_RETURN_NOT_FOUND          = 5139,
+    LANG_MAIL_RETURN_NOT_NORMAL         = 5140,
+    LANG_MAIL_RETURN_NO_SENDER          = 5141,
+    LANG_MAIL_RETURN_ALREADY_RETURNED   = 5142,
+    LANG_MAIL_RETURN_HOOK_BLOCKED       = 5143,
+
+    // Room for more strings    5144-9999
 
     // Level requirement notifications
     LANG_SAY_REQ                        = 6604,
@@ -1434,6 +1445,10 @@ enum AcoreStrings
     LANG_DEBUG_FACTIONCHANGE_GOLD_FAIL             = 30122,
     LANG_DEBUG_FACTIONCHANGE_GOLD_OK               = 30123,
     LANG_DEBUG_FACTIONCHANGE_GOLD_NOLIMIT          = 30124,
-    LANG_DEBUG_FACTIONCHANGE_NA                    = 30125
+    LANG_DEBUG_FACTIONCHANGE_NA                    = 30125,
+
+    // Achievement commands
+    LANG_ACHIEVEMENT_ADD_ONLINE                    = 30126,
+    LANG_ACHIEVEMENT_ADD_OFFLINE                   = 30127
 };
 #endif
