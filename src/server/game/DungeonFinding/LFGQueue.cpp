@@ -175,7 +175,7 @@ namespace lfg
 
     uint8 LFGQueue::FindGroups()
     {
-        LOG_DEBUG("lfg", "FIND GROUPS!");
+        //LOG_DEBUG("lfg", "FIND GROUPS!");
         uint8 newGroupsProcessed = 0;
         if (!newToQueueStore.empty())
         {
@@ -488,7 +488,7 @@ namespace lfg
         else
             m_QueueStatusTimer += diff;
 
-        LOG_DEBUG("lfg", "UPDATE UpdateQueueTimers");
+        //LOG_DEBUG("lfg", "UPDATE UpdateQueueTimers");
         for (Lfg5GuidsList::iterator it = CompatibleList.begin(); it != CompatibleList.end(); )
         {
             Lfg5GuidsList::iterator itr = it++;

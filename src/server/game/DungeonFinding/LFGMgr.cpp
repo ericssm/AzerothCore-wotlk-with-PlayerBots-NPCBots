@@ -2669,7 +2669,7 @@ namespace lfg
         else
             state = PlayersStore[guid].GetState();
 
-        LOG_DEBUG("lfg", "LFGMgr::GetState: [{}] = {}", guid.ToString(), state);
+        //LOG_DEBUG("lfg", "LFGMgr::GetState: [{}] = {}", guid.ToString(), state);
         return state;
     }
 
