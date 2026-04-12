@@ -25,7 +25,9 @@
 #include "Implementation/LoginDatabase.h"
 #include "Implementation/WorldDatabase.h"
 
+#ifdef MOD_PLAYERBOTS
 #include "Implementation/PlayerbotsDatabase.h"
+#endif
 
 #include "PreparedStatement.h"
 #include "QueryCallback.h"

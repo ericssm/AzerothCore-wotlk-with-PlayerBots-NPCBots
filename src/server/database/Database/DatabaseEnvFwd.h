@@ -32,7 +32,9 @@ class CharacterDatabaseConnection;
 class LoginDatabaseConnection;
 class WorldDatabaseConnection;
 
+#ifdef MOD_PLAYERBOTS
 class PlayerbotsDatabaseConnection;
+#endif
 
 class PreparedStatementBase;
 
@@ -43,7 +45,9 @@ using CharacterDatabasePreparedStatement = PreparedStatement<CharacterDatabaseCo
 using LoginDatabasePreparedStatement = PreparedStatement<LoginDatabaseConnection>;
 using WorldDatabasePreparedStatement = PreparedStatement<WorldDatabaseConnection>;
 
+#ifdef MOD_PLAYERBOTS
 using PlayerbotsDatabasePreparedStatement = PreparedStatement<PlayerbotsDatabaseConnection>;
+#endif
 
 class PreparedResultSet;
 using PreparedQueryResult = std::shared_ptr<PreparedResultSet>;

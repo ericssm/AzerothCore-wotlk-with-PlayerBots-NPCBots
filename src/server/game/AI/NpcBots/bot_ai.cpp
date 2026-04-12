@@ -645,7 +645,7 @@ void bot_ai::ResetBotAI(uint8 resetType)
 
 bool bot_ai::_checkImmunities(Unit const* target, SpellInfo const* spellInfo) const
 {
-    return target && spellInfo && !target->IsImmunedToDamage(spellInfo);
+    return target && spellInfo && !target->IsImmunedToDamage(target,spellInfo);
 }
 
 SpellCastResult bot_ai::CheckBotCast(Unit const* victim, uint32 spellId) const
@@ -18040,7 +18040,7 @@ bool bot_ai::GlobalUpdate(uint32 diff)
         //Long-timed updates
 
         if (me->IsInWorld() && me->IsAlive() && me->IsInCombat() && !me->GetMap()->IsDungeon() && (IAmFree() || !master->IsInCombat()))
-            me->getHostileRefMgr().deleteReferencesOutOfRange(me->GetMap()->GetVisibilityRange());
+            me->GetCombatManager().EndCombatBeyondRange(me->GetMap()->GetVisibilityRange(), true);
     }
 
     if (_updateTimerMedium <= diff)

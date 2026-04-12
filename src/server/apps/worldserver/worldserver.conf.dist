@@ -34,6 +34,7 @@
 #    CHARACTER DELETE
 #    CHARACTER CREATION
 #    CHARACTER
+#    ACHIEVEMENT
 #    SKILL
 #    STATS
 #    REPUTATION
@@ -610,6 +611,15 @@ AllowLoggingIPAddressesInDatabase = 1
 #
 
 Allow.IP.Based.Action.Logging = 0
+
+#
+#    LogSpamReports
+#        Description: Allow logging spam reports from players in the chat, mail or calendar into the database.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+#
+
+LogSpamReports = 1
 
 #
 #  Appender config values: Given an appender "name"
@@ -2230,6 +2240,22 @@ SpellQueue.Window = 400
 ###################################################################################################
 
 ###################################################################################################
+# ACHIEVEMENT
+#
+#    Achievement.RealmFirstKillWindow
+#        Description: Time window (in seconds) for realm first kill achievements after the first
+#                     completion. This setting controls whether multiple groups can earn the
+#                     realm first kill achievement within a short time window.
+#        Default:     60 - (Allow additional groups to complete within 60 seconds/1 minute)
+#                     0  - (Strict mode, only the first group/player gets the achievement)
+#                     1+ - (Extended window, allow N seconds for additional completions)
+
+Achievement.RealmFirstKillWindow = 60
+
+#
+###################################################################################################
+
+###################################################################################################
 # SKILL
 #
 #    MaxPrimaryTradeSkill
@@ -3615,6 +3641,15 @@ Wintergrasp.NoBattleTimer = 150
 Wintergrasp.CrashRestartTimer = 10
 
 #
+#     Wintergrasp.SkipBattleSessionCount
+#         Description: When the peace timer expires, if the number of active sessions
+#                      exceeds this value, a new war will not start.
+#                      Set to 0 to disable this check.
+#         Default:     3500
+
+Wintergrasp.SkipBattleSessionCount = 3500
+
+#
 ###################################################################################################
 
 ###################################################################################################
@@ -4616,20 +4651,6 @@ Calculate.Creature.Zone.Area.Data = 0
 #
 
 Calculate.Gameoject.Zone.Area.Data = 0
-
-#
-#    TeleportTimeoutNear
-#       Description:  No description
-#       Default:  25
-
-TeleportTimeoutNear = 25
-
-#
-#    TeleportTimeoutFar
-#       Description:  No description
-#       Default:  45
-
-TeleportTimeoutFar = 45
 
 #
 #    DailyRBGArenaPoints.MinLevel
