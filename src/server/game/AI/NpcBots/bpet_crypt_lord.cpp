@@ -192,7 +192,7 @@ public:
 
             if (Unit* u = me->GetVictim())
             {
-                if (petOwner->GetBotAI()->HasRole(BOT_ROLE_DPS) && me->IsWithinMeleeRange(u) && me->isAttackReady())
+                if (petOwner->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS) && me->IsWithinMeleeRange(u) && me->isAttackReady())
                 {
                     me->resetAttackTimer();
                     SpellInfo const* spellInfo = sSpellMgr->AssertSpellInfo(SPELL_SOUL_BITE);
@@ -247,7 +247,7 @@ public:
                 _targetRecheckTimer = urand(1000, 1500);
 
                 std::list<Unit*> targets;
-                if (petOwner->GetBotAI()->HasRole(BOT_ROLE_DPS) && !is_full && !expired)
+                if (petOwner->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS) && !is_full && !expired)
                 {
                     Bcore::AnyUnfriendlyUnitInObjectRangeCheck check(petOwner, petOwner, LOCUST_SWARM_EFFECTIVE_RADIUS);
                     Bcore::UnitListSearcher searcher(petOwner, targets, check);

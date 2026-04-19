@@ -2132,7 +2132,7 @@ public:
                 handler->PSendSysMessage("{} is dead!", bot->GetName());
                 return true;
             }
-            if (!bot->GetBotAI()->HasRole(BOT_ROLE_DPS) || bot->GetVictim() || bot->IsInCombat() || !bot->getAttackers().empty())
+            if (!bot->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS) || bot->GetVictim() || bot->IsInCombat() || !bot->getAttackers().empty())
             {
                 handler->PSendSysMessage("{} cannot pull target! Must be idle and have DPS role", bot->GetName());
                 return true;

@@ -90,7 +90,7 @@ public:
             StartAttack(opponent, IsPetMelee());
 
             float dist = me->GetDistance(opponent);
-            bool canDPS = petOwner->GetBotAI()->HasRole(BOT_ROLE_DPS);
+            bool canDPS = petOwner->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS);
 
             if (IsSpellReady(SHADOWCRAWL_1, diff) && canDPS && dist < 30)
             {

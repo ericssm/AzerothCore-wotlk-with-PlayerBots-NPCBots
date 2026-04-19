@@ -1028,29 +1028,29 @@ void bot_ai::_calculatePos(Unit const* followUnit, Position& pos, float* speed/*
     uint8 followdist = !player ? BotMgr::GetBotFollowDistMax() / 2 : player->GetBotMgr()->GetBotFollowDist();
     float mydist, angle;
 
-    if (HasRole(BOT_ROLE_TANK) && !IsTank(followUnit))
+    if (HasRole(NPC_BOT_ROLE_TANK) && !IsTank(followUnit))
     {
-        uint8 tanks = player != master ? 10 : std::max<uint8>(1, player->GetBotMgr()->GetNpcBotsCountByRole(BOT_ROLE_TANK));
-        uint8 slot = player != master ? urand(0, 9) : player->GetBotMgr()->GetNpcBotSlotByRole(BOT_ROLE_TANK, me);
+        uint8 tanks = player != master ? 10 : std::max<uint8>(1, player->GetBotMgr()->GetNpcBotsCountByRole(NPC_BOT_ROLE_TANK));
+        uint8 slot = player != master ? urand(0, 9) : player->GetBotMgr()->GetNpcBotSlotByRole(NPC_BOT_ROLE_TANK, me);
         angle = float(M_PI) / 6.0f; //max bias (left of right) //total arc is angle * 2
         angle = (angle / tanks) * (slot - (slot % 2)); //bias
         if (slot % 2) angle *= -1.f; //bias interchange
         mydist = 3.5f;
     }
-    else if (HasRole(BOT_ROLE_RANGED))
+    else if (HasRole(NPC_BOT_ROLE_RANGED))
     {
-        uint8 rangeds = player != master ? 20 : std::max<uint8>(1, player->GetBotMgr()->GetNpcBotsCountByRole(BOT_ROLE_RANGED));
-        uint8 slot = player != master ? urand(0, 19) : player->GetBotMgr()->GetNpcBotSlotByRole(BOT_ROLE_RANGED, me);
+        uint8 rangeds = player != master ? 20 : std::max<uint8>(1, player->GetBotMgr()->GetNpcBotsCountByRole(NPC_BOT_ROLE_RANGED));
+        uint8 slot = player != master ? urand(0, 19) : player->GetBotMgr()->GetNpcBotSlotByRole(NPC_BOT_ROLE_RANGED, me);
         angle = float(M_PI) / 3.5f; //max bias (left of right) //total arc is angle * 2
         angle = (angle / rangeds) * (slot - (slot % 2)); //bias
         if (slot % 2) angle *= -1.f; //bias interchange
         angle += float(M_PI); //behind
         mydist = 1.0f;
     }
-    else if (HasRole(BOT_ROLE_DPS))
+    else if (HasRole(NPC_BOT_ROLE_DPS))
     {
-        uint8 dpss = player != master ? 20 : std::max<uint8>(1, player->GetBotMgr()->GetNpcBotsCountByRole(BOT_ROLE_DPS));
-        uint8 slot = player != master ? urand(0, 19) : player->GetBotMgr()->GetNpcBotSlotByRole(BOT_ROLE_DPS, me);
+        uint8 dpss = player != master ? 20 : std::max<uint8>(1, player->GetBotMgr()->GetNpcBotsCountByRole(NPC_BOT_ROLE_DPS));
+        uint8 slot = player != master ? urand(0, 19) : player->GetBotMgr()->GetNpcBotSlotByRole(NPC_BOT_ROLE_DPS, me);
         angle = float(M_PI) / 7.5f; //max bias (left of right) //total arc is angle * 2
         angle = (angle / dpss) * (slot); //bias
         if (slot % 2) angle *= -1.f; //bias interchange
@@ -1434,7 +1434,7 @@ void bot_ai::BuffAndHealGroup(uint32 diff)
     {
         //heals
         map = master->GetBotMgr()->GetBotMap();
-        if (HasRole(BOT_ROLE_HEAL))
+        if (HasRole(NPC_BOT_ROLE_HEAL))
         {
             std::list<Unit*> targets3;
             if (master->IsAlive() && !master->HasUnitState(UNIT_STATE_ISOLATED) && GetHealthPCT(master) <= hppctthreshold && me->GetDistance(master) < 40)
@@ -1508,7 +1508,7 @@ void bot_ai::BuffAndHealGroup(uint32 diff)
     }
     bool Bots = false;
     //heals
-    if (HasRole(BOT_ROLE_HEAL))
+    if (HasRole(NPC_BOT_ROLE_HEAL))
     {
         std::list<Unit*> targets5;
         for (GroupReference const* itr = pGroup->GetFirstMember(); itr != nullptr; itr = itr->next())
@@ -1992,7 +1992,7 @@ void bot_ai::_getBotDispellableAuraList(Unit const* target, uint32 dispelMask, s
                 continue;
 
             //skip Vampiric Touch to prevent being CCed just heal it out
-            if (HasRole(BOT_ROLE_HEAL) && aura->GetSpellInfo()->IsRankOf(sSpellMgr->GetSpellInfo(34914)))
+            if (HasRole(NPC_BOT_ROLE_HEAL) && aura->GetSpellInfo()->IsRankOf(sSpellMgr->GetSpellInfo(34914)))
                 continue;
 
             if (((aura->GetSpellInfo()->AttributesEx7 & SPELL_ATTR7_DISPEL_REMOVES_CHARGES) ? aura->GetCharges() : aura->GetStackAmount()) > 0)
@@ -2258,8 +2258,8 @@ void bot_ai::_listAuras(Player const* player, Unit const* unit) const
         if (IsWanderer())
             botstring << "\n_baseLevel: " << uint32(_baseLevel);
 
-        botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_BOT_ROLEMASK_MAIN) << ": " << uint32(_roleMask & BOT_ROLE_MASK_MAIN);
-        botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_BOT_ROLEMASK_GATHERING) << ": " << uint32(_roleMask & BOT_ROLE_MASK_GATHERING);
+        botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_BOT_ROLEMASK_MAIN) << ": " << uint32(_roleMask & NPC_BOT_ROLE_MASK_MAIN);
+        botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_BOT_ROLEMASK_GATHERING) << ": " << uint32(_roleMask & NPC_BOT_ROLE_MASK_GATHERING);
 
         botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_PVP_KILLS) << ": " << uint32(_pvpKillsCount) << ", " << LocalizedNpcText(player, BOT_TEXT_PLAYERS) << ": " << uint32(_playerKillsCount) << ", " << LocalizedNpcText(player, BOT_TEXT_TOTAL) << ": " << uint32(_killsCount);
         botstring << "\n" << LocalizedNpcText(player, BOT_TEXT_DIED_) << uint32(_deathsCount) << LocalizedNpcText(player, BOT_TEXT__TIMES);
@@ -3972,7 +3972,7 @@ Unit* bot_ai::_getVehicleTarget(BotVehicleStrats /*strat*/) const
         {
             if (ObjectGuid guid = gr->GetTargetIcons()[i])
             {
-                if ((HasRole(BOT_ROLE_RANGED)|| HasVehicleRoleOverride(BOT_ROLE_RANGED)) &&
+                if ((HasRole(NPC_BOT_ROLE_RANGED)|| HasVehicleRoleOverride(NPC_BOT_ROLE_RANGED)) &&
                     (BotMgr::GetRangedDPSTargetIconFlags() & GroupIconsFlags[i]))
                 {
                     if (mytar && mytar->GetGUID() == guid)
@@ -4062,7 +4062,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
 
     //Immediate targets
     //orders
-    if (!IAmFree() && HasOrders() && HasRole(BOT_ROLE_DPS) && !me->IsInCombat() && me->getAttackers().empty())
+    if (!IAmFree() && HasOrders() && HasRole(NPC_BOT_ROLE_DPS) && !me->IsInCombat() && me->getAttackers().empty())
     {
         if (_orders.front()._type == BOT_ORDER_PULL)
         {
@@ -4105,11 +4105,11 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
         };
 
         // Blackwing Lair
-        if (me->GetMapId() == 469 && GetBotClass() == BOT_CLASS_ROGUE && !HasRole(BOT_ROLE_DPS) && me->HasStealthAura() && isInWMOArea(WMOAreaGroupLashlayer)) // BWL - Bloodlord Lashlayer
+        if (me->GetMapId() == 469 && GetBotClass() == BOT_CLASS_ROGUE && !HasRole(NPC_BOT_ROLE_DPS) && me->HasStealthAura() && isInWMOArea(WMOAreaGroupLashlayer)) // BWL - Bloodlord Lashlayer
             return { nullptr, nullptr };
 
         // Icecrown Citadel - Lord Marrowgar
-        if (me->GetMapId() == 631 && isInWMOArea(WMOAreaGroupMarrowgar) && me->IsInCombat() && HasRole(BOT_ROLE_DPS) && !IsTank())
+        if (me->GetMapId() == 631 && isInWMOArea(WMOAreaGroupMarrowgar) && me->IsInCombat() && HasRole(NPC_BOT_ROLE_DPS) && !IsTank())
         {
             static const std::array BoneSpikeIds = { CREATURE_ICC_BONE_SPIKE1, CREATURE_ICC_BONE_SPIKE2, CREATURE_ICC_BONE_SPIKE3 };
 
@@ -4118,7 +4118,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
                     return false;
                 for (uint32 bsId : BoneSpikeIds) {
                     if (unit->GetEntry() == bsId)  {
-                        if (HasRole(BOT_ROLE_RANGED))
+                        if (HasRole(NPC_BOT_ROLE_RANGED))
                             return true;
                         float dist = me->GetDistance2d(unit);
                         if (dist < mydist) {
@@ -4221,7 +4221,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
         }
 
         // Icecrown Citadel - The Lich King
-        if (me->GetMapId() == 631 && isInWMOArea(WMOAreaGroupLichKing) && me->IsInCombat() && HasRole(BOT_ROLE_DPS) && !IsTank())
+        if (me->GetMapId() == 631 && isInWMOArea(WMOAreaGroupLichKing) && me->IsInCombat() && HasRole(NPC_BOT_ROLE_DPS) && !IsTank())
         {
             static const std::array IceSphereIds = { CREATURE_ICC_ICE_SPHERE1, CREATURE_ICC_ICE_SPHERE2, CREATURE_ICC_ICE_SPHERE3, CREATURE_ICC_ICE_SPHERE4 };
             static const std::array ValkyrShadowguardIds = { CREATURE_ICC_VALKYR_LK1, CREATURE_ICC_VALKYR_LK2, CREATURE_ICC_VALKYR_LK3, CREATURE_ICC_VALKYR_LK4 };
@@ -4246,7 +4246,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
                 for (uint32 isId : IceSphereIds) {
                     if (unit->IsAlive() && unit->GetEntry() == isId) {
                         float dist = usearcher->GetDistance2d(unit);
-                        if (dist < mydist && (HasRole(BOT_ROLE_RANGED) || dist < 7.f)) {
+                        if (dist < mydist && (HasRole(NPC_BOT_ROLE_RANGED) || dist < 7.f)) {
                             mydist = dist;
                             return true;
                         }
@@ -4395,7 +4395,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
         if (_primaryIconDamage >= 0)
         {
             uint32 iconMask = BotMgr::GetDPSTargetIconFlags();
-            if (HasRole(BOT_ROLE_RANGED))
+            if (HasRole(NPC_BOT_ROLE_RANGED))
                 iconMask |= BotMgr::GetRangedDPSTargetIconFlags();
             if (iconMask & (1u << _primaryIconDamage))
             {
@@ -4423,7 +4423,7 @@ std::tuple<Unit*, Unit*> bot_ai::_getTargets(bool byspell, bool ranged, bool &re
 
             if (ObjectGuid guid = gr->GetTargetIcons()[i])
             {
-                if (HasRole(BOT_ROLE_RANGED) && (BotMgr::GetRangedDPSTargetIconFlags() & GroupIconsFlags[i]))
+                if (HasRole(NPC_BOT_ROLE_RANGED) && (BotMgr::GetRangedDPSTargetIconFlags() & GroupIconsFlags[i]))
                 {
                     if (mytar && mytar->GetGUID() == guid)
                         return { mytar, mytar };
@@ -4734,7 +4734,7 @@ bool bot_ai::CheckAttackTarget()
     if (IAmFree() && Feasting())
         return false;
 
-    bool ranged = HasRole(BOT_ROLE_RANGED);
+    bool ranged = HasRole(NPC_BOT_ROLE_RANGED);
     bool byspell = false;
     bool reset = false;
 
@@ -4756,7 +4756,7 @@ bool bot_ai::CheckAttackTarget()
                     byspell = true;
                     break;
                 case BOT_STANCE_NONE:
-                    byspell = ranged && HasRole(BOT_ROLE_DPS);
+                    byspell = ranged && HasRole(NPC_BOT_ROLE_DPS);
                     break;
                 default:
                     BOT_LOG_ERROR("entities.player", "bot_ai::CheckAttackTarget(): druid has NYI bot stance {}", uint32(GetBotStance()));
@@ -4767,12 +4767,12 @@ bool bot_ai::CheckAttackTarget()
         case BOT_CLASS_MAGE:
         case BOT_CLASS_WARLOCK:
         case BOT_CLASS_SHAMAN:
-            byspell = ranged && HasRole(BOT_ROLE_DPS);
+            byspell = ranged && HasRole(NPC_BOT_ROLE_DPS);
             break;
         case BOT_CLASS_SPHYNX:
         case BOT_CLASS_ARCHMAGE:
         case BOT_CLASS_NECROMANCER:
-            byspell = HasRole(BOT_ROLE_DPS);
+            byspell = HasRole(NPC_BOT_ROLE_DPS);
             break;
         case BOT_CLASS_HUNTER:
         case BOT_CLASS_DEATH_KNIGHT:
@@ -5490,7 +5490,7 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
     if (angleMode == BOT_ATTACK_ANGLE_AVOID_FRONTAL_AOE)
     {
         static const float rangedAngleDelta = float(M_PI) * 0.62f;
-        if (HasRole(BOT_ROLE_RANGED) && !IAmFree() && !target->IsControlledByPlayer() && target->HasInArc(float(M_PI), me) &&
+        if (HasRole(NPC_BOT_ROLE_RANGED) && !IAmFree() && !target->IsControlledByPlayer() && target->HasInArc(float(M_PI), me) &&
             (IsTank(master) || master->GetDistance(target) < 2.5f || !target->HasInArc(float(M_PI), master)))
             angle += (target->GetRelativeAngle(master) > 0.f) ? rangedAngleDelta : -rangedAngleDelta;
     }
@@ -5571,7 +5571,7 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
         toofaraway = master->GetDistance(ppos) > (followdist > 38 ? 38.f : followdist < 20 ? 20.f : float(followdist));
         bool outoflos = !target->IsWithinLOS(ppos.m_positionX, ppos.m_positionY, ppos.m_positionZ);
         bool isinaoe = IsWithinAoERadius(ppos);
-        bool canattack = HasRole(BOT_ROLE_RANGED) || me->IsWithinMeleeRangeAt(ppos, target);
+        bool canattack = HasRole(NPC_BOT_ROLE_RANGED) || me->IsWithinMeleeRangeAt(ppos, target);
         if (!toofaraway && !outoflos && !isinaoe && canattack)
         {
             //if (!aoespots.empty())
@@ -5622,7 +5622,7 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
                 minposdist = curdist;
             }
             if (curdist < minattackposdist &&
-                (HasRole(BOT_ROLE_RANGED) ? (target->GetDistance(*ci) - me->GetCombatReach() < dist) : me->IsWithinMeleeRangeAt(*ci, target)))
+                (HasRole(NPC_BOT_ROLE_RANGED) ? (target->GetDistance(*ci) - me->GetCombatReach() < dist) : me->IsWithinMeleeRangeAt(*ci, target)))
             {
                 closestAttackPos = &(*ci);
                 minattackposdist = curdist;
@@ -5642,7 +5642,7 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
     }
 
     // Ranged bots that are being targeted should move towards a tank bot or towards the player
-    if (!IAmFree() && !IsTank(me) && HasRole(BOT_ROLE_RANGED) && target->GetVictim() == me && !CCed(target))
+    if (!IAmFree() && !IsTank(me) && HasRole(NPC_BOT_ROLE_RANGED) && target->GetVictim() == me && !CCed(target))
     {
         std::vector<Unit const*> safetyTargets;
         if (Group const* gr = master->GetGroup())
@@ -5660,7 +5660,7 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
                 for (BotMap::const_iterator citr = map->begin(); citr != map->end(); ++citr)
                 {
                     Creature const* c = citr->second;
-                    if (c && c->IsInWorld() && me->GetMap() == c->FindMap() && c->IsAlive() && !c->HasUnitState(UNIT_STATE_ISOLATED) && IsTank(c) && c->GetBotAI()->HasRole(BOT_ROLE_DPS))
+                    if (c && c->IsInWorld() && me->GetMap() == c->FindMap() && c->IsAlive() && !c->HasUnitState(UNIT_STATE_ISOLATED) && IsTank(c) && c->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS))
                         safetyTargets.push_back(c);
                 }
             }
@@ -5671,7 +5671,7 @@ void bot_ai::CalculateAttackPos(Unit* target, Position& pos, bool& force) const
             for (BotMap::const_iterator citr = map->begin(); citr != map->end(); ++citr)
             {
                 Creature const* c = citr->second;
-                if (c && c->IsInWorld() && me->GetMap() == c->FindMap() && c->IsAlive() && !c->HasUnitState(UNIT_STATE_ISOLATED) && IsTank(c) && c->GetBotAI()->HasRole(BOT_ROLE_DPS))
+                if (c && c->IsInWorld() && me->GetMap() == c->FindMap() && c->IsAlive() && !c->HasUnitState(UNIT_STATE_ISOLATED) && IsTank(c) && c->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS))
                     safetyTargets.push_back(c);
             }
         }
@@ -5770,7 +5770,7 @@ void bot_ai::GetInPosition(bool force, Unit* newtarget, Position* mypos)
 
     if (newtarget != me->GetVictim() && (mover == me || CanBotAttackOnVehicle()))
     {
-        if (!me->Attack(newtarget, !HasRole(BOT_ROLE_RANGED)))
+        if (!me->Attack(newtarget, !HasRole(NPC_BOT_ROLE_RANGED)))
             me->SetInFront(newtarget);
     }
 }
@@ -5875,7 +5875,7 @@ void bot_ai::CheckAttackState()
 {
     if (me->GetVictim() && me->GetVictim()->IsAlive())
     {
-        if (HasRole(BOT_ROLE_DPS) && !me->HasAuraType(SPELL_AURA_MOD_STEALTH) && !me->HasAuraType(SPELL_AURA_MOD_INVISIBILITY) &&
+        if (HasRole(NPC_BOT_ROLE_DPS) && !me->HasAuraType(SPELL_AURA_MOD_STEALTH) && !me->HasAuraType(SPELL_AURA_MOD_INVISIBILITY) &&
             !IsShootingWand())
             DoMeleeAttackIfReady();
     }
@@ -5883,7 +5883,7 @@ void bot_ai::CheckAttackState()
 //Move behind current target if needed (avoid cleaves and dodges/parries, also rogues/ferals)
 void bot_ai::MoveBehind(Unit const* target) const
 {
-    if (_moveBehindTimer > lastdiff || HasBotCommandState(BOT_COMMAND_MASK_UNMOVING) || HasRole(BOT_ROLE_RANGED) || JumpingOrFalling() ||
+    if (_moveBehindTimer > lastdiff || HasBotCommandState(BOT_COMMAND_MASK_UNMOVING) || HasRole(NPC_BOT_ROLE_RANGED) || JumpingOrFalling() ||
         /*(me->isMoving() && target->GetTypeId() != TYPEID_PLAYER) ||*/
         me->GetVehicle() || (IsTank() && target->GetVictim() == me) || CCed(me, true) ||
         !target->IsWithinCombatRange(me, ATTACK_DISTANCE) || !target->HasInArc(float(M_PI), me))
@@ -7558,7 +7558,7 @@ void bot_ai::OnSpellHit(Unit* caster, SpellInfo const* spell)
     if (!HasBotCommandState(BOT_COMMAND_FULLSTOP | BOT_COMMAND_INACTION))
     {
         if (spell->HasAura(SPELL_AURA_MOD_TAUNT) || spell->HasEffect(SPELL_EFFECT_ATTACK_ME))
-            if (caster && me->Attack(caster, !HasRole(BOT_ROLE_RANGED)))
+            if (caster && me->Attack(caster, !HasRole(NPC_BOT_ROLE_RANGED)))
             {}//me->GetMotionMaster()->MoveChase(caster);
     }
 
@@ -10288,12 +10288,12 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 AddGossipItemFor(player, GOSSIP_ICON_TALK, LocalizedNpcText(player, BOT_TEXT_GATHERING) + "...", GOSSIP_SENDER_ROLES_GATHERING, GOSSIP_ACTION_INFO_DEF + 1);
             AddGossipItemFor(player, GOSSIP_ICON_TALK, LocalizedNpcText(player, BOT_TEXT_LOOTING) + "...", GOSSIP_SENDER_ROLES_LOOTING, GOSSIP_ACTION_INFO_DEF + 2);
 
-            uint32 role = BOT_ROLE_TANK;
-            for (; role != BOT_MAX_ROLE; role <<= 1)
+            uint32 role = NPC_BOT_ROLE_TANK;
+            for (; role != NPC_BOT_MAX_ROLE; role <<= 1)
             {
-                if (!(role & BOT_ROLE_MASK_MAIN)) //hidden
+                if (!(role & NPC_BOT_ROLE_MASK_MAIN)) //hidden
                     continue;
-                if (role == BOT_ROLE_HEAL && !IsHealingClass(_botclass))
+                if (role == NPC_BOT_ROLE_HEAL && !IsHealingClass(_botclass))
                     continue;
 
                 AddGossipItemFor(player, GetRoleIcon(role), LocalizedNpcText(player, GetRoleString(role)), GOSSIP_SENDER_ROLES_MAIN_TOGGLE, GOSSIP_ACTION_INFO_DEF + role);
@@ -10314,10 +10314,10 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
         {
             subMenu = true;
 
-            uint32 role = BOT_ROLE_GATHERING_MINING;
-            for (; role != BOT_MAX_ROLE; role <<= 1)
+            uint32 role = NPC_BOT_ROLE_GATHERING_MINING;
+            for (; role != NPC_BOT_MAX_ROLE; role <<= 1)
             {
-                if (!(role & BOT_ROLE_MASK_GATHERING)) //hidden
+                if (!(role & NPC_BOT_ROLE_MASK_GATHERING)) //hidden
                     continue;
 
                 AddGossipItemFor(player, GetRoleIcon(role), LocalizedNpcText(player, GetRoleString(role)), GOSSIP_SENDER_ROLES_GATHERING_TOGGLE, GOSSIP_ACTION_INFO_DEF + role);
@@ -10338,10 +10338,10 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
         {
             subMenu = true;
 
-            uint32 role = BOT_ROLE_AUTOLOOT;
-            for (; role != BOT_MAX_ROLE; role <<= 1)
+            uint32 role = NPC_BOT_ROLE_AUTOLOOT;
+            for (; role != NPC_BOT_MAX_ROLE; role <<= 1)
             {
-                if (!(role & (BOT_ROLE_AUTOLOOT | BOT_ROLE_MASK_LOOTING)))
+                if (!(role & (NPC_BOT_ROLE_AUTOLOOT | NPC_BOT_ROLE_MASK_LOOTING)))
                     continue;
 
                 AddGossipItemFor(player, GetRoleIcon(role), LocalizedNpcText(player, GetRoleString(role)), GOSSIP_SENDER_ROLES_LOOTING_TOGGLE, GOSSIP_ACTION_INFO_DEF + role);
@@ -10942,7 +10942,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             player->PlayerTalkClass->GetGossipMenu().AddMenuItem(-1, GOSSIP_ICON_CHAT, diststr.str(),
                 GOSSIP_SENDER_FORMATION_FOLLOW_DISTANCE_SET, GOSSIP_ACTION_INFO_DEF + 1, "", 0, true);
 
-            if (HasRole(BOT_ROLE_RANGED))
+            if (HasRole(NPC_BOT_ROLE_RANGED))
             {
                 AddGossipItemFor(player, !player->GetBotMgr()->GetBotAllowCombatPositioning() ? GOSSIP_ICON_BATTLE : GOSSIP_ICON_CHAT,
                     LocalizedNpcText(player, BOT_TEXT_DISABLE_COMBAT_POSITIONING), GOSSIP_SENDER_FORMATION_TOGGLE_COMBAT_POSITIONING, GOSSIP_ACTION_INFO_DEF + 2);
@@ -10950,14 +10950,14 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 AddGossipItemFor(player, GOSSIP_ICON_TALK, LocalizedNpcText(player, BOT_TEXT_ATTACK_ANGLE) + "...", GOSSIP_SENDER_FORMATION_ATTACK_ANGLE, GOSSIP_ACTION_INFO_DEF + 4);
             }
 
-            if (!HasRole(BOT_ROLE_TANK) && HasRole(BOT_ROLE_DPS | BOT_ROLE_HEAL))
+            if (!HasRole(NPC_BOT_ROLE_TANK) && HasRole(NPC_BOT_ROLE_DPS | NPC_BOT_ROLE_HEAL))
                 AddGossipItemFor(player, GOSSIP_ICON_TALK, LocalizedNpcText(player, BOT_TEXT_ENGAGE_BEHAVIOR) + "...", GOSSIP_SENDER_ENGAGE_BEHAVIOR, GOSSIP_ACTION_INFO_DEF + 5);
 
             if (player->GetGroup())
             {
-                for (uint32 role = BOT_ROLE_TANK; !!(role & BOT_ROLE_MASK_MAIN); role <<= 1)
+                for (uint32 role = NPC_BOT_ROLE_TANK; !!(role & NPC_BOT_ROLE_MASK_MAIN); role <<= 1)
                 {
-                    if (role & (BOT_ROLE_TANK | BOT_ROLE_DPS) && HasRole(role))
+                    if (role & (NPC_BOT_ROLE_TANK | NPC_BOT_ROLE_DPS) && HasRole(role))
                         AddGossipItemFor(player, GOSSIP_ICON_TALK, LocalizedNpcText(player, BOT_TEXT_PRIORITY_TARGET) + " (" + LocalizedNpcText(player, GetRoleString(role)) + ")...", GOSSIP_SENDER_PRIORITY_TARGET, uint32(GOSSIP_ACTION_INFO_DEF) + role);
                 }
             }
@@ -11029,7 +11029,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
         {
             subMenu = true;
 
-            if (HasRole(BOT_ROLE_DPS))
+            if (HasRole(NPC_BOT_ROLE_DPS))
             {
                 std::ostringstream delaystr;
                 delaystr.setf(std::ios_base::fixed);
@@ -11038,7 +11038,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                 player->PlayerTalkClass->GetGossipMenu().AddMenuItem(-1, GOSSIP_ICON_CHAT, delaystr.str(),
                     GOSSIP_SENDER_ENGAGE_DELAY_SET_ATTACK, GOSSIP_ACTION_INFO_DEF + 1, "", 0, true);
             }
-            if (HasRole(BOT_ROLE_HEAL))
+            if (HasRole(NPC_BOT_ROLE_HEAL))
             {
                 std::ostringstream delaystr;
                 delaystr.setf(std::ios_base::fixed);
@@ -11062,7 +11062,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             BotMap const* bmap = player->GetBotMgr()->GetBotMap(); // player === master
             for (BotMap::const_iterator citr = bmap->begin(); citr != bmap->end(); ++citr)
             {
-                if (citr->second && citr->second != me && citr->second->GetBotAI() && citr->second->GetBotAI()->HasRole(BOT_ROLE_HEAL))
+                if (citr->second && citr->second != me && citr->second->GetBotAI() && citr->second->GetBotAI()->HasRole(NPC_BOT_ROLE_HEAL))
                     citr->second->GetBotAI()->SetHealHpPctThreshold(threshold);
             }
 
@@ -11080,10 +11080,10 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
 
             switch (role)
             {
-                case BOT_ROLE_TANK:
+                case NPC_BOT_ROLE_TANK:
                     _primaryIconTank = icon;
                     break;
-                case BOT_ROLE_DPS:
+                case NPC_BOT_ROLE_DPS:
                     _primaryIconDamage = icon;
                     break;
                 default:
@@ -11105,7 +11105,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             uint32 role = action - GOSSIP_ACTION_INFO_DEF;
             switch (role)
             {
-                case BOT_ROLE_TANK:
+                case NPC_BOT_ROLE_TANK:
                     for (int8 i = TARGETICONCOUNT - 1; i >= 0; --i)
                     {
                         bool prio = i == _primaryIconTank;
@@ -11115,13 +11115,13 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                     }
                     AddGossipItemFor(player, (_primaryIconTank == -1) ? GOSSIP_ICON_BATTLE : GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_NONE2), GOSSIP_SENDER_PRIORITY_TARGET_SET_TANK, uint32(GOSSIP_ACTION_INFO_DEF - 1));
                     break;
-                case BOT_ROLE_DPS:
+                case NPC_BOT_ROLE_DPS:
                     for (int8 i = TARGETICONCOUNT - 1; i >= 0; --i)
                     {
                         bool prio = i == _primaryIconDamage;
                         ObjectGuid guid = gr->GetTargetIcons()[i];
                         uint32 iconMask = BotMgr::GetDPSTargetIconFlags();
-                        if (HasRole(BOT_ROLE_RANGED))
+                        if (HasRole(NPC_BOT_ROLE_RANGED))
                             iconMask |= BotMgr::GetRangedDPSTargetIconFlags();
                         if (guid && iconMask & GroupIconsFlags[i])
                             AddGossipItemFor(player, prio ? GOSSIP_ICON_BATTLE : GOSSIP_ICON_CHAT, player->GetBotMgr()->GetTargetIconString(uint8(i)), GOSSIP_SENDER_PRIORITY_TARGET_SET_DPS, uint32(GOSSIP_ACTION_INFO_DEF) + uint32(i));
@@ -11297,31 +11297,31 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                     close = false;
                     ChatHandler ch(player->GetSession());
                     ch.PSendSysMessage("{}'s Roles:", me->GetName());
-                    for (uint32 i = BOT_MAX_ROLE; i != BOT_ROLE_NONE; i >>= 1)
+                    for (uint32 i = NPC_BOT_MAX_ROLE; i != NPC_BOT_ROLE_NONE; i >>= 1)
                     {
                         if (_roleMask & i)
                         {
                             switch (i)
                             {
-                                case BOT_ROLE_TANK:
+                                case NPC_BOT_ROLE_TANK:
                                     ch.SendSysMessage("BOT_ROLE_TANK");
                                     break;
-                                case BOT_ROLE_TANK_OFF:
+                                case NPC_BOT_ROLE_TANK_OFF:
                                     ch.SendSysMessage("BOT_ROLE_TANK_OFF");
                                     break;
-                                case BOT_ROLE_DPS:
+                                case NPC_BOT_ROLE_DPS:
                                     ch.SendSysMessage("BOT_ROLE_DPS");
                                     break;
-                                case BOT_ROLE_HEAL:
+                                case NPC_BOT_ROLE_HEAL:
                                     ch.SendSysMessage("BOT_ROLE_HEAL");
                                     break;
                                 //case BOT_ROLE_MELEE:
                                 //    ch.SendSysMessage("BOT_ROLE_MELEE");
                                 //    break;
-                                case BOT_ROLE_RANGED:
+                                case NPC_BOT_ROLE_RANGED:
                                     ch.SendSysMessage("BOT_ROLE_RANGED");
                                     break;
-                                case BOT_ROLE_PARTY:
+                                case NPC_BOT_ROLE_PARTY:
                                     ch.SendSysMessage("BOT_ROLE_PARTY");
                                     break;
                                 default:
@@ -11795,7 +11795,7 @@ void bot_ai::OnOwnerDamagedBy(Unit* attacker)
         return;
 
     SetBotCommandState(BOT_COMMAND_COMBATRESET); //reset AttackStart()
-    me->Attack(attacker, !HasRole(BOT_ROLE_RANGED));
+    me->Attack(attacker, !HasRole(NPC_BOT_ROLE_RANGED));
 }
 //force vehicle targeting and attack if vehicle is damaged
 void bot_ai::OnOwnerVehicleDamagedBy(Unit* attacker)
@@ -11885,20 +11885,20 @@ void bot_ai::FillKillReward(GameObject* go) const
 }
 uint32 bot_ai::_getLootQualityMask() const
 {
-    uint32 lootRoleMask = (_roleMask & BOT_ROLE_MASK_LOOTING);
+    uint32 lootRoleMask = (_roleMask & NPC_BOT_ROLE_MASK_LOOTING);
     uint32 lootMask = 0;
 
-    if (lootRoleMask & BOT_ROLE_AUTOLOOT_POOR)
+    if (lootRoleMask & NPC_BOT_ROLE_AUTOLOOT_POOR)
         lootMask |= (1 << ITEM_QUALITY_POOR);
-    if (lootRoleMask & BOT_ROLE_AUTOLOOT_COMMON)
+    if (lootRoleMask & NPC_BOT_ROLE_AUTOLOOT_COMMON)
         lootMask |= (1 << ITEM_QUALITY_NORMAL);
-    if (lootRoleMask & BOT_ROLE_AUTOLOOT_UNCOMMON)
+    if (lootRoleMask & NPC_BOT_ROLE_AUTOLOOT_UNCOMMON)
         lootMask |= (1 << ITEM_QUALITY_UNCOMMON);
-    if (lootRoleMask & BOT_ROLE_AUTOLOOT_RARE)
+    if (lootRoleMask & NPC_BOT_ROLE_AUTOLOOT_RARE)
         lootMask |= (1 << ITEM_QUALITY_RARE);
-    if (lootRoleMask & BOT_ROLE_AUTOLOOT_EPIC)
+    if (lootRoleMask & NPC_BOT_ROLE_AUTOLOOT_EPIC)
         lootMask |= (1 << ITEM_QUALITY_EPIC);
-    if (lootRoleMask & BOT_ROLE_AUTOLOOT_LEGENDARY)
+    if (lootRoleMask & NPC_BOT_ROLE_AUTOLOOT_LEGENDARY)
         lootMask |= (1 << ITEM_QUALITY_LEGENDARY);
 
     return lootMask;
@@ -14204,11 +14204,11 @@ float bot_ai::_getStatScore(uint8 stat) const
     static const float fzero = 0.0f;
 
     float tankMod = IsTank() ? fone : fzero;
-    float healMod = HasRole(BOT_ROLE_HEAL) ? fone : fzero;
+    float healMod = HasRole(NPC_BOT_ROLE_HEAL) ? fone : fzero;
     float castMod = IsCastingClass(_botclass) ? fone : fzero;
     float spiritMod = (_botclass == BOT_CLASS_PRIEST || _botclass == BOT_CLASS_MAGE || _botclass == BOT_CLASS_WARLOCK || (_botclass == BOT_CLASS_DRUID && _spec != BOT_SPEC_DRUID_FERAL)) ? fone : fzero;
-    float dpsMod = HasRole(BOT_ROLE_DPS) ? fone : fzero;
-    float meleeMod = !HasRole(BOT_ROLE_RANGED) ? fone : fzero;
+    float dpsMod = HasRole(NPC_BOT_ROLE_DPS) ? fone : fzero;
+    float meleeMod = !HasRole(NPC_BOT_ROLE_RANGED) ? fone : fzero;
     float manaMod = (_botclass == BOT_CLASS_DRUID || me->GetPowerType() == POWER_MANA) ? fone : fzero;
 
     switch (stat)
@@ -14261,7 +14261,7 @@ float bot_ai::_getStatScore(uint8 stat) const
         case BOT_STAT_MOD_HIT_RATING:
         case BOT_STAT_MOD_CRIT_RATING:
         case BOT_STAT_MOD_HASTE_RATING:
-            return HasRole(BOT_ROLE_DPS|BOT_ROLE_HEAL) ? 1.0f : 0.0f;
+            return HasRole(NPC_BOT_ROLE_DPS| NPC_BOT_ROLE_HEAL) ? 1.0f : 0.0f;
         case BOT_STAT_MOD_EXPERTISE_RATING:
             return 2.0f * dpsMod * meleeMod;
         case BOT_STAT_MOD_ATTACK_POWER:
@@ -14729,22 +14729,22 @@ uint32 bot_ai::GetRoleString(uint32 role)
 {
     switch (role)
     {
-        case BOT_ROLE_TANK:                 return BOT_TEXT_TANK;
-        case BOT_ROLE_TANK_OFF:             return BOT_TEXT_TANK_OFF;
-        case BOT_ROLE_DPS:                  return BOT_TEXT_DPS;
-        case BOT_ROLE_HEAL:                 return BOT_TEXT_HEAL;
-        case BOT_ROLE_RANGED:               return BOT_TEXT_RANGED;
-        case BOT_ROLE_GATHERING_MINING:     return BOT_TEXT_MINER;
-        case BOT_ROLE_GATHERING_HERBALISM:  return BOT_TEXT_HERBALIST;
-        case BOT_ROLE_GATHERING_SKINNING:   return BOT_TEXT_SKINNER;
-        case BOT_ROLE_GATHERING_ENGINEERING:return BOT_TEXT_ENGINEER;
-        case BOT_ROLE_AUTOLOOT:             return BOT_TEXT_LOOTING;
-        case BOT_ROLE_AUTOLOOT_POOR:        return BOT_TEXT_POOR;
-        case BOT_ROLE_AUTOLOOT_COMMON:      return BOT_TEXT_COMMON;
-        case BOT_ROLE_AUTOLOOT_UNCOMMON:    return BOT_TEXT_UNCOMMON;
-        case BOT_ROLE_AUTOLOOT_RARE:        return BOT_TEXT_RARE;
-        case BOT_ROLE_AUTOLOOT_EPIC:        return BOT_TEXT_EPIC;
-        case BOT_ROLE_AUTOLOOT_LEGENDARY:   return BOT_TEXT_LEGENDARY;
+        case NPC_BOT_ROLE_TANK:                 return BOT_TEXT_TANK;
+        case NPC_BOT_ROLE_TANK_OFF:             return BOT_TEXT_TANK_OFF;
+        case NPC_BOT_ROLE_DPS:                  return BOT_TEXT_DPS;
+        case NPC_BOT_ROLE_HEAL:                 return BOT_TEXT_HEAL;
+        case NPC_BOT_ROLE_RANGED:               return BOT_TEXT_RANGED;
+        case NPC_BOT_ROLE_GATHERING_MINING:     return BOT_TEXT_MINER;
+        case NPC_BOT_ROLE_GATHERING_HERBALISM:  return BOT_TEXT_HERBALIST;
+        case NPC_BOT_ROLE_GATHERING_SKINNING:   return BOT_TEXT_SKINNER;
+        case NPC_BOT_ROLE_GATHERING_ENGINEERING:return BOT_TEXT_ENGINEER;
+        case NPC_BOT_ROLE_AUTOLOOT:             return BOT_TEXT_LOOTING;
+        case NPC_BOT_ROLE_AUTOLOOT_POOR:        return BOT_TEXT_POOR;
+        case NPC_BOT_ROLE_AUTOLOOT_COMMON:      return BOT_TEXT_COMMON;
+        case NPC_BOT_ROLE_AUTOLOOT_UNCOMMON:    return BOT_TEXT_UNCOMMON;
+        case NPC_BOT_ROLE_AUTOLOOT_RARE:        return BOT_TEXT_RARE;
+        case NPC_BOT_ROLE_AUTOLOOT_EPIC:        return BOT_TEXT_EPIC;
+        case NPC_BOT_ROLE_AUTOLOOT_LEGENDARY:   return BOT_TEXT_LEGENDARY;
         default:                            return BOT_TEXT_UNKNOWN;
     }
 }
@@ -14759,16 +14759,16 @@ void bot_ai::ToggleRole(uint32 role, bool force)
     if (HasRole(role))
     {
         //linked roles
-        if (role & BOT_ROLE_TANK)
-            role |= BOT_ROLE_TANK_OFF;
+        if (role & NPC_BOT_ROLE_TANK)
+            role |= NPC_BOT_ROLE_TANK_OFF;
 
         _roleMask &= ~role;
     }
     else
     {
         //linked roles
-        if (role & BOT_ROLE_TANK_OFF)
-            role |= BOT_ROLE_TANK;
+        if (role & NPC_BOT_ROLE_TANK_OFF)
+            role |= NPC_BOT_ROLE_TANK;
 
         _roleMask |= role;
     }
@@ -14781,7 +14781,7 @@ void bot_ai::ToggleRole(uint32 role, bool force)
 
 uint32 bot_ai::DefaultRolesForClass(uint8 m_class, uint8 spec)
 {
-    uint32 roleMask = BOT_ROLE_DPS;
+    uint32 roleMask = NPC_BOT_ROLE_DPS;
 
     //if (bot_ai::IsHealingClass(m_class))
     //    roleMask |= BOT_ROLE_HEAL;
@@ -14794,7 +14794,7 @@ uint32 bot_ai::DefaultRolesForClass(uint8 m_class, uint8 spec)
             case BOT_SPEC_DRUID_FERAL:
                 break;
             default:
-                roleMask |= BOT_ROLE_RANGED;
+                roleMask |= NPC_BOT_ROLE_RANGED;
                 break;
         }
     }
@@ -14805,10 +14805,10 @@ uint32 bot_ai::DefaultRolesForClass(uint8 m_class, uint8 spec)
 bool bot_ai::IsTank(Unit const* unit) const
 {
     if (!unit || unit == me)
-        return HasRole(BOT_ROLE_TANK);
+        return HasRole(NPC_BOT_ROLE_TANK);
 
     if (Creature const* bot = unit->ToCreature())
-        return bot->GetBotAI() && bot->GetBotAI()->HasRole(BOT_ROLE_TANK);
+        return bot->GetBotAI() && bot->GetBotAI()->HasRole(NPC_BOT_ROLE_TANK);
 
     if (Player const* player = unit->ToPlayer())
     {
@@ -14851,10 +14851,10 @@ bool bot_ai::IsTank(Unit const* unit) const
 bool bot_ai::IsOffTank(Unit const* unit) const
 {
     if (!unit || unit == me)
-        return HasRole(BOT_ROLE_TANK_OFF);
+        return HasRole(NPC_BOT_ROLE_TANK_OFF);
 
     if (Creature const* bot = unit->ToCreature())
-        return bot->GetBotAI() && bot->GetBotAI()->HasRole(BOT_ROLE_TANK_OFF);
+        return bot->GetBotAI() && bot->GetBotAI()->HasRole(NPC_BOT_ROLE_TANK_OFF);
 
     if (Player const* player = unit->ToPlayer())
     {
@@ -15062,7 +15062,7 @@ void bot_ai::InitRoles()
 {
     if (IsTempBot())
     {
-        _roleMask = BOT_ROLE_DPS;
+        _roleMask = NPC_BOT_ROLE_DPS;
         return;
     }
     else if (IAmFree())
@@ -16214,7 +16214,7 @@ bool bot_ai::UpdateImpossibleChase(Unit const* target)
         return true;
     }
 
-    if (target->IsPlayer() && (!me->IsWithinDist(target, HasRole(BOT_ROLE_RANGED) ? 65 : 40) || me->IsWithinDist(target, HasRole(BOT_ROLE_RANGED) ? 35 : 10)))
+    if (target->IsPlayer() && (!me->IsWithinDist(target, HasRole(NPC_BOT_ROLE_RANGED) ? 65 : 40) || me->IsWithinDist(target, HasRole(NPC_BOT_ROLE_RANGED) ? 35 : 10)))
         return false;
 
     _unreachableCount = 0;
@@ -16311,7 +16311,7 @@ void bot_ai::JustEngagedWith(Unit* u)
             me->AttackStop();
             me->BotStopMovement();
             SetBotCommandState(BOT_COMMAND_COMBATRESET); //reset AttackStart()
-            me->Attack(u, !HasRole(BOT_ROLE_RANGED));
+            me->Attack(u, !HasRole(NPC_BOT_ROLE_RANGED));
         }
     }
 }
@@ -16920,7 +16920,7 @@ void bot_ai::_ProcessOrders()
                 BOT_LOG_DEBUG("npcbots", "bot_ai::_ProcessOrders: {} front order (type {}) expired...", me->GetName(), uint32(order._type));
             CancelOrder(order);
         }
-        else if (order._type == BOT_ORDER_PULL && (!HasRole(BOT_ROLE_DPS) || me->IsInCombat() || !me->getAttackers().empty()))
+        else if (order._type == BOT_ORDER_PULL && (!HasRole(NPC_BOT_ROLE_DPS) || me->IsInCombat() || !me->getAttackers().empty()))
             CompleteOrder(order);
         else
             break;
@@ -17081,7 +17081,7 @@ void bot_ai::DoSkytalonVehicleStrats(uint32 diff)
         finishComboPoints = 3;
         finishPower = 25;
     }
-    //if (HasRole(BOT_ROLE_HEAL))
+    //if (HasRole(NPC_BOT_ROLE_HEAL))
     //{
     //    finishComboPoints = 4;
     //    finishPower = 50;
@@ -17101,7 +17101,7 @@ void bot_ai::DoSkytalonVehicleStrats(uint32 diff)
                 drakespell = drake->m_spells[4]; //flame shield
                 target = drake;
             }
-            else if (HasRole(BOT_ROLE_HEAL))
+            else if (HasRole(NPC_BOT_ROLE_HEAL))
             {
                 drakespell = drake->m_spells[3]; //life burst
                 bool cast = false;
@@ -17130,12 +17130,12 @@ void bot_ai::DoSkytalonVehicleStrats(uint32 diff)
     }
     else if (drakePower >= 35)
     {
-        if (HasRole(BOT_ROLE_DPS))
+        if (HasRole(NPC_BOT_ROLE_DPS))
         {
             drakespell = drake->m_spells[0]; //flame spike
             target = opponent;
         }
-        else if (HasRole(BOT_ROLE_HEAL))
+        else if (HasRole(NPC_BOT_ROLE_HEAL))
         {
             drakespell = drake->m_spells[2]; //revivify
             //bots won't care about target they have cp on so choose randomly
@@ -17208,7 +17208,7 @@ void bot_ai::DoSkytalonVehicleStrats(uint32 diff)
         }
     }
 
-    //if (!HasRole(BOT_ROLE_TANK|BOT_ROLE_HEAL) && drake->GetMap()->IsRaid() && target && target->GetVictim() == drake)
+    //if (!HasRole(NPC_BOT_ROLE_TANK|NPC_BOT_ROLE_HEAL) && drake->GetMap()->IsRaid() && target && target->GetVictim() == drake)
     //    target = nullptr;
 
     if (!target)
@@ -17840,7 +17840,7 @@ bool bot_ai::HasVehicleRoleOverride(uint32 role) const
             case CREATURE_ULDUAR_DEMOLISHER:
                 switch (role)
                 {
-                    case BOT_ROLE_RANGED:
+                    case NPC_BOT_ROLE_RANGED:
                         return true;
                     default:
                         break;
@@ -18384,13 +18384,13 @@ bool bot_ai::GlobalUpdate(uint32 diff)
         }
 
         //Gathering
-        if (me->IsInWorld() && !IAmFree() && HasRole(BOT_ROLE_MASK_GATHERING) && !me->IsInCombat() && !master->IsInCombat() && !master->IsMounted() && !CCed(me) &&
+        if (me->IsInWorld() && !IAmFree() && HasRole(NPC_BOT_ROLE_MASK_GATHERING) && !me->IsInCombat() && !master->IsInCombat() && !master->IsMounted() && !CCed(me) &&
             master->GetLootGUID().IsEmpty() && !me->isMoving() && !master->isMoving() && master->IsStandState() && !Feasting() && !IsCasting() && !IsCasting(master) &&
             !HasBotCommandState(BOT_COMMAND_MASK_UNMOVING) && !me->GetVehicle())
         {
-            //BOT_LOG_ERROR("spells", "bot_ai:UpdateEx by %s, found free master, my skills: %u:", me->GetName().c_str(), uint32(_roleMask & BOT_ROLE_MASK_GATHERING));
+            //BOT_LOG_ERROR("spells", "bot_ai:UpdateEx by %s, found free master, my skills: %u:", me->GetName().c_str(), uint32(_roleMask & NPC_BOT_ROLE_MASK_GATHERING));
             std::list<WorldObject*> woList;
-            NearbyObjectBySkillCheck check(master, INTERACTION_DISTANCE - 1.0f, (_roleMask & BOT_ROLE_MASK_GATHERING));
+            NearbyObjectBySkillCheck check(master, INTERACTION_DISTANCE - 1.0f, (_roleMask & NPC_BOT_ROLE_MASK_GATHERING));
             Bcore::WorldObjectListSearcher<NearbyObjectBySkillCheck> searcher(me, woList, check, GRID_MAP_TYPE_MASK_CREATURE|GRID_MAP_TYPE_MASK_GAMEOBJECT);
             Cell::VisitObjects(me, searcher, 20.f);
             //me->VisitNearbyObject(20.f, searcher);
@@ -18461,11 +18461,11 @@ bool bot_ai::GlobalUpdate(uint32 diff)
         }
 
         //Looting
-        if (me->IsInWorld() && !IAmFree() && HasRole(BOT_ROLE_AUTOLOOT) && HasRole(BOT_ROLE_MASK_LOOTING) &&
+        if (me->IsInWorld() && !IAmFree() && HasRole(NPC_BOT_ROLE_AUTOLOOT) && HasRole(NPC_BOT_ROLE_MASK_LOOTING) &&
             !me->GetVictim() && !master->IsMounted() && !CCed(me) && !Feasting() && !IsCasting() &&
             !HasBotCommandState(BOT_COMMAND_MASK_UNMOVING))
         {
-            //BOT_LOG_ERROR("scripts", "bot_ai Looting by %s, my mask: %u:", me->GetName().c_str(), uint32(_roleMask & BOT_ROLE_MASK_LOOTING));
+            //BOT_LOG_ERROR("scripts", "bot_ai Looting by %s, my mask: %u:", me->GetName().c_str(), uint32(_roleMask & NPC_BOT_ROLE_MASK_LOOTING));
             std::list<Unit*> crList;
             NearbyLootableCreatureCheck check(master, std::min(30.f, std::max(5.f, sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE) - 10.f)));
             Bcore::UnitListSearcher<NearbyLootableCreatureCheck> searcher(me, crList, check);
@@ -18540,7 +18540,7 @@ bool bot_ai::GlobalUpdate(uint32 diff)
         checkAurasTimer += uint32(__rand + __rand + (IAmFree() ? 1000 : 40 * (1 + master->GetNpcBotsCount())));
 
         //group demand
-        if (!IAmFree() && HasRole(BOT_ROLE_PARTY) && (!master->GetGroup() || !master->GetGroup()->IsMember(me->GetGUID())))
+        if (!IAmFree() && HasRole(NPC_BOT_ROLE_PARTY) && (!master->GetGroup() || !master->GetGroup()->IsMember(me->GetGUID())))
         {
             //BOT_LOG_ERROR("entities.player", "CheckAuras(): adding %s to group", me->GetName().c_str());
             master->GetBotMgr()->AddBotToGroup(me);
@@ -18564,7 +18564,7 @@ bool bot_ai::GlobalUpdate(uint32 diff)
                 {
                     GetInPosition(true, victim);
                 }
-                else if (!HasRole(BOT_ROLE_RANGED) && !HasVehicleRoleOverride(BOT_ROLE_RANGED) &&
+                else if (!HasRole(NPC_BOT_ROLE_RANGED) && !HasVehicleRoleOverride(NPC_BOT_ROLE_RANGED) &&
                     !(!IAmFree() && !GetAoeSpots().empty()))
                 {
                     if (me->GetDistance(victim) > 1.5f)
@@ -20925,8 +20925,8 @@ void bot_ai::ChooseVehicleForEncounter(uint32 &creEntry, uint32 &vehEntry) const
         case CREATURE_OCULUS_DRAKE_RUBY:
         case CREATURE_OCULUS_DRAKE_EMERALD:
         case CREATURE_OCULUS_DRAKE_AMBER:
-            creEntry = (HasRole(BOT_ROLE_TANK)/* && mVeh->GetBase()->GetEntry() != CREATURE_OCULUS_DRAKE_RUBY*/) ? CREATURE_OCULUS_DRAKE_RUBY :
-                (HasRole(BOT_ROLE_HEAL)/* && mVeh->GetBase()->GetEntry() != CREATURE_OCULUS_DRAKE_EMERALD*/) ? CREATURE_OCULUS_DRAKE_EMERALD :
+            creEntry = (HasRole(NPC_BOT_ROLE_TANK)/* && mVeh->GetBase()->GetEntry() != CREATURE_OCULUS_DRAKE_RUBY*/) ? CREATURE_OCULUS_DRAKE_RUBY :
+                (HasRole(NPC_BOT_ROLE_HEAL)/* && mVeh->GetBase()->GetEntry() != CREATURE_OCULUS_DRAKE_EMERALD*/) ? CREATURE_OCULUS_DRAKE_EMERALD :
                 CREATURE_OCULUS_DRAKE_AMBER;
             break;
         //case CREATURE_TOC_NIGHTSABER:
@@ -20957,7 +20957,7 @@ void bot_ai::ChooseVehicleForEncounter(uint32 &creEntry, uint32 &vehEntry) const
         case CREATURE_ICC_GUNSHIPCANNON_ALLIANCE:
         case CREATURE_ICC_GUNSHIPCANNON_HORDE:
             //limited amount of cannons
-            if (!IsTank() && HasRole(BOT_ROLE_DPS) &&
+            if (!IsTank() && HasRole(NPC_BOT_ROLE_DPS) &&
                 master->GetBotMgr()->GetNpcBotsCountByVehicleEntry(mVeh->GetBase()->GetEntry()) <
                 std::max<uint8>(master->GetBotMgr()->GetNpcBotsCount() / 2, 8))
                 creEntry = mVeh->GetBase()->GetEntry();
@@ -21328,11 +21328,11 @@ bool bot_ai::IsHeroExClass(uint8 m_class)
 }
 bool bot_ai::IsMelee() const
 {
-    return !IsRanged() && HasRole(BOT_ROLE_DPS|BOT_ROLE_TANK);
+    return !IsRanged() && HasRole(NPC_BOT_ROLE_DPS| NPC_BOT_ROLE_TANK);
 }
 bool bot_ai::IsRanged() const
 {
-    return HasRole(BOT_ROLE_RANGED) || HasVehicleRoleOverride(BOT_ROLE_RANGED);
+    return HasRole(NPC_BOT_ROLE_RANGED) || HasVehicleRoleOverride(NPC_BOT_ROLE_RANGED);
 }
 
 bool bot_ai::IsShootingWand(Unit const* u) const

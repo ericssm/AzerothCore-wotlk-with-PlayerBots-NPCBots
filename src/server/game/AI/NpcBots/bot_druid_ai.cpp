@@ -347,21 +347,21 @@ public:
         {
             if (!bot_ai::StartAttack(u, force))
                 return;
-            if (_form == DRUID_BEAR_FORM && HasRole(BOT_ROLE_RANGED) && IsSpellReady(BASH_1, GetLastDiff(), false))
+            if (_form == DRUID_BEAR_FORM && HasRole(NPC_BOT_ROLE_RANGED) && IsSpellReady(BASH_1, GetLastDiff(), false))
                 return;
             GetInPosition(force, u);
         }
 
         bool MassGroupHeal(Player* gPlayer, uint32 diff)
         {
-            if (!HasRole(BOT_ROLE_HEAL)) return false;
+            if (!HasRole(NPC_BOT_ROLE_HEAL)) return false;
             if (!gPlayer || GC_Timer > diff || IAmFree()) return false;
             if (IsCasting()) return false; // if I'm already casting
             if (Rand() > 30 + 50 * (me->GetMap()->IsRaid())) return false;
             if (!gPlayer->GetGroup()) return false;
 
             bool tranq = IsSpellReady(TRANQUILITY_1, diff, false) && master->GetBotMgr()->IsPartyInCombat(false);
-            bool growt = IsSpellReady(WILD_GROWTH_1, diff, false) && !HasRole(BOT_ROLE_DPS);
+            bool growt = IsSpellReady(WILD_GROWTH_1, diff, false) && !HasRole(NPC_BOT_ROLE_DPS);
             if (!tranq && !growt)
                 return false;
 
@@ -501,7 +501,7 @@ public:
             if (!(_form == DRUID_MOONKIN_FORM || _form == BOT_STANCE_NONE))
                 return;
             //Skip Tranquility, Hurricane
-            if (GC_Timer > diff || Rand() > 35 || IsChanneling() || (HasRole(BOT_ROLE_HEAL) && IsCasting()))
+            if (GC_Timer > diff || Rand() > 35 || IsChanneling() || (HasRole(NPC_BOT_ROLE_HEAL) && IsCasting()))
                 return;
 
             if (IsSpellReady(CYCLONE_1, diff))
@@ -580,7 +580,7 @@ public:
             else
                 DoNonCombatActions(diff);
 
-            if (HasRole(BOT_ROLE_RANGED) || !me->IsInCombat() || !me->GetVictim() ||
+            if (HasRole(NPC_BOT_ROLE_RANGED) || !me->IsInCombat() || !me->GetVictim() ||
                 (_form != DRUID_BEAR_FORM && (_form != DRUID_CAT_FORM || !me->GetMap()->IsRaid())))
                 BuffAndHealGroup(diff);
             if (_form != DRUID_BEAR_FORM && _form != DRUID_CAT_FORM)
@@ -627,7 +627,7 @@ public:
             //NOT all forms abilities (prioritized)
             //Cat Instaheal
             if (_form == DRUID_CAT_FORM && GC_Timer <= diff && Rand() < 60 &&
-                HasRole(BOT_ROLE_HEAL) && GetHealthPCT(me) < 45 &&
+                HasRole(NPC_BOT_ROLE_HEAL) && GetHealthPCT(me) < 45 &&
                 (me->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DRUID, 0x0, 0x80000, 0x0) ||/*me->HasAura(PREDATORS_SWIFTNESS_BUFF)*/
                 (IsSpellReady(NATURES_SWIFTNESS_1, diff, false) && doCast(me, GetSpell(NATURES_SWIFTNESS_1)))))
             {
@@ -645,14 +645,14 @@ public:
             }
             //Roots
             if (_form != DRUID_BEAR_FORM && _form != DRUID_TREE_FORM && Rand() < 35 &&
-                (HasRole(BOT_ROLE_DPS) || IAmFree()) && IsSpellReady(ENTANGLING_ROOTS_1, diff) &&
+                (HasRole(NPC_BOT_ROLE_DPS) || IAmFree()) && IsSpellReady(ENTANGLING_ROOTS_1, diff) &&
                 (_form != DRUID_CAT_FORM || IAmFree() || me->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DRUID, 0x0, 0x80000, 0x0)
                 /*me->HasAura(PREDATORS_SWIFTNESS_BUFF)*/))
                 CheckRoots();
 
             //ALL forms abilities
             //Nature's Grasp (no shapeshift)
-            if (IsSpellReady(NATURES_GRASP_1, diff) && HasRole(BOT_ROLE_DPS) && HasRole(BOT_ROLE_RANGED) && Rand() < 70 &&
+            if (IsSpellReady(NATURES_GRASP_1, diff) && HasRole(NPC_BOT_ROLE_DPS) && HasRole(NPC_BOT_ROLE_RANGED) && Rand() < 70 &&
                 !me->getAttackers().empty())
             {
                 if (doCast(me, GetSpell(NATURES_GRASP_1)))
@@ -697,7 +697,7 @@ public:
                         break;
                     case DRUID_MOONKIN_FORM:
                     case BOT_STANCE_NONE:
-                        if (HasRole(BOT_ROLE_DPS))
+                        if (HasRole(NPC_BOT_ROLE_DPS))
                             doBalanceActions(mytar, diff);
                         break;
                     default:
@@ -742,7 +742,7 @@ public:
             }
             //GROWL 2 (distant)
             if (IsSpellReady(GROWL_1, diff, false) && !IAmFree() && u == me &&  Rand() < 20 && IsTank() &&
-                (IsOffTank() || master->GetBotMgr()->GetNpcBotsCountByRole(BOT_ROLE_TANK_OFF) == 0) &&
+                (IsOffTank() || master->GetBotMgr()->GetNpcBotsCountByRole(NPC_BOT_ROLE_TANK_OFF) == 0) &&
                 !(me->GetLevel() >= 40 && mytar->GetTypeId() == TYPEID_UNIT &&
                 (mytar->ToCreature()->IsDungeonBoss() || mytar->ToCreature()->isWorldBoss())))
             {
@@ -805,7 +805,7 @@ public:
             if (dist > 5) return;
 
             //Berserk (Bear)
-            if (IsSpellReady(BERSERK_1, diff) && !HasRole(BOT_ROLE_HEAL) && rage > 400 && Rand() < 40 &&
+            if (IsSpellReady(BERSERK_1, diff) && !HasRole(NPC_BOT_ROLE_HEAL) && rage > 400 && Rand() < 40 &&
                 me->getAttackers().size() > 2)
             {
                 if (doCast(me, GetSpell(BERSERK_1)))
@@ -951,7 +951,7 @@ public:
             }
             //Berserk can be used After Tiger's Fury without dispelling it
             //Berserk (Cat)
-            if (IsSpellReady(BERSERK_1, diff) && Rand() < 80 && !IsSpellReady(TIGERS_FURY_1, diff, false) && (!HasRole(BOT_ROLE_HEAL) || me->HasAuraType(SPELL_AURA_MOD_FEAR)) &&
+            if (IsSpellReady(BERSERK_1, diff) && Rand() < 80 && !IsSpellReady(TIGERS_FURY_1, diff, false) && (!HasRole(NPC_BOT_ROLE_HEAL) || me->HasAuraType(SPELL_AURA_MOD_FEAR)) &&
                 (!me->HasAuraType(SPELL_AURA_MOD_STEALTH) || energy >= 40 || me->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DRUID, 0x0, 0x200000, 0x0)) &&
                 (mytar->GetTypeId() == TYPEID_PLAYER || mytar->GetHealth() + 5000 > me->GetHealth()))
             {
@@ -1063,7 +1063,7 @@ public:
         {
             MoveBehind(mytar);
 
-            if (HasRole(BOT_ROLE_HEAL) && GetManaPCT(me) < 25)
+            if (HasRole(NPC_BOT_ROLE_HEAL) && GetManaPCT(me) < 25)
                 return;
 
             //BOT_ROLE_DPS is checked in Attack(uint32)
@@ -1266,7 +1266,7 @@ public:
                 if (hots >= minHots && doCast(target, GetSpell(NOURISH_1)))
                     return true;
             }
-            if (IsSpellReady(SWIFTMEND_1, diff, false) && !HasRole(BOT_ROLE_DPS|BOT_ROLE_TANK) && hp < 60 &&
+            if (IsSpellReady(SWIFTMEND_1, diff, false) && !HasRole(NPC_BOT_ROLE_DPS| NPC_BOT_ROLE_TANK) && hp < 60 &&
                 (xppct <= 15 || int32(GetLostHP(target)) > _heals[REJUVENATION_1]) &&
                 //rejuv,regro
                 target->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_DRUID, 0x50, 0x0, 0x0, me->GetGUID())
@@ -2243,7 +2243,7 @@ public:
 
             //Bash desperate use (ranged): retreat
             //Only if hit
-            if (baseId == BASH_1 && HasRole(BOT_ROLE_RANGED) && !HasBotCommandState(BOT_COMMAND_MASK_UNMOVING))
+            if (baseId == BASH_1 && HasRole(NPC_BOT_ROLE_RANGED) && !HasBotCommandState(BOT_COMMAND_MASK_UNMOVING))
             {
                 //if (GC_Timer <= lastdiff && GetSpell(TRAVEL_FORM_1))
                 //    doCast(me, GetSpell(TRAVEL_FORM_1));
@@ -2839,9 +2839,9 @@ public:
                 case TYPHOON_1:
                 case STARFALL_1:
                 case MOONKIN_FORM_1:
-                    return (GetBotRoles() & BOT_ROLE_MASK_MAIN) == (BOT_ROLE_DPS|BOT_ROLE_RANGED);
+                    return (GetBotRoles() & NPC_BOT_ROLE_MASK_MAIN) == (NPC_BOT_ROLE_DPS| NPC_BOT_ROLE_RANGED);
                 case TREE_OF_LIFE_FORM_1:
-                    return ((GetBotRoles() & BOT_ROLE_MASK_MAIN) & ~BOT_ROLE_RANGED) == BOT_ROLE_HEAL;
+                    return ((GetBotRoles() & NPC_BOT_ROLE_MASK_MAIN) & ~NPC_BOT_ROLE_RANGED) == NPC_BOT_ROLE_HEAL;
                 case SURVIVAL_INSTINCTS_1:
                 case FRENZIED_REGENERATION_1:
                 case ENRAGE_1:
@@ -2853,7 +2853,7 @@ public:
                     return _form == DRUID_CAT_FORM;
                 case BERSERK_1:
                     return (_form == DRUID_BEAR_FORM || _form == DRUID_CAT_FORM) &&
-                        (((GetBotRoles() & BOT_ROLE_MASK_MAIN) & BOT_ROLE_TANK) || (GetBotRoles() & BOT_ROLE_MASK_MAIN) == BOT_ROLE_DPS);
+                        (((GetBotRoles() & NPC_BOT_ROLE_MASK_MAIN) & NPC_BOT_ROLE_TANK) || (GetBotRoles() & NPC_BOT_ROLE_MASK_MAIN) == NPC_BOT_ROLE_DPS);
                 default:
                     return false;
             }
@@ -2967,13 +2967,13 @@ public:
                 bool has_bear_form_spell = !!GetSpell(_baseSpellForShapeshift(DRUID_BEAR_FORM));
                 if ((IsTank() || (IsWanderer() && !has_cat_form_spell)) && has_bear_form_spell)
                     form = DRUID_BEAR_FORM;
-                else if (HasRole(BOT_ROLE_DPS))
+                else if (HasRole(NPC_BOT_ROLE_DPS))
                     form = has_cat_form_spell ? DRUID_CAT_FORM : has_bear_form_spell ? DRUID_BEAR_FORM : BOT_STANCE_NONE;
             }
-            if (form == BOT_STANCE_NONE && HasRole(BOT_ROLE_DPS))
-                form = (!HasRole(BOT_ROLE_HEAL) && !!GetSpell(_baseSpellForShapeshift(DRUID_MOONKIN_FORM))) ? DRUID_MOONKIN_FORM : BOT_STANCE_NONE;
-            if (form == BOT_STANCE_NONE && HasRole(BOT_ROLE_HEAL))
-                form = (!HasRole(BOT_ROLE_DPS) && !!GetSpell(_baseSpellForShapeshift(DRUID_TREE_FORM))) ? DRUID_TREE_FORM : BOT_STANCE_NONE;
+            if (form == BOT_STANCE_NONE && HasRole(NPC_BOT_ROLE_DPS))
+                form = (!HasRole(NPC_BOT_ROLE_HEAL) && !!GetSpell(_baseSpellForShapeshift(DRUID_MOONKIN_FORM))) ? DRUID_MOONKIN_FORM : BOT_STANCE_NONE;
+            if (form == BOT_STANCE_NONE && HasRole(NPC_BOT_ROLE_HEAL))
+                form = (!HasRole(NPC_BOT_ROLE_DPS) && !!GetSpell(_baseSpellForShapeshift(DRUID_TREE_FORM))) ? DRUID_TREE_FORM : BOT_STANCE_NONE;
             return form;
         }
 

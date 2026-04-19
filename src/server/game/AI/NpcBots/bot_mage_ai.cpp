@@ -307,7 +307,7 @@ public:
             }
 
             //ARMOR
-            uint32 MOLTENARMOR = HasRole(BOT_ROLE_DPS) ? GetSpell(MOLTEN_ARMOR_1) : GetSpell(ICE_ARMOR_1);
+            uint32 MOLTENARMOR = HasRole(NPC_BOT_ROLE_DPS) ? GetSpell(MOLTEN_ARMOR_1) : GetSpell(ICE_ARMOR_1);
             uint32 ICEARMOR = GetSpell(ICE_ARMOR_1) ? GetSpell(ICE_ARMOR_1) : GetSpell(FROST_ARMOR_1);
             uint32 ARMOR = !MOLTENARMOR ? ICEARMOR : (me->GetMap()->IsDungeon() || !ICEARMOR) ? MOLTENARMOR : ICEARMOR;
             if (ARMOR && !me->HasAura(ARMOR))
@@ -416,7 +416,7 @@ public:
 
             MoveBehind(mytar);
 
-            if (!HasRole(BOT_ROLE_DPS))
+            if (!HasRole(NPC_BOT_ROLE_DPS))
                 return;
 
             Unit::AttackerSet const& b_attackers = me->getAttackers();
@@ -718,7 +718,7 @@ public:
                     cast = true;
                 }
             }
-            if (!cast && me->IsInCombat() && !me->getAttackers().empty() && HasRole(BOT_ROLE_RANGED))
+            if (!cast && me->IsInCombat() && !me->getAttackers().empty() && HasRole(NPC_BOT_ROLE_RANGED))
             {
                 cast = me->HasAuraWithMechanic((1<<MECHANIC_STUN)|(1<<MECHANIC_ROOT));
                 if (!cast)
@@ -789,12 +789,12 @@ public:
                         if (i > 0)
                         {
                             Creature const* bot = member->ToCreature();
-                            if (bot->GetBotAI()->HasRole(BOT_ROLE_TANK) ||
+                            if (bot->GetBotAI()->HasRole(NPC_BOT_ROLE_TANK) ||
                                 bot->GetBotClass() == BOT_CLASS_BM || bot->GetBotClass() == BOT_CLASS_HUNTER ||
                                 bot->GetBotClass() == BOT_CLASS_SPELLBREAKER || bot->GetBotClass() == BOT_CLASS_DARK_RANGER ||
                                 bot->GetBotClass() == BOT_CLASS_SEA_WITCH)
                                 continue;
-                            if (i < 2 && bot->GetBotAI()->HasRole(BOT_ROLE_DPS))
+                            if (i < 2 && bot->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS))
                                 continue;
                         }
                         targets.insert(member);

@@ -295,7 +295,7 @@ public:
 
             MoveBehind(mytar);
 
-            if (!HasRole(BOT_ROLE_DPS))
+            if (!HasRole(NPC_BOT_ROLE_DPS))
                 return;
 
             if (IsSpellReady(IMPALE_1, diff) && _impaleCheckTimer <= diff && me->GetPower(POWER_MANA) >= IMPALE_COST &&

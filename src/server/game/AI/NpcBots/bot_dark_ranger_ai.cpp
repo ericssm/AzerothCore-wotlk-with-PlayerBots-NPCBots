@@ -230,7 +230,7 @@ public:
                 if (shot->GetSpellInfo()->Id == AUTO_SHOT_1 && (shot->m_targets.GetUnitTarget() != mytar || !inpostion))
                     me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             }
-            else if (HasRole(BOT_ROLE_DPS)/* && dist > 5*/ && dist < maxRangeLong)
+            else if (HasRole(NPC_BOT_ROLE_DPS)/* && dist > 5*/ && dist < maxRangeLong)
             {
                 if (doCast(mytar, AUTO_SHOT_1))
                 {}
@@ -241,7 +241,7 @@ public:
                 return;
 
             //Black Arrow
-            if (IsSpellReady(BLACK_ARROW_1, diff) && HasRole(BOT_ROLE_DPS) &&
+            if (IsSpellReady(BLACK_ARROW_1, diff) && HasRole(NPC_BOT_ROLE_DPS) &&
                 (Rand() < 20 || !mytar->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_WARLOCK, 0x0, 0x4, 0x0, me->GetGUID())))
             {
                 if (doCast(mytar, GetSpell(BLACK_ARROW_1)))
@@ -251,7 +251,7 @@ public:
 
         void CheckDrainLife(uint32 diff)
         {
-            if (!IsSpellReady(DRAIN_LIFE_1, diff) || !HasRole(BOT_ROLE_DPS) || GetHealthPCT(me) > 70 || Rand() > 80 ||
+            if (!IsSpellReady(DRAIN_LIFE_1, diff) || !HasRole(NPC_BOT_ROLE_DPS) || GetHealthPCT(me) > 70 || Rand() > 80 ||
                 IsCasting())
                 return;
 
@@ -265,7 +265,7 @@ public:
 
         void CheckBlackArrow(uint32 diff)
         {
-            if (!IsSpellReady(BLACK_ARROW_1, diff) || !HasRole(BOT_ROLE_DPS) || Rand() > 30)
+            if (!IsSpellReady(BLACK_ARROW_1, diff) || !HasRole(NPC_BOT_ROLE_DPS) || Rand() > 30)
                 return;
 
             std::list<Unit*> targets;

@@ -85,7 +85,7 @@ public:
 
         void UpdateAI(uint32 diff) override
         {
-            if (((liveTimer += diff) >= TORNADO_DURATION) || !petOwner->GetBotAI()->HasRole(BOT_ROLE_DPS))
+            if (((liveTimer += diff) >= TORNADO_DURATION) || !petOwner->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS))
             {
                 canUpdate = false;
                 me->ToTempSummon()->UnSummon(1ms);

@@ -293,7 +293,7 @@ Creature::Creature(): Unit(), MovableMapObject(), m_groupLootTimer(0), lootingGr
     m_CombatDistance = 0.0f;
 
     ResetLootMode(); // restore default loot mode
-    TriggerJustRespawned = false;
+    TriggerJustRespawned = true;
     _focusSpell = nullptr;
 
     m_respawnedTime = time_t(0);
@@ -754,10 +754,10 @@ void Creature::Update(uint32 diff)
 
     if (IsAIEnabled && TriggerJustRespawned)
     {
+        if (_respawnCompatibilityMode && m_vehicleKit)
+            m_vehicleKit->Reset();
         TriggerJustRespawned = false;
         AI()->JustRespawned();
-        if (m_vehicleKit)
-            m_vehicleKit->Reset();
     }
 
     switch (m_deathState)

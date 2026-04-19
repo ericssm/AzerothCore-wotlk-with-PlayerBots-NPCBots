@@ -193,7 +193,7 @@ public:
 
             MoveBehind(mytar);
 
-            if (!HasRole(BOT_ROLE_DPS))
+            if (!HasRole(NPC_BOT_ROLE_DPS))
                 return;
 
             if (GC_Timer > diff)
@@ -224,7 +224,7 @@ public:
         {
             if (DevourcheckTimer > diff || !IsSpellReady(DEVOUR_MAGIC_1, diff, false) || IsCasting() ||
                 (GetHealthPCT(me) > 75 && Rand() > 15 &&
-                (!HasRole(BOT_ROLE_DPS) || me->GetPower(POWER_MANA) >= SPLASH_ATTACK_COST * 6)))
+                (!HasRole(NPC_BOT_ROLE_DPS) || me->GetPower(POWER_MANA) >= SPLASH_ATTACK_COST * 6)))
                 return;
 
             DevourcheckTimer = urand(350, 700);
@@ -236,7 +236,7 @@ public:
 
         void CheckDrainMana(uint32 diff)
         {
-            if (DraincheckTimer > diff || Rand() > 40 || IAmFree() || !HasRole(BOT_ROLE_DPS) || IsCasting() ||
+            if (DraincheckTimer > diff || Rand() > 40 || IAmFree() || !HasRole(NPC_BOT_ROLE_DPS) || IsCasting() ||
                 !IsSpellReady(DRAIN_MANA_1, diff, false) || me->GetPower(POWER_MANA) >= SPLASH_ATTACK_COST)
                 return;
 
@@ -257,8 +257,8 @@ public:
         void CheckReplenishHealth(uint32 diff)
         {
             if (ReplHealthcheckTimer > diff || !IsSpellReady(REPLENISH_HEALTH_1, diff) || IAmFree() ||
-                !HasRole(BOT_ROLE_HEAL) || IsCasting() ||
-                (HasRole(BOT_ROLE_DPS) && me->GetPower(POWER_MANA) > 0))
+                !HasRole(NPC_BOT_ROLE_HEAL) || IsCasting() ||
+                (HasRole(NPC_BOT_ROLE_DPS) && me->GetPower(POWER_MANA) > 0))
                 return;
 
             ReplHealthcheckTimer = 1000;
@@ -291,7 +291,7 @@ public:
         void CheckReplenishMana(uint32 diff)
         {
             if (ReplManacheckTimer > diff || !IsSpellReady(REPLENISH_MANA_1, diff) || IAmFree() || IsCasting() ||
-                (HasRole(BOT_ROLE_DPS) && me->GetPower(POWER_MANA) > 0))
+                (HasRole(NPC_BOT_ROLE_DPS) && me->GetPower(POWER_MANA) > 0))
                 return;
 
             ReplManacheckTimer = 1000;

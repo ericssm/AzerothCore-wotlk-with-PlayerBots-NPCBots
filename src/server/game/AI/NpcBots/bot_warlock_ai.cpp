@@ -490,7 +490,7 @@ public:
                     return;
             }
             //Shadowfury
-            if (HasRole(BOT_ROLE_DPS) && IsSpellReady(SHADOWFURY_1, diff))
+            if (HasRole(NPC_BOT_ROLE_DPS) && IsSpellReady(SHADOWFURY_1, diff))
             {
                 if (Unit* u = FindCastingTarget(CalcSpellMaxRange(SHADOWFURY_1), 0, SHADOWFURY_1))
                 {
@@ -501,7 +501,7 @@ public:
                 }
             }
              //Death Coil
-            if (HasRole(BOT_ROLE_DPS) && IsSpellReady(DEATH_COIL_1, diff))
+            if (HasRole(NPC_BOT_ROLE_DPS) && IsSpellReady(DEATH_COIL_1, diff))
             {
                 if (Unit* u = FindCastingTarget(CalcSpellMaxRange(DEATH_COIL_1), 0, DEATH_COIL_1))
                 {
@@ -559,7 +559,7 @@ public:
                 }
             }
             //COIL
-            if (HasRole(BOT_ROLE_DPS) && IsSpellReady(DEATH_COIL_1, diff))
+            if (HasRole(NPC_BOT_ROLE_DPS) && IsSpellReady(DEATH_COIL_1, diff))
             {
                 Unit* u = needFearM ? *(m_attackers.begin()) : nullptr;
                 if (u && u->GetMaxHealth() > master->GetMaxHealth() * 2 &&
@@ -753,7 +753,7 @@ public:
                 return;
 
             //Offensive heal (Death Coil)
-            if (IsSpellReady(DEATH_COIL_1, diff) && can_do_shadow && HasRole(BOT_ROLE_DPS) && dist < CalcSpellMaxRange(DEATH_COIL_1) &&
+            if (IsSpellReady(DEATH_COIL_1, diff) && can_do_shadow && HasRole(NPC_BOT_ROLE_DPS) && dist < CalcSpellMaxRange(DEATH_COIL_1) &&
                 GetHealthPCT(me) < 35)
             {
                 //if (me->IsNonMeleeSpellCast(true))
@@ -763,7 +763,7 @@ public:
             }
 
             //Life Tap / Dark Pact for Glyph of Life Tap
-            if (lifeTapCheckTimer <= diff && HasRole(BOT_ROLE_DPS) && Rand() < 75)
+            if (lifeTapCheckTimer <= diff && HasRole(NPC_BOT_ROLE_DPS) && Rand() < 75)
             {
                 lifeTapCheckTimer = 10000;
                 if (me->GetLevel() >= 15 && !me->GetAuraEffect(SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, SPELLFAMILY_WARLOCK, 208, 0))
@@ -783,14 +783,14 @@ public:
                 }
             }
             //Shadowfury
-            if (IsSpellReady(SHADOWFURY_1, diff) && can_do_shadow && HasRole(BOT_ROLE_DPS) && !CCed(mytar, true) && Rand() < 55)
+            if (IsSpellReady(SHADOWFURY_1, diff) && can_do_shadow && HasRole(NPC_BOT_ROLE_DPS) && !CCed(mytar, true) && Rand() < 55)
             {
                 if (FindSplashTarget(CalcSpellMaxRange(SHADOWFURY_1)) &&
                     doCast(mytar, GetSpell(SHADOWFURY_1)))
                     return;
             }
             //Hellfire
-            if (IsSpellReady(HELLFIRE_1, diff) && HasRole(BOT_ROLE_DPS) && !IAmFree() && !JumpingOrFalling() &&
+            if (IsSpellReady(HELLFIRE_1, diff) && HasRole(NPC_BOT_ROLE_DPS) && !IAmFree() && !JumpingOrFalling() &&
                 GetHealthPCT(me) > 90 && Rand() < 25)
             {
                 std::list<Unit*> targets;
@@ -818,7 +818,7 @@ public:
                     return;
             }
             //Rain of Fire
-            if (IsSpellReady(RAIN_OF_FIRE_1, diff) && HasRole(BOT_ROLE_DPS) && !JumpingOrFalling() && Rand() < 45 &&
+            if (IsSpellReady(RAIN_OF_FIRE_1, diff) && HasRole(NPC_BOT_ROLE_DPS) && !JumpingOrFalling() && Rand() < 45 &&
                 (GetSpec() != BOT_SPEC_WARLOCK_AFFLICTION || !GetSpell(SEED_OF_CORRUPTION_1)))
             {
                 if (Unit* raintarget = FindAOETarget(CalcSpellMaxRange(RAIN_OF_FIRE_1)))
@@ -828,7 +828,7 @@ public:
                 }
             }
             //Searing Pain (PvP)
-            if (longCasted && IsSpellReady(SEARING_PAIN_1, diff) && can_do_fire && HasRole(BOT_ROLE_DPS) &&
+            if (longCasted && IsSpellReady(SEARING_PAIN_1, diff) && can_do_fire && HasRole(NPC_BOT_ROLE_DPS) &&
                 GetSpec() != BOT_SPEC_WARLOCK_AFFLICTION &&
                 mytar->GetTypeId() == TYPEID_PLAYER && Rand() < 35 && dist < CalcSpellMaxRange(SEARING_PAIN_1))
             {
@@ -836,7 +836,7 @@ public:
                     return;
             }
             //Shadowflame
-            if (longCasted && IsSpellReady(SHADOWFLAME_1, diff) && can_do_shadow && HasRole(BOT_ROLE_DPS) && Rand() < 65)
+            if (longCasted && IsSpellReady(SHADOWFLAME_1, diff) && can_do_shadow && HasRole(NPC_BOT_ROLE_DPS) && Rand() < 65)
             {
                 std::list<Unit*> targets;
                 GetNearbyTargetsInConeList(targets, 8); //radius 10 yd
@@ -858,7 +858,7 @@ public:
                         if (doCast(mytar, GetSpell(CURSE_OF_THE_ELEMENTS_1)))
                             return;
                     }
-                    if (!(curses & CURSE_MASK_MY_AGONY) && GetSpell(CURSE_OF_AGONY_1) && HasRole(BOT_ROLE_DPS) &&
+                    if (!(curses & CURSE_MASK_MY_AGONY) && GetSpell(CURSE_OF_AGONY_1) && HasRole(NPC_BOT_ROLE_DPS) &&
                         mytar->GetHealth() > me->GetMaxHealth() / 4 * (1 + mytar->getAttackers().size()))
                     {
                         if (doCast(mytar, GetSpell(CURSE_OF_AGONY_1)))
@@ -885,7 +885,7 @@ public:
                 }
             }
 
-            if (!HasRole(BOT_ROLE_DPS))
+            if (!HasRole(NPC_BOT_ROLE_DPS))
                 return;
 
             //Chaos Bolt

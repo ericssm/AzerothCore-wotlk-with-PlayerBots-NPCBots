@@ -592,7 +592,7 @@ public:
 
             //FIRE
             //FIREsituative1 : magma
-            if (TotemTimer[T_FIRE] <= diff && me->IsInCombat() && !IAmFree() && HasRole(BOT_ROLE_DPS) &&
+            if (TotemTimer[T_FIRE] <= diff && me->IsInCombat() && !IAmFree() && HasRole(NPC_BOT_ROLE_DPS) &&
                 GetSpell(MAGMA_TOTEM_1)/* && _totems[T_FIRE].second.type != BOT_TOTEM_MAGMA*/)
             {
                 //magma no cd 8 yd, 2 sec delay before first tick
@@ -794,7 +794,7 @@ public:
                 {
                     bool cast = false;
 
-                    if (!IsMelee() && HasRole(BOT_ROLE_DPS|BOT_ROLE_HEAL) && !IsMeleeClass(master->GetClass()))
+                    if (!IsMelee() && HasRole(NPC_BOT_ROLE_DPS|NPC_BOT_ROLE_HEAL) && !IsMeleeClass(master->GetClass()))
                         cast = true;
                     else if (!GetSpell(WINDFURY_TOTEM_1)) //disabled
                         cast = true;
@@ -818,7 +818,7 @@ public:
                 {
                     bool cast = false;
 
-                    if ((IsMelee() && HasRole(BOT_ROLE_DPS)) || (!IAmFree() && IsMeleeClass(master->GetClass())))
+                    if ((IsMelee() && HasRole(NPC_BOT_ROLE_DPS)) || (!IAmFree() && IsMeleeClass(master->GetClass())))
                         cast = true;
                     else if (!GetSpell(WRATH_OF_AIR_TOTEM_1)) //disabled or not available yet
                         cast = true;
@@ -859,7 +859,7 @@ public:
             if (GetHealthPCT(me) < (50 + 20 * me->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE) + 5 * uint32(me->getAttackers().size())))
                 cast = true;
             //case 2: low mana (melee)
-            else if (me->GetVictim() && !CCed(me, true) && HasRole(BOT_ROLE_DPS) && IsMelee() && GetManaPCT(me) < 40)
+            else if (me->GetVictim() && !CCed(me, true) && HasRole(NPC_BOT_ROLE_DPS) && IsMelee() && GetManaPCT(me) < 40)
                 cast = true;
 
             if (cast && doCast(me, GetSpell(SHAMANISTIC_RAGE_1)))
@@ -868,7 +868,7 @@ public:
 
         void CheckThunderStorm(uint32 diff)
         {
-            if (!IsSpellReady(THUNDERSTORM_1, diff) || !me->IsAlive() || !HasRole(BOT_ROLE_DPS) || IsCasting() || Rand() > 25)
+            if (!IsSpellReady(THUNDERSTORM_1, diff) || !me->IsAlive() || !HasRole(NPC_BOT_ROLE_DPS) || IsCasting() || Rand() > 25)
                 return;
 
             //case 1: low mana
@@ -905,7 +905,7 @@ public:
 
         void Counter(uint32 diff)
         {
-            if (!IsSpellReady(WIND_SHEAR_1, diff, false) || (HasRole(BOT_ROLE_HEAL) && IsCasting()) || Rand() > 40)
+            if (!IsSpellReady(WIND_SHEAR_1, diff, false) || (HasRole(NPC_BOT_ROLE_HEAL) && IsCasting()) || Rand() > 40)
                 return;
 
             if (Unit* target = FindCastingTarget(CalcSpellMaxRange(WIND_SHEAR_1), 0, WIND_SHEAR_1))
@@ -925,9 +925,9 @@ public:
 
             //Aura const* shield = nullptr;
             uint32 SHIELD =
-                HasRole(BOT_ROLE_TANK)   ? GetSpell(EARTH_SHIELD_1) :
-                HasRole(BOT_ROLE_HEAL)   ? GetSpell(WATER_SHIELD_1) :
-                HasRole(BOT_ROLE_DPS)    ? GetSpell(LIGHTNING_SHIELD_1) :
+                HasRole(NPC_BOT_ROLE_TANK)   ? GetSpell(EARTH_SHIELD_1) :
+                HasRole(NPC_BOT_ROLE_HEAL)   ? GetSpell(WATER_SHIELD_1) :
+                HasRole(NPC_BOT_ROLE_DPS)    ? GetSpell(LIGHTNING_SHIELD_1) :
                 0;
             SHIELD =
                 SHIELD ? SHIELD :
@@ -935,7 +935,7 @@ public:
                 GetSpell(EARTH_SHIELD_1) ? GetSpell(EARTH_SHIELD_1) :
                 0;
 
-            if (!SHIELD && HasRole(BOT_ROLE_DPS))
+            if (!SHIELD && HasRole(NPC_BOT_ROLE_DPS))
                 SHIELD = GetSpell(LIGHTNING_SHIELD_1);
 
             if (!SHIELD)
@@ -978,7 +978,7 @@ public:
             {
                 if (GetManaPCT(me) < 33)
                     DrinkPotion(true);
-                else if (GetHealthPCT(me) < 50 && (!HasRole(BOT_ROLE_HEAL) || me->HasAuraType(SPELL_AURA_MOD_SILENCE)))
+                else if (GetHealthPCT(me) < 50 && (!HasRole(NPC_BOT_ROLE_HEAL) || me->HasAuraType(SPELL_AURA_MOD_SILENCE)))
                     DrinkPotion(false);
             }
 
@@ -1038,20 +1038,20 @@ public:
             float dist = me->GetDistance(mytar);
 
             //spell reflections
-            if (IsSpellReady(EARTH_SHOCK_1, diff) && can_do_nature && HasRole(BOT_ROLE_DPS) && dist < 25 && CanRemoveReflectSpells(mytar, EARTH_SHOCK_1) &&
+            if (IsSpellReady(EARTH_SHOCK_1, diff) && can_do_nature && HasRole(NPC_BOT_ROLE_DPS) && dist < 25 && CanRemoveReflectSpells(mytar, EARTH_SHOCK_1) &&
                 doCast(mytar, EARTH_SHOCK_1))
                 return;
 
             MoveBehind(mytar);
 
             //STORMSTRIKE
-            if (IsSpellReady(STORMSTRIKE_1, diff) && can_do_nature && HasRole(BOT_ROLE_DPS) && IsMelee() && dist <= 5 && Rand() < 120)
+            if (IsSpellReady(STORMSTRIKE_1, diff) && can_do_nature && HasRole(NPC_BOT_ROLE_DPS) && IsMelee() && dist <= 5 && Rand() < 120)
             {
                 if (doCast(mytar, GetSpell(STORMSTRIKE_1)))
                     return;
             }
             //SHOCKS
-            if (GetSpellCooldown(EARTH_SHOCK_1) <= diff && HasRole(BOT_ROLE_DPS) &&
+            if (GetSpellCooldown(EARTH_SHOCK_1) <= diff && HasRole(NPC_BOT_ROLE_DPS) &&
                 (GetSpell(FLAME_SHOCK_1) || GetSpell(EARTH_SHOCK_1) || GetSpell(FROST_SHOCK_1)) &&
                 dist < 25 && Rand() < 70)
             {
@@ -1077,7 +1077,7 @@ public:
             }
 
             //Feral Spirit
-            if (IsSpellReady(FERAL_SPIRIT_1, diff) && HasRole(BOT_ROLE_DPS) && Rand() < 40 && dist < 5)
+            if (IsSpellReady(FERAL_SPIRIT_1, diff) && HasRole(NPC_BOT_ROLE_DPS) && Rand() < 40 && dist < 5)
             {
                 SummonBotPet(mytar);
                 SetSpellCooldown(FERAL_SPIRIT_1, 180000);
@@ -1085,7 +1085,7 @@ public:
             }
 
             //LAVA BURST
-            if (IsSpellReady(LAVA_BURST_1, diff) && can_do_fire && HasRole(BOT_ROLE_DPS) &&
+            if (IsSpellReady(LAVA_BURST_1, diff) && can_do_fire && HasRole(NPC_BOT_ROLE_DPS) &&
                 (GetSpec() == BOT_SPEC_SHAMAN_ELEMENTAL || (IsRanged() && (!can_do_nature || !GetSpell(LIGHTNING_BOLT_1)))) &&
                 dist < CalcSpellMaxRange(LAVA_BURST_1) && Rand() < 60 &&
                 (me->getAttackers().empty() || dist > 10))
@@ -1095,18 +1095,18 @@ public:
             }
 
             if (((MaelstromCount < 5 || MaelstromTimer == 0 || me->GetLevel() < 55) && IsMelee()) ||
-                (HasRole(BOT_ROLE_HEAL) && GetManaPCT(me) < 25))
+                (HasRole(NPC_BOT_ROLE_HEAL) && GetManaPCT(me) < 25))
                 return;
 
             //CHAIN LIGHTNING
-            if (IsSpellReady(CHAIN_LIGHTNING_1, diff) && can_do_nature && HasRole(BOT_ROLE_DPS) && dist < CalcSpellMaxRange(CHAIN_LIGHTNING_1) && Rand() < 80)
+            if (IsSpellReady(CHAIN_LIGHTNING_1, diff) && can_do_nature && HasRole(NPC_BOT_ROLE_DPS) && dist < CalcSpellMaxRange(CHAIN_LIGHTNING_1) && Rand() < 80)
             {
                 Unit* u = FindSplashTarget(35.f, mytar, 5.f);
                 if (u && doCast(mytar, GetSpell(CHAIN_LIGHTNING_1)))
                     return;
             }
             //LIGHTNING BOLT
-            if (IsSpellReady(LIGHTNING_BOLT_1, diff) && can_do_nature && HasRole(BOT_ROLE_DPS) && dist < CalcSpellMaxRange(LIGHTNING_BOLT_1))
+            if (IsSpellReady(LIGHTNING_BOLT_1, diff) && can_do_nature && HasRole(NPC_BOT_ROLE_DPS) && dist < CalcSpellMaxRange(LIGHTNING_BOLT_1))
             {
                 uint32 LIGHTNING_BOLT = GetSpell(LIGHTNING_BOLT_1);
                 if (doCast(mytar, LIGHTNING_BOLT))
@@ -1203,10 +1203,10 @@ public:
             //MH 1+ Rockbiter, 10+ Flametongue, 30+ Windfury/Earthliving
             //OH 1+ Rockbiter, 10+ Flametongue, 20+ Frostbrand, 30+ Windfury/Earthliving
             if (needChooseMHEnchant && mhReady)
-                mhEnchant = HasRole(BOT_ROLE_HEAL) ? (me->GetLevel() >= 30 ? EARTHLIVING_WEAPON_1 :
+                mhEnchant = HasRole(NPC_BOT_ROLE_HEAL) ? (me->GetLevel() >= 30 ? EARTHLIVING_WEAPON_1 :
                     me->GetLevel() >= 10 ? FLAMETONGUE_WEAPON_1 :
                     0/*ROCKBITER_WEAPON_1*/) :
-                    HasRole(BOT_ROLE_RANGED) ? (me->GetLevel() >= 10 ? FLAMETONGUE_WEAPON_1 :
+                    HasRole(NPC_BOT_ROLE_RANGED) ? (me->GetLevel() >= 10 ? FLAMETONGUE_WEAPON_1 :
                     0/*ROCKBITER_WEAPON_1*/) :
                     (me->GetLevel() >= 30 ? WINDFURY_WEAPON_1 :
                     //me->GetLevel() >= 20 ? FROSTBRAND_WEAPON_1 :
@@ -1214,10 +1214,10 @@ public:
                     0/*ROCKBITER_WEAPON_1*/);
 
             if (needChooseOHEnchant && ohReady) //basically only lvl 40+
-                ohEnchant = HasRole(BOT_ROLE_HEAL) ? (me->GetLevel() >= 30 ? EARTHLIVING_WEAPON_1 :
+                ohEnchant = HasRole(NPC_BOT_ROLE_HEAL) ? (me->GetLevel() >= 30 ? EARTHLIVING_WEAPON_1 :
                     me->GetLevel() >= 10 ? FLAMETONGUE_WEAPON_1 :
                     0/*ROCKBITER_WEAPON_1*/) :
-                    HasRole(BOT_ROLE_RANGED) ? (me->GetLevel() >= 10 ? FLAMETONGUE_WEAPON_1 :
+                    HasRole(NPC_BOT_ROLE_RANGED) ? (me->GetLevel() >= 10 ? FLAMETONGUE_WEAPON_1 :
                     0/*ROCKBITER_WEAPON_1*/) :
                     (me->GetLevel() >= 30 ? WINDFURY_WEAPON_1 :
                     me->GetLevel() >= 20 ? FROSTBRAND_WEAPON_1 :
@@ -1347,7 +1347,7 @@ public:
 
         void CheckFireNova(uint32 diff)
         {
-            if (!HasRole(BOT_ROLE_DPS) || _totems[T_FIRE].second._type == BOT_TOTEM_NONE ||
+            if (!HasRole(NPC_BOT_ROLE_DPS) || _totems[T_FIRE].second._type == BOT_TOTEM_NONE ||
                 !IsSpellReady(FIRE_NOVA_1, diff) || IsCasting() || Rand() > 25)
                 return;
 

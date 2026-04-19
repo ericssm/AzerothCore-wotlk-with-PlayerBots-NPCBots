@@ -160,7 +160,7 @@ public:
 
         void Counter(uint32 diff)
         {
-            if (!IsSpellReady(FORKED_LIGHTNING_1, diff, false) || !HasRole(BOT_ROLE_DPS) || Rand() > 55)
+            if (!IsSpellReady(FORKED_LIGHTNING_1, diff, false) || !HasRole(NPC_BOT_ROLE_DPS) || Rand() > 55)
                 return;
 
             if (Unit* target = FindCastingTarget(CalcSpellMaxRange(FORKED_LIGHTNING_1) - 5.f, 0, FORKED_LIGHTNING_1))
@@ -268,7 +268,7 @@ public:
             //if (shot && shot->GetSpellInfo()->Id == AUTO_SHOT_1 && (shot->m_targets.GetUnitTarget() != mytar || !inpostion))
             //    me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
 
-            if (!HasRole(BOT_ROLE_DPS))
+            if (!HasRole(NPC_BOT_ROLE_DPS))
                 return;
 
             //RANGED SECTION

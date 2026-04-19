@@ -400,7 +400,7 @@ public:
                         {
                             Creature* bot = it->second;
                             if (IsMeleeClass(bot->GetBotClass()) && bot->GetVictim() &&
-                                bot->GetBotAI()->HasRole(BOT_ROLE_DPS) && !bot->GetBotAI()->HasRole(BOT_ROLE_RANGED) &&
+                                bot->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS) && !bot->GetBotAI()->HasRole(NPC_BOT_ROLE_RANGED) &&
                                 GetHealthPCT(bot) > 60 && me->GetDistance(bot) < 30 && !CCed(bot, true) &&
                                 !bot->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, SPELLFAMILY_DEATHKNIGHT, 0x20000000, 0x0, 0x0))
                             {
@@ -415,7 +415,7 @@ public:
                 }
             }
 
-            if (!target && me->GetVictim() && HasRole(BOT_ROLE_DPS) && !HasRole(BOT_ROLE_RANGED) &&
+            if (!target && me->GetVictim() && HasRole(NPC_BOT_ROLE_DPS) && !HasRole(NPC_BOT_ROLE_RANGED) &&
                 GetHealthPCT(me) > 60 && me->getAttackers().empty() && !CCed(me, true) &&
                 !me->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, SPELLFAMILY_DEATHKNIGHT, 0x20000000, 0x0, 0x0))
                 target = me;
@@ -681,7 +681,7 @@ public:
             }
             //LICHBORNE + DEATH COIL
             if ((me->GetCreatureType() == CREATURE_TYPE_UNDEAD || IsSpellReady(LICHBORNE_1, diff, false)) &&
-                (IAmFree() || IsTank() || master->GetBotMgr()->GetNpcBotsCountByRole(BOT_ROLE_HEAL) == 0) &&
+                (IAmFree() || IsTank() || master->GetBotMgr()->GetNpcBotsCountByRole(NPC_BOT_ROLE_HEAL) == 0) &&
                 IsSpellReady(DEATH_COIL_1, diff) && Rand() < 45 && GetHealthPCT(me) < 80 && runicpower >= rcost(DEATH_COIL_1))
             {
                 if (me->GetCreatureType() == CREATURE_TYPE_UNDEAD || doCast(me, GetSpell(LICHBORNE_1)))
@@ -737,7 +737,7 @@ public:
             }
             //DARK COMMAND 2 (distant)
             if (IsSpellReady(DARK_COMMAND_1, diff, false) && !IAmFree() && u == me && Rand() < 30 && IsTank() &&
-                (IsOffTank() || master->GetBotMgr()->GetNpcBotsCountByRole(BOT_ROLE_TANK_OFF) == 0) &&
+                (IsOffTank() || master->GetBotMgr()->GetNpcBotsCountByRole(NPC_BOT_ROLE_TANK_OFF) == 0) &&
                 !(me->GetLevel() >= 40 && mytar->GetTypeId() == TYPEID_UNIT &&
                 (mytar->ToCreature()->IsDungeonBoss() || mytar->ToCreature()->isWorldBoss())))
             {
@@ -771,7 +771,7 @@ public:
                 {}
             }
 
-            if (!HasRole(BOT_ROLE_DPS))
+            if (!HasRole(NPC_BOT_ROLE_DPS))
                 return;
 
             //CHAINS OF ICE

@@ -100,7 +100,7 @@ public:
                 }
 
                 if (IsSpellReady(PHASE_SHIFT_1, diff, false) && !me->GetVictim() &&
-                    (!petOwner->GetBotAI()->HasRole(BOT_ROLE_DPS) || !me->IsInCombat()) &&
+                    (!petOwner->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS) || !me->IsInCombat()) &&
                     !me->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
                 {
                     me->CastSpell(me, GetSpell(PHASE_SHIFT_1), false);
@@ -215,7 +215,7 @@ public:
 
             float dist = me->GetDistance(opponent);
             Unit const* u = opponent->GetVictim();
-            bool canDPS = petOwner->GetBotAI()->HasRole(BOT_ROLE_DPS);
+            bool canDPS = petOwner->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS);
 
             if (myType == BOT_PET_IMP)
             {

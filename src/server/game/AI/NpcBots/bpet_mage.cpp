@@ -52,7 +52,7 @@ public:
 
         void DoPetActions(uint32 diff)
         {
-            if (!petOwner->GetBotAI()->HasRole(BOT_ROLE_DPS))
+            if (!petOwner->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS))
                 return;
 
             if (!IsSpellReady(FREEZE_1, diff, false) || Rand() > 40 || !IsCasting(petOwner))
@@ -103,7 +103,7 @@ public:
         {
             StartAttack(opponent, IsPetMelee());
 
-            if (!petOwner->GetBotAI()->HasRole(BOT_ROLE_DPS))
+            if (!petOwner->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS))
                 return;
 
             if (IsSpellReady(WATERBOLT_1, diff) && me->GetDistance(opponent) < 45)

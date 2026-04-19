@@ -204,7 +204,7 @@ public:
             for (Unit const* member : BotMgr::GetAllGroupMembers(gr))
             {
                 if (me->GetMap() != member->FindMap() || !member->IsAlive() || !member->IsInCombat() ||
-                    me->GetDistance(member) > 40 || GetManaPCT(member) > (HasRole(BOT_ROLE_HEAL) ? 10 : 50) ||
+                    me->GetDistance(member) > 40 || GetManaPCT(member) > (HasRole(NPC_BOT_ROLE_HEAL) ? 10 : 50) ||
                     (member->IsNPCBot() && member->ToCreature()->IsTempBot()) ||
                     member->GetAuraEffect(SPELL_AURA_MOD_INCREASE_ENERGY, SPELLFAMILY_PRIEST, 0x0, 0x0, 0x10))
                     continue;
@@ -218,7 +218,7 @@ public:
 
         bool MassGroupHeal(uint32 diff)
         {
-            if (!HasRole(BOT_ROLE_HEAL) || IsCasting() || Rand() > (65 + 40 * me->GetMap()->IsRaid()))
+            if (!HasRole(NPC_BOT_ROLE_HEAL) || IsCasting() || Rand() > (65 + 40 * me->GetMap()->IsRaid()))
                 return false;
 
             Group const* gr = !IAmFree() ? master->GetGroup() : GetGroup();
@@ -414,7 +414,7 @@ public:
             {
                 if (GetManaPCT(me) < 33)
                     DrinkPotion(true);
-                else if (GetHealthPCT(me) < 50 && (!HasRole(BOT_ROLE_HEAL) || me->HasAuraType(SPELL_AURA_MOD_SILENCE)))
+                else if (GetHealthPCT(me) < 50 && (!HasRole(NPC_BOT_ROLE_HEAL) || me->HasAuraType(SPELL_AURA_MOD_SILENCE)))
                     DrinkPotion(false);
             }
 
@@ -461,7 +461,7 @@ public:
             if (IsCasting())
                 return;
 
-            if (IsSpellReady(SHADOWFORM_1, diff) && HasRole(BOT_ROLE_DPS) && !HasRole(BOT_ROLE_HEAL))
+            if (IsSpellReady(SHADOWFORM_1, diff) && HasRole(NPC_BOT_ROLE_DPS) && !HasRole(NPC_BOT_ROLE_HEAL))
             {
                 if (doCast(me, SHADOWFORM_1))
                     return;
@@ -517,7 +517,7 @@ public:
                 doCast(mytar, SW_PAIN_1)) //yes, using rank 1
                 return;
 
-            if (!HasRole(BOT_ROLE_DPS))
+            if (!HasRole(NPC_BOT_ROLE_DPS))
                 return;
 
             if (IsSpellReady(SHADOWFIEND_1, diff) && GetManaPCT(me) < 50)
@@ -526,7 +526,7 @@ public:
                 SetSpellCooldown(SHADOWFIEND_1, 180000); // (5 - 2) min with Veiled Shadows
             }
 
-            if (!HasRole(BOT_ROLE_HEAL) || GetManaPCT(me) > 35 || botPet)
+            if (!HasRole(NPC_BOT_ROLE_HEAL) || GetManaPCT(me) > 35 || botPet)
             {
                 if (IsSpellReady(SW_DEATH_1, diff) && can_do_shadow && Rand() < 90 && GetHealthPCT(me) > 50 &&
                     (me->GetMap()->IsRaid() || GetHealthPCT(mytar) < 15 || mytar->GetHealth() < me->GetMaxHealth()/8) &&
@@ -564,11 +564,11 @@ public:
                             return;
                 }
                 if (IsSpellReady(HOLY_FIRE_1, diff) && can_do_holy &&
-                    (HasRole(BOT_ROLE_HEAL) || me->GetShapeshiftForm() != FORM_SHADOW) &&
+                    (HasRole(NPC_BOT_ROLE_HEAL) || me->GetShapeshiftForm() != FORM_SHADOW) &&
                     doCast(mytar, GetSpell(HOLY_FIRE_1)))
                     return;
                 if (IsSpellReady(MIND_FLAY_1, diff) && can_do_shadow &&
-                    (!HasRole(BOT_ROLE_HEAL) || mytar->GetHealth() < me->GetMaxHealth()/2) &&
+                    (!HasRole(NPC_BOT_ROLE_HEAL) || mytar->GetHealth() < me->GetMaxHealth()/2) &&
                     doCast(mytar, GetSpell(MIND_FLAY_1)))
                     return;
                 if (IsSpellReady(SMITE_1, diff) && can_do_holy && me->GetLevel() < 20 &&//MF is lvl 20, MB is lvl 10
@@ -712,7 +712,7 @@ public:
                     !me->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_RESISTANCE, SPELLFAMILY_PRIEST, 0x2) &&
                     doCast(me, GetSpell(INNER_FIRE_1)))
                     return true;
-                if (HasRole(BOT_ROLE_DPS) && GetSpell(VAMPIRIC_EMBRACE_1) &&
+                if (HasRole(NPC_BOT_ROLE_DPS) && GetSpell(VAMPIRIC_EMBRACE_1) &&
                     !me->HasAuraTypeWithFamilyFlags(SPELL_AURA_DUMMY, SPELLFAMILY_PRIEST, 0x4) &&
                     doCast(me, GetSpell(VAMPIRIC_EMBRACE_1)))
                     return true;
@@ -780,7 +780,7 @@ public:
         void Counter(uint32 diff)
         {
             if (ShackcheckTimer > diff || !IsSpellReady(SHACKLE_UNDEAD_1, diff) || Shackcheck || Rand() > 65 ||
-                (HasRole(BOT_ROLE_HEAL) && (IsCasting() || GetManaPCT(me) < 20)))
+                (HasRole(NPC_BOT_ROLE_HEAL) && (IsCasting() || GetManaPCT(me) < 20)))
                 return;
 
             //always glyphed so <= 0.5 sec cast time
@@ -794,7 +794,7 @@ public:
 
         void CheckDispel(uint32 diff)
         {
-            if (HasRole(BOT_ROLE_HEAL) && !HasRole(BOT_ROLE_DPS))
+            if (HasRole(NPC_BOT_ROLE_HEAL) && !HasRole(NPC_BOT_ROLE_DPS))
                 return;
 
             if (DispelcheckTimer > diff || IsCasting() || Rand() > 35)
@@ -818,7 +818,7 @@ public:
 
         void CheckMending(uint32 diff)
         {
-            if (Mend_Timer > diff || !IsSpellReady(PRAYER_OF_MENDING_1, diff) || !HasRole(BOT_ROLE_HEAL) || IsCasting() || Rand() > 75)
+            if (Mend_Timer > diff || !IsSpellReady(PRAYER_OF_MENDING_1, diff) || !HasRole(NPC_BOT_ROLE_HEAL) || IsCasting() || Rand() > 75)
                 return;
 
             Mend_Timer = urand(1000, 3000);
@@ -906,7 +906,7 @@ public:
                 for (BotMap::const_iterator itr = map->begin(); itr != map->end(); ++itr)
                 {
                     u = itr->second;
-                    if (u->IsAlive() && u->IsInWorld() && u->ToCreature()->GetBotAI()->HasRole(BOT_ROLE_HEAL) &&
+                    if (u->IsAlive() && u->IsInWorld() && u->ToCreature()->GetBotAI()->HasRole(NPC_BOT_ROLE_HEAL) &&
                         u->ToCreature()->GetBotClass() < BOT_CLASS_EX_START &&
                         GetManaPCT(u) < 70 && me->IsWithinDistInMap(u, 30) &&
                         !u->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK, SPELLFAMILY_PRIEST, 0x80000000) &&
@@ -945,7 +945,7 @@ public:
                 for (BotMap::const_iterator bitr = map->begin(); bitr != map->end(); ++bitr)
                 {
                     u = bitr->second;
-                    if (u->IsAlive() && u->IsInWorld() && u->ToCreature()->GetBotAI()->HasRole(BOT_ROLE_HEAL) &&
+                    if (u->IsAlive() && u->IsInWorld() && u->ToCreature()->GetBotAI()->HasRole(NPC_BOT_ROLE_HEAL) &&
                         !IsHeroExClass(u->ToCreature()->GetBotClass()) &&
                         GetManaPCT(u) < 70 && me->IsWithinDistInMap(u, 30) &&
                         !u->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK, SPELLFAMILY_PRIEST, 0x80000000) &&
@@ -1065,7 +1065,7 @@ public:
         {
             if (me->GetVehicle())
                 return;
-            if (!IsSpellReady(DISPERSION_1, diff) || !me->IsInCombat() || HasRole(BOT_ROLE_HEAL) || IsCasting() || Rand() > 60)
+            if (!IsSpellReady(DISPERSION_1, diff) || !me->IsInCombat() || HasRole(NPC_BOT_ROLE_HEAL) || IsCasting() || Rand() > 60)
                 return;
             if ((me->getAttackers().size() > 3 && !IsSpellReady(FADE_1, diff, false) && GetHealthPCT(me) < 90) ||
                 (GetHealthPCT(me) < 20 && (me->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE) || !me->getAttackers().empty())) ||

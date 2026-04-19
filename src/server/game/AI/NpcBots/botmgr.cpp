@@ -772,7 +772,7 @@ uint8 BotMgr::GetNpcBotSlotByRole(uint32 roles, Creature const* bot) const
     {
         if (roles & itr->second->GetBotRoles())
         {
-            if (!(roles == BOT_ROLE_DPS && (itr->second->GetBotRoles() & BOT_ROLE_TANK)))
+            if (!(roles == NPC_BOT_ROLE_DPS && (itr->second->GetBotRoles() & NPC_BOT_ROLE_TANK)))
                 ++count;
             if (itr->second == bot)
                 return count;
@@ -2002,7 +2002,7 @@ BotAddResult BotMgr::AddBot(Creature* bot)
     if (!bot->GetBotAI()->IsTempBot())
     {
         bot->GetBotAI()->SetBotCommandState(BOT_COMMAND_FOLLOW, true);
-        if (bot->GetBotAI()->HasRole(BOT_ROLE_PARTY))
+        if (bot->GetBotAI()->HasRole(NPC_BOT_ROLE_PARTY))
             AddBotToGroup(bot);
 
         uint32 newOwner = _owner->GetGUID().GetCounter();
@@ -2043,8 +2043,8 @@ bool BotMgr::AddBotToGroup(Creature* bot)
 
     if (gr->AddMember(bot))
     {
-        if (!bot->GetBotAI()->HasRole(BOT_ROLE_PARTY))
-            bot->GetBotAI()->ToggleRole(BOT_ROLE_PARTY, true);
+        if (!bot->GetBotAI()->HasRole(NPC_BOT_ROLE_PARTY))
+            bot->GetBotAI()->ToggleRole(NPC_BOT_ROLE_PARTY, true);
 
         return true;
     }
@@ -2071,8 +2071,8 @@ bool BotMgr::RemoveBotFromGroup(Creature* bot)
 
     RemoveBotFromBGQueue(bot);
 
-    if (bot->GetBotAI()->HasRole(BOT_ROLE_PARTY) && !_owner->GetSession()->PlayerLogout())
-        bot->GetBotAI()->ToggleRole(BOT_ROLE_PARTY, true);
+    if (bot->GetBotAI()->HasRole(NPC_BOT_ROLE_PARTY) && !_owner->GetSession()->PlayerLogout())
+        bot->GetBotAI()->ToggleRole(NPC_BOT_ROLE_PARTY, true);
 
     //debug
     //if (gr->RemoveMember(bot->GetGUID()))
@@ -2864,8 +2864,8 @@ void BotMgr::PropagateEngageTimers() const
         if (itr->second->GetBotAI()->IsTank())
             continue;
 
-        bool is_heal = itr->second->GetBotAI()->HasRole(BOT_ROLE_HEAL);
-        bool is_dps= itr->second->GetBotAI()->HasRole(BOT_ROLE_DPS);
+        bool is_heal = itr->second->GetBotAI()->HasRole(NPC_BOT_ROLE_HEAL);
+        bool is_dps= itr->second->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS);
         uint32 delay = (is_heal && is_dps) ? std::max<uint32>(delay_dps, delay_heal) : is_heal ? delay_heal : is_dps ? delay_dps : 0;
 
         itr->second->GetBotAI()->ResetEngageTimer(delay);

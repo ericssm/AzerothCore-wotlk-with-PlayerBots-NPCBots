@@ -532,7 +532,7 @@ public:
             }
             //TAUNT 2 (distant)
             if (IsSpellReady(TAUNT_1, diff, false) && !IAmFree() && u == me && Rand() < 35 && IsTank() &&
-                (IsOffTank() || master->GetBotMgr()->GetNpcBotsCountByRole(BOT_ROLE_TANK_OFF) == 0) &&
+                (IsOffTank() || master->GetBotMgr()->GetNpcBotsCountByRole(NPC_BOT_ROLE_TANK_OFF) == 0) &&
                 !(me->GetLevel() >= 40 && mytar->GetTypeId() == TYPEID_UNIT &&
                 (mytar->ToCreature()->IsDungeonBoss() || mytar->ToCreature()->isWorldBoss())) &&
                 (_inStance(2) || stancetimer <= diff))
@@ -545,7 +545,7 @@ public:
                 }
             }
             //CHARGE (warbringer)
-            if (IsSpellReady(CHARGE_1, diff, false) && !HasRole(BOT_ROLE_RANGED) && Rand() < 70 &&
+            if (IsSpellReady(CHARGE_1, diff, false) && !HasRole(NPC_BOT_ROLE_RANGED) && Rand() < 70 &&
                 !HasBotCommandState(BOT_COMMAND_STAY) &&
                 !(IsTank() && mytar->GetTypeId() == TYPEID_UNIT && mytar->ToCreature()->isWorldBoss()) &&
                 dist > 8 && dist < CalcSpellMaxRange(CHARGE_1) &&
@@ -556,7 +556,7 @@ public:
                     return;
             }
             //INTERCEPT (warbringer)
-            if (IsSpellReady(INTERCEPT_1, diff, false) && !HasRole(BOT_ROLE_RANGED) && HasRole(BOT_ROLE_DPS) &&
+            if (IsSpellReady(INTERCEPT_1, diff, false) && !HasRole(NPC_BOT_ROLE_RANGED) && HasRole(NPC_BOT_ROLE_DPS) &&
                 !HasBotCommandState(BOT_COMMAND_STAY) &&
                 !(IsTank() && mytar->GetTypeId() == TYPEID_UNIT && mytar->ToCreature()->isWorldBoss()) &&
                 !me->HasUnitState(UNIT_STATE_CHARGING) &&
@@ -606,7 +606,7 @@ public:
                     return;
             }
             //MOCKING BLOW
-            if (IsSpellReady(MOCKING_BLOW_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && Rand() < 70 && u && u != me &&
+            if (IsSpellReady(MOCKING_BLOW_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && Rand() < 70 && u && u != me &&
                 !IsTank(u) && dist < 5 && rage >= rcost(MOCKING_BLOW_1) &&
                 !CCed(mytar) && (!IsTankingClass(u->GetClass()) || IsTank()) && IsInBotParty(u) &&
                 (_inStance(4) || (stancetimer <= diff && stanceChange(diff, 4))))
@@ -615,7 +615,7 @@ public:
                     return;
             }
             //SHIELD SLAM
-            if (IsSpellReady(SHIELD_SLAM_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && CanBlock() &&
+            if (IsSpellReady(SHIELD_SLAM_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && CanBlock() &&
                 (_inStance(4) || stancetimer <= diff) && dist <= 5 && rage >= rcost(SHIELD_SLAM_1) &&
                 Rand() < (75 + 200*(me->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_WARRIOR, 2780, 0) != nullptr)
                 /*me->HasAura(SWORD_AND_BOARD_BUFF)*/))
@@ -643,7 +643,7 @@ public:
                     return;
             }
             //SHOCKWAVE - frontal cone
-            if (IsSpellReady(SHOCKWAVE_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && dist < 8.f && !CCed(mytar) &&
+            if (IsSpellReady(SHOCKWAVE_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && dist < 8.f && !CCed(mytar) &&
                 rage >= rcost(SHOCKWAVE_1) && Rand() < (70 + 70 * mytar->IsNonMeleeSpellCast(false)) &&
                 me->HasInArc(float(M_PI)/2, mytar) && mytar->IsWithinLOSInMap(me, VMAP::ModelIgnoreFlags::M2, LINEOFSIGHT_ALL_CHECKS))
             {
@@ -651,7 +651,7 @@ public:
                     return;
             }
             //HEROIC THROW
-            if (IsSpellReady(HEROIC_THROW_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && dist < 30 &&
+            if (IsSpellReady(HEROIC_THROW_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && dist < 30 &&
                 (mytar->GetTypeId() == TYPEID_UNIT || dist > 6) &&
                 Rand() < (20 - 15 * CanBlock() + 90 * mytar->IsNonMeleeSpellCast(false,false,true)))
             {
@@ -659,7 +659,7 @@ public:
                     return;
             }
             //THUNDER CLAP
-            if (IsSpellReady(THUNDER_CLAP_1, diff) && HasRole(BOT_ROLE_DPS) && !isFury && Rand() < 40 &&
+            if (IsSpellReady(THUNDER_CLAP_1, diff) && HasRole(NPC_BOT_ROLE_DPS) && !isFury && Rand() < 40 &&
                 (_inStance(4) || stancetimer <= diff) && dist < 7.5f && rage >= rcost(THUNDER_CLAP_1) &&
                 ((IsTank() && b_attackers.size() > 1) ||
                 (mytar->GetHealth() > me->GetMaxHealth() / 2 &&
@@ -673,7 +673,7 @@ public:
                 }
             }
             //REVENGE
-            if (IsSpellReady(REVENGE_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && IsTank() && me->HasReactive(REACTIVE_DEFENSE) &&
+            if (IsSpellReady(REVENGE_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && IsTank() && me->HasReactive(REACTIVE_DEFENSE) &&
                 Rand() < 150 && (_inStance(2) || stancetimer <= diff) && dist < 5 && rage >= rcost(REVENGE_1))
             {
                 if (_inStance(2) || stanceChange(diff, 2))
@@ -683,7 +683,7 @@ public:
                 }
             }
             //CONCUSSION BLOW
-            if (IsSpellReady(CONCUSSION_BLOW_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && !CCed(mytar) &&
+            if (IsSpellReady(CONCUSSION_BLOW_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && !CCed(mytar) &&
                 dist < 5 && rage >= rcost(CONCUSSION_BLOW_1) &&
                 mytar->GetDiminishing(DIMINISHING_STUN) <= DIMINISHING_LEVEL_2 &&
                 Rand() < (30 + 60 * mytar->IsNonMeleeSpellCast(false,false,true)))
@@ -770,7 +770,7 @@ public:
                     return;
             }
             //Retaliation
-            if (IsSpellReady(RETALIATION_1, diff) && HasRole(BOT_ROLE_DPS) && !CanBlock() && Rand() < 40 &&
+            if (IsSpellReady(RETALIATION_1, diff) && HasRole(NPC_BOT_ROLE_DPS) && !CanBlock() && Rand() < 40 &&
                 !me->HasAuraType(SPELL_AURA_MOD_DISARM) && b_attackers.size() > 4 &&
                 (_inStance(1) || stanceChange(diff, 1)))
             {
@@ -778,7 +778,7 @@ public:
                     return;
             }
             //Recklessness
-            if (IsSpellReady(RECKLESSNESS_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && !CanBlock() && !IsTank() && Rand() < 60 &&
+            if (IsSpellReady(RECKLESSNESS_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && !CanBlock() && !IsTank() && Rand() < 60 &&
                 GetHealthPCT(me) > 50 && (_inStance(3) || stancetimer <= diff) && b_attackers.size() < 2 &&
                 (mytar->GetHealth() > me->GetHealth()/2 * (1 + mytar->getAttackers().size()) || mytar->IsControlledByPlayer()) &&
                 !me->GetAuraEffect(SPELL_AURA_MECHANIC_IMMUNITY, SPELLFAMILY_WARRIOR, 0x0, 0x20000, 0x0)
@@ -789,7 +789,7 @@ public:
                     return;
             }
             //DEATHWISH
-            if (IsSpellReady(DEATH_WISH_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && !IsTank() && Rand() < 70 &&
+            if (IsSpellReady(DEATH_WISH_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && !IsTank() && Rand() < 70 &&
                 dist < 15 && rage >= rcost(DEATH_WISH_1) &&
                 mytar->GetHealth() > me->GetHealth()/4 * (1 + mytar->getAttackers().size()) &&
                 !me->GetAuraEffect(SPELL_AURA_MECHANIC_IMMUNITY, SPELLFAMILY_WARRIOR, 0x0, 0x20000, 0x0)
@@ -800,14 +800,14 @@ public:
             }
 
             //VICTORY RUSH
-            if (IsSpellReady(VICTORY_RUSH_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && Rand() < 70 && dist < 5 && _inStance(5) &&
+            if (IsSpellReady(VICTORY_RUSH_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && Rand() < 70 && dist < 5 && _inStance(5) &&
                 me->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_WARRIOR, 0x0, 0x40000, 0x0))
             {
                 if (doCast(mytar, GetSpell(VICTORY_RUSH_1)))
                     return;
             }
             //DEVASTATE - only with shield
-            if (IsSpellReady(DEVASTATE_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && CanBlock() && Rand() < 100 &&
+            if (IsSpellReady(DEVASTATE_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && CanBlock() && Rand() < 100 &&
                 dist < 5 && rage >= rcost(DEVASTATE_1))
             {
                 if (doCast(mytar, GetSpell(DEVASTATE_1)))
@@ -816,7 +816,7 @@ public:
             //SUNDER ARMOR
             if (IsSpellReady(SUNDER_ARMOR_1, diff) && !IAmFree() && can_do_normal && dist < 5 && Rand() < 45 &&
                 (IsTank() ? (mytar->GetHealth() > me->GetMaxHealth()) : (Rand() < 25 && mytar->GetHealth() > me->GetMaxHealth() * 2)) &&
-                (!HasRole(BOT_ROLE_DPS) || !CanBlock() || !GetSpell(DEVASTATE_1)) &&
+                (!HasRole(NPC_BOT_ROLE_DPS) || !CanBlock() || !GetSpell(DEVASTATE_1)) &&
                 (IsTank() || master->GetBotMgr()->HasBotWithSpec(BOT_SPEC_WARRIOR_PROTECTION, false)) && rage >= rcost(SUNDER_ARMOR_1))
             {
                 AuraEffect const* sunder = mytar->GetAuraEffect(SUNDER_ARMOR_DEBUFF, 0);
@@ -825,7 +825,7 @@ public:
                     return;
             }
             //SWEEPING STRIKES //no GCD
-            if (IsSpellReady(SWEEPING_STRIKES_1, diff, false) && HasRole(BOT_ROLE_DPS) && !IsTank() && Rand() < 65 &&
+            if (IsSpellReady(SWEEPING_STRIKES_1, diff, false) && HasRole(NPC_BOT_ROLE_DPS) && !IsTank() && Rand() < 65 &&
                 (_inStance(5) || stancetimer <= diff) && rage >= rcost(SWEEPING_STRIKES_1) &&
                 (b_attackers.size() > 1 || FindSplashTarget(7, mytar)))
             {
@@ -834,7 +834,7 @@ public:
                     getrage();
             }
             //REND
-            if (IsSpellReady(REND_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && Rand() < 80 &&
+            if (IsSpellReady(REND_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && Rand() < 80 &&
                 mytar->GetHealth() > me->GetMaxHealth() / 4 * (1 + mytar->getAttackers().size()) &&
                 (isArms || mytar->GetClass() == CLASS_ROGUE || mytar->GetShapeshiftForm() == FORM_CAT) &&
                 dist < 5 && rage >= rcost(REND_1) && mytar->GetCreatureType() != CREATURE_TYPE_MECHANICAL &&
@@ -847,21 +847,21 @@ public:
                     return;
             }
             //BLOODTHIRST
-            if (IsSpellReady(BLOODTHIRST_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) &&
+            if (IsSpellReady(BLOODTHIRST_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) &&
                 dist < 5 && rage >= rcost(BLOODTHIRST_1))
             {
                 if (doCast(mytar, GetSpell(BLOODTHIRST_1)))
                     return;
             }
             //MORTAL STRIKE
-            if (IsSpellReady(MORTAL_STRIKE_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && !CanBlock() &&
+            if (IsSpellReady(MORTAL_STRIKE_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && !CanBlock() &&
                 dist < 5 && rage >= rcost(MORTAL_STRIKE_1))
             {
                 if (doCast(mytar, GetSpell(MORTAL_STRIKE_1)))
                     return;
             }
             //OVERPOWER
-            if (IsSpellReady(OVERPOWER_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && !IsTank() && (!isFury || rage < 250) &&
+            if (IsSpellReady(OVERPOWER_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && !IsTank() && (!isFury || rage < 250) &&
                 (_inStance(1) || stancetimer <= diff) && dist < 5 && rage >= rcost(OVERPOWER_1) &&
                 (me->HasReactive(REACTIVE_OVERPOWER) ||
                 me->GetAuraEffect(SPELL_AURA_ABILITY_IGNORE_AURASTATE, SPELLFAMILY_WARRIOR, 2961, 0)
@@ -874,7 +874,7 @@ public:
                 }
             }
             //BLADESTORM
-            if (IsSpellReady(BLADESTORM_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && !IsTank() && !CanBlock() &&
+            if (IsSpellReady(BLADESTORM_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && !IsTank() && !CanBlock() &&
                dist < 10 && rage >= rcost(BLADESTORM_1) &&
                (b_attackers.size() > 1 || mytar->GetHealth() > me->GetHealth() / 3 * (1 + mytar->getAttackers().size()) ||
                mytar->IsControlledByPlayer()) &&
@@ -886,7 +886,7 @@ public:
                     return;
             }
             //WHIRLWIND
-            if (IsSpellReady(WHIRLWIND_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && !IsTank() && !CanBlock() && Rand() < 80 &&
+            if (IsSpellReady(WHIRLWIND_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && !IsTank() && !CanBlock() && Rand() < 80 &&
                 (isFury || mytar->IsControlledByPlayer() || me->GetLevel() < 60 || !me->GetMap()->IsDungeon()) &&
                 (_inStance(3) || stancetimer <= diff) && dist < 6.f &&
                 rage >= rcost(WHIRLWIND_1) && (isFury || rage >= 500 || FindSplashTarget(7.f, mytar, 15.f)))
@@ -896,7 +896,7 @@ public:
                     return;
             }
             //EXECUTE
-            if (IsSpellReady(EXECUTE_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && !IsTank() && Rand() < 110 &&
+            if (IsSpellReady(EXECUTE_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && !IsTank() && Rand() < 110 &&
                 (isFury || !me->GetMap()->IsRaid()) &&
                 (mytar->HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT) ||
                 me->GetAuraEffect(SPELL_AURA_ABILITY_IGNORE_AURASTATE, SPELLFAMILY_WARRIOR, 0x0, 0x2000000, 0x0)) &&
@@ -907,7 +907,7 @@ public:
                     return;
             }
             //SLAM only with improved, has SPELL_ATTR2_DO_NOT_RESET_COMBAT_TIMERS
-            if (IsSpellReady(SLAM_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) && !IsTank() && !CanBlock() &&
+            if (IsSpellReady(SLAM_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && !IsTank() && !CanBlock() &&
                 me->GetLevel() >= 40 && dist < 5 && rage >= rcost(SLAM_1) &&
                 ((isArms && !mytar->isMoving() && me->getAttackTimer(BASE_ATTACK) > 500) ||
                 me->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_WARRIOR, 0x0, 0x1000000, 0x0))
@@ -922,14 +922,14 @@ public:
                 return;
 
             //CLEAVE //no GCD
-            if (IsSpellReady(CLEAVE_1, diff, false) && can_do_normal && HasRole(BOT_ROLE_DPS) && Rand() < 70 &&
+            if (IsSpellReady(CLEAVE_1, diff, false) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && Rand() < 70 &&
                 dist < 5 && (!IsTank() || rage >= 500) && rage >= rcost(CLEAVE_1) && FindSplashTarget())
             {
                 if (doCast(mytar, GetSpell(CLEAVE_1)))
                     return;
             }
             //HEROIC STRIKE
-            if (IsSpellReady(HEROIC_STRIKE_1, diff, false) && can_do_normal && HasRole(BOT_ROLE_DPS) && Rand() < 55 && rage >= 350 &&
+            if (IsSpellReady(HEROIC_STRIKE_1, diff, false) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && Rand() < 55 && rage >= 350 &&
                 dist < 5 && (isFury || IsTank() || rage >= 650) && rage >= rcost(HEROIC_STRIKE_1))
             {
                 if (doCast(mytar, GetSpell(HEROIC_STRIKE_1)))
@@ -990,7 +990,7 @@ public:
             bool commandingshout = !hasCS && (!bs || bs->GetBase()->GetCasterGUID() != me->GetGUID()) &&
                 GetSpell(COMMANDING_SHOUT_1);
 
-            if (battleshout && !hasCS && !HasRole(BOT_ROLE_DPS) && GetSpell(COMMANDING_SHOUT_1))
+            if (battleshout && !hasCS && !HasRole(NPC_BOT_ROLE_DPS) && GetSpell(COMMANDING_SHOUT_1))
             {
                 battleshout = false;
                 commandingshout = true;
@@ -1045,7 +1045,7 @@ public:
                             !member->IsAlive() || me->GetDistance(member) > 30 ||
                             (member->IsNPCBot() && member->ToCreature()->IsTempBot()) ||
                             (i < 2 && !(i == 0 ? IsTankingClass(member->GetClass()) : IsTank(member))) ||
-                            (i == 3 && !member->ToCreature()->GetBotAI()->HasRole(BOT_ROLE_DPS)) ||
+                            (i == 3 && !member->ToCreature()->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS)) ||
                             member->HasAura(VIGILANCE) || member->HasAura(DAMAGE_REDUCTION))
                             continue;
                         targets.insert(member);

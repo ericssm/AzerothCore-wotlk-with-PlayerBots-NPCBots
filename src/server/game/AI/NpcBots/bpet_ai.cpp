@@ -1600,7 +1600,7 @@ void bot_pet_ai::CalculateAttackPos(Unit* target, Position& pos) const
         angle = target->GetAbsoluteAngle(me);
     //most ranged classes have some sort of 20yd spell
     if (rangeMode != BOT_ATTACK_RANGE_EXACT)
-        dist = std::min<float>(dist, petOwner->GetBotAI()->HasRole(BOT_ROLE_DPS) ? GetSpellAttackRange(rangeMode == BOT_ATTACK_RANGE_LONG) - 4.f : 30.f);
+        dist = std::min<float>(dist, petOwner->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS) ? GetSpellAttackRange(rangeMode == BOT_ATTACK_RANGE_LONG) - 4.f : 30.f);
 
     float clockwise = (me->GetEntry() % 2) ? 1.f : -1.f;
     float angleDelta = frand(0.0f, float(M_PI)*0.10f) * clockwise;
@@ -1692,7 +1692,7 @@ void bot_pet_ai::CheckAttackState()
     {
         MoveBehind(me->GetVictim());
 
-        if (petOwner->GetBotAI()->HasRole(BOT_ROLE_DPS) &&
+        if (petOwner->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS) &&
             !me->HasAuraType(SPELL_AURA_MOD_STEALTH) && !me->HasAuraType(SPELL_AURA_MOD_INVISIBILITY))
         {
             //if (!CCed(me->GetVictim()) || me->HasAuraType(SPELL_AURA_MOD_TAUNT))
@@ -2182,7 +2182,7 @@ bool bot_pet_ai::CCed(Unit const* target, bool root)
 bool bot_pet_ai::IsTank(Unit const* unit) const
 {
     if (Creature const* bot = unit->ToCreature())
-        return bot->GetBotAI() && bot->GetBotAI()->HasRole(BOT_ROLE_TANK);
+        return bot->GetBotAI() && bot->GetBotAI()->HasRole(NPC_BOT_ROLE_TANK);
     else if (Player const* player = unit->ToPlayer())
     {
         if (Group const* gr = player->GetGroup())
@@ -2202,7 +2202,7 @@ bool bot_pet_ai::IsTank(Unit const* unit) const
 bool bot_pet_ai::IsOffTank(Unit const* unit) const
 {
     if (Creature const* bot = unit->ToCreature())
-        return bot->GetBotAI() && bot->GetBotAI()->HasRole(BOT_ROLE_TANK_OFF);
+        return bot->GetBotAI() && bot->GetBotAI()->HasRole(NPC_BOT_ROLE_TANK_OFF);
     else if (Player const* player = unit->ToPlayer())
     {
         if (Group const* gr = player->GetGroup())

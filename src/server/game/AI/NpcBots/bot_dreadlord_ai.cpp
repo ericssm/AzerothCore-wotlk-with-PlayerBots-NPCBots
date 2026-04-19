@@ -234,7 +234,7 @@ public:
 
             MoveBehind(mytar);
 
-            if (!HasRole(BOT_ROLE_DPS))
+            if (!HasRole(NPC_BOT_ROLE_DPS))
                 return;
 
             if (IsSpellReady(CARRION_SWARM_1, diff) && me->GetPower(POWER_MANA) >= CARRION_COST && Rand() < 80)

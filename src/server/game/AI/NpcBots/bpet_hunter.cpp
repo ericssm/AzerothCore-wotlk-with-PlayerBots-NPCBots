@@ -240,7 +240,7 @@ public:
             Unit const* u = opponent->GetVictim();
             float dist = me->GetDistance(opponent);
             uint32 focus = me->GetPower(POWER_FOCUS);
-            bool canDPS = petOwner->GetBotAI()->HasRole(BOT_ROLE_DPS);
+            bool canDPS = petOwner->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS);
 
             //improved + Longevity applied to cds
 

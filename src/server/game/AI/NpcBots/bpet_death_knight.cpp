@@ -81,7 +81,7 @@ public:
 
             float dist = me->GetDistance(opponent);
             //Unit const* u = opponent->GetVictim();
-            bool canDPS = petOwner->GetBotAI()->HasRole(BOT_ROLE_DPS);
+            bool canDPS = petOwner->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS);
 
             if (myType == BOT_PET_GHOUL)
             {

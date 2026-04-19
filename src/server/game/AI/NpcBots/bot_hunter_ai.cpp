@@ -382,13 +382,13 @@ public:
 
             Unit* target = nullptr;
 
-            if (IsSpellReady(SCATTER_SHOT_1, diff) && HasRole(BOT_ROLE_DPS))
+            if (IsSpellReady(SCATTER_SHOT_1, diff) && HasRole(NPC_BOT_ROLE_DPS))
             {
                 target = FindCastingTarget(CalcSpellMaxRange(SCATTER_SHOT_1), 0, SCATTER_SHOT_1);
                 if (target && doCast(target, GetSpell(SCATTER_SHOT_1)))
                     return;
             }
-            if (!target && IsSpellReady(WYVERN_STING_1, diff) && HasRole(BOT_ROLE_DPS))
+            if (!target && IsSpellReady(WYVERN_STING_1, diff) && HasRole(NPC_BOT_ROLE_DPS))
             {
                 target = FindCastingTarget(CalcSpellMaxRange(WYVERN_STING_1), 5, WYVERN_STING_1);
                 if (target && doCast(target, GetSpell(WYVERN_STING_1)))
@@ -406,7 +406,7 @@ public:
             //    if (target && doCast(target, GetSpell(SCARE_BEAST_1)))
             //        return;
             //}
-            if (!target && IsSpellReady(SILENCING_SHOT_1, diff, false) && HasRole(BOT_ROLE_DPS))
+            if (!target && IsSpellReady(SILENCING_SHOT_1, diff, false) && HasRole(NPC_BOT_ROLE_DPS))
             {
                 target = FindCastingTarget(CalcSpellMaxRange(SILENCING_SHOT_1), 5, SILENCING_SHOT_1);
                 if (target && doCast(target, GetSpell(SILENCING_SHOT_1)))
@@ -416,7 +416,7 @@ public:
 
         void CheckScatter(uint32 diff)
         {
-            if (!IsSpellReady(SCATTER_SHOT_1, diff) || !HasRole(BOT_ROLE_DPS) || Rand() > 50)
+            if (!IsSpellReady(SCATTER_SHOT_1, diff) || !HasRole(NPC_BOT_ROLE_DPS) || Rand() > 50)
                 return;
 
             for (Unit* mtar : { opponent, disttarget })
@@ -440,7 +440,7 @@ public:
 
         void CheckWyvernSting(uint32 diff)
         {
-            if (!IsSpellReady(WYVERN_STING_1, diff) || !HasRole(BOT_ROLE_DPS) || Rand() > 50)
+            if (!IsSpellReady(WYVERN_STING_1, diff) || !HasRole(NPC_BOT_ROLE_DPS) || Rand() > 50)
                 return;
 
             if (Unit* target = FindStunTarget(CalcSpellMaxRange(WYVERN_STING_1)))
@@ -495,14 +495,14 @@ public:
                 //}
             }
             //only if taming beast (or manual)
-            if (IsSpellReady(FREEZING_TRAP_1, diff) && !HasRole(BOT_ROLE_DPS) && !IAmFree() &&
+            if (IsSpellReady(FREEZING_TRAP_1, diff) && !HasRole(NPC_BOT_ROLE_DPS) && !IAmFree() &&
                 master->GetAuraEffect(SPELL_AURA_MOD_RESISTANCE_PCT, SPELLFAMILY_GENERIC, 255, 2))
             {
                 if (doCast(me, GetSpell(FREEZING_TRAP_1)))
                     return;
             }
             //black arrow, immolation trap, explosive trap: cat 1250
-            if (IsSpellReady(EXPLOSIVE_TRAP_1, diff) && HasRole(BOT_ROLE_DPS))
+            if (IsSpellReady(EXPLOSIVE_TRAP_1, diff) && HasRole(NPC_BOT_ROLE_DPS))
             {
                 if (targets.size() > 1)
                 {
@@ -510,7 +510,7 @@ public:
                         return;
                 }
             }
-            if (IsSpellReady(IMMOLATION_TRAP_1, diff) && HasRole(BOT_ROLE_DPS) && !(*targets.begin())->IsControlledByPlayer())
+            if (IsSpellReady(IMMOLATION_TRAP_1, diff) && HasRole(NPC_BOT_ROLE_DPS) && !(*targets.begin())->IsControlledByPlayer())
             {
                 if (targets.size() > 1)
                 {
@@ -519,7 +519,7 @@ public:
                 }
             }
             //snake trap: cat 1249
-            //if (IsSpellReady(SNAKE_TRAP_1, diff) && HasRole(BOT_ROLE_DPS) && (*targets.begin())->IsControlledByPlayer())
+            //if (IsSpellReady(SNAKE_TRAP_1, diff) && HasRole(NPC_BOT_ROLE_DPS) && (*targets.begin())->IsControlledByPlayer())
             //{
             //    if (doCast(me, GetSpell(SNAKE_TRAP_1)))
             //        return;
@@ -774,7 +774,7 @@ public:
                 if (shot->GetSpellInfo()->Id == AUTO_SHOT_1 && (shot->m_targets.GetUnitTarget() != mytar || !inposition))
                     me->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             }
-            else if (HasRole(BOT_ROLE_DPS) && dist > 5 && dist < maxRangeNormal)
+            else if (HasRole(NPC_BOT_ROLE_DPS) && dist > 5 && dist < maxRangeNormal)
             {
                 if (doCast(mytar, AUTO_SHOT_1))
                 {}
@@ -791,7 +791,7 @@ public:
                 CanAffectVictimBools(mytar, SPELL_SCHOOL_NATURE, SPELL_SCHOOL_FIRE, SPELL_SCHOOL_ARCANE, SPELL_SCHOOL_SHADOW, SPELL_SCHOOL_NORMAL);
 
             //scatter pvp
-            if (IsSpellReady(SCATTER_SHOT_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) &&
+            if (IsSpellReady(SCATTER_SHOT_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) &&
                 mytar->GetTypeId() == TYPEID_PLAYER && dist < 10 && Rand() < 60)
             {
                 if (doCast(mytar, GetSpell(SCATTER_SHOT_1)))
@@ -822,13 +822,13 @@ public:
                     return;
 
                 //MONGOOSE BITE
-                if (IsSpellReady(MONGOOSE_BITE_1, diff) && HasRole(BOT_ROLE_DPS) && Rand() < 50)
+                if (IsSpellReady(MONGOOSE_BITE_1, diff) && HasRole(NPC_BOT_ROLE_DPS) && Rand() < 50)
                 {
                     if (doCast(mytar, GetSpell(MONGOOSE_BITE_1)))
                         return;
                 }
                 //COUNTERATTACK
-                if (IsSpellReady(COUNTERATTACK_1, diff) && HasRole(BOT_ROLE_DPS) &&
+                if (IsSpellReady(COUNTERATTACK_1, diff) && HasRole(NPC_BOT_ROLE_DPS) &&
                     me->HasReactive(REACTIVE_HUNTER_PARRY) && Rand() < 90)
                 {
                     if (doCast(mytar, GetSpell(COUNTERATTACK_1)))
@@ -842,7 +842,7 @@ public:
                         return;
                 }
                 //RAPTOR STRIKE
-                if (IsSpellReady(RAPTOR_STRIKE_1, diff, false) && HasRole(BOT_ROLE_DPS) && Rand() < 40 &&
+                if (IsSpellReady(RAPTOR_STRIKE_1, diff, false) && HasRole(NPC_BOT_ROLE_DPS) && Rand() < 40 &&
                     !me->GetCurrentSpell(CURRENT_MELEE_SPELL))
                 {
                     if (doCast(mytar, GetSpell(RAPTOR_STRIKE_1)))
@@ -869,7 +869,7 @@ public:
                 return;
 
             //KILL SHOT
-            if (IsSpellReady(KILL_SHOT_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS) &&
+            if (IsSpellReady(KILL_SHOT_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) &&
                 mytar->HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT))
             {
                 if (doCast(mytar, GetSpell(KILL_SHOT_1)))
@@ -899,7 +899,7 @@ public:
                     return;
             }
             //MULTI-SHOT shares cd with aimed shot
-            if (IsSpellReady(MULTISHOT_1, diff) && HasRole(BOT_ROLE_DPS) && Rand() < 70)
+            if (IsSpellReady(MULTISHOT_1, diff) && HasRole(NPC_BOT_ROLE_DPS) && Rand() < 70)
             {
                 if (Rand() < 30 || !GetSpell(STEADY_SHOT_1) || FindSplashTarget(maxRangeNormal))
                 {
@@ -908,7 +908,7 @@ public:
                 }
             }
             //VOLLEY
-            if (IsSpellReady(VOLLEY_1, diff) && HasRole(BOT_ROLE_DPS) && !JumpingOrFalling() && Rand() < 75)
+            if (IsSpellReady(VOLLEY_1, diff) && HasRole(NPC_BOT_ROLE_DPS) && !JumpingOrFalling() && Rand() < 75)
             {
                 if (Unit* target = FindAOETarget(maxRangeNormal))
                 {
@@ -917,7 +917,7 @@ public:
                 }
             }
             //RAPID FIRE
-            if (IsSpellReady(RAPID_FIRE_1, diff, false) && can_do_normal && HasRole(BOT_ROLE_DPS) && !me->isMoving() && Rand() < 55 &&
+            if (IsSpellReady(RAPID_FIRE_1, diff, false) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS) && !me->isMoving() && Rand() < 55 &&
                 (mytar->GetHealth() > me->GetMaxHealth() * (1 + mytar->getAttackers().size()) ||
                 mytar->GetTypeId() == TYPEID_PLAYER) &&
                 !me->HasAuraTypeWithFamilyFlags(SPELL_AURA_MOD_RANGED_HASTE, SPELLFAMILY_HUNTER, 0x20))
@@ -927,14 +927,14 @@ public:
             }
             //BLACK ARROW
             //Black Arrow shares cooldown with fire traps
-            if (IsSpellReady(BLACK_ARROW_1, diff) && can_do_shadow && HasRole(BOT_ROLE_DPS) &&
+            if (IsSpellReady(BLACK_ARROW_1, diff) && can_do_shadow && HasRole(NPC_BOT_ROLE_DPS) &&
                 mytar->GetHealth() > me->GetMaxHealth()/4 * (1 + mytar->getAttackers().size()))
             {
                 if (doCast(mytar, GetSpell(BLACK_ARROW_1)))
                     return;
             }
             //CHIMERA SHOT: no viper
-            if (IsSpellReady(CHIMERA_SHOT_1, diff) && can_do_nature && HasRole(BOT_ROLE_DPS))
+            if (IsSpellReady(CHIMERA_SHOT_1, diff) && can_do_nature && HasRole(NPC_BOT_ROLE_DPS))
             {
                 //Serpent
                 if (mytar->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_FROM_CASTER, SPELLFAMILY_HUNTER, 0x4000, 0x0, 0x0, me->GetGUID()))
@@ -976,7 +976,7 @@ public:
                     if (!sting)
                         STING = VIPER_STING_1;
                 }
-                if (!STING && GetSpell(SERPENT_STING_1) && HasRole(BOT_ROLE_DPS) &&
+                if (!STING && GetSpell(SERPENT_STING_1) && HasRole(NPC_BOT_ROLE_DPS) &&
                     mytar->GetHealth() > me->GetMaxHealth()/2 * (1 + mytar->getAttackers().size()))
                 {
                     sting = mytar->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_FROM_CASTER, SPELLFAMILY_HUNTER, 0x4000, 0x0, 0x0, me->GetGUID());
@@ -999,25 +999,25 @@ public:
                 }
             }
             //EXPLOSIVE SHOT: replaces Arcane Shot at 60
-            if (IsSpellReady(EXPLOSIVE_SHOT_1, diff) && can_do_fire && HasRole(BOT_ROLE_DPS))
+            if (IsSpellReady(EXPLOSIVE_SHOT_1, diff) && can_do_fire && HasRole(NPC_BOT_ROLE_DPS))
             {
                 if (doCast(mytar, GetSpell(EXPLOSIVE_SHOT_1)))
                     return;
             }
             //ARCANE SHOT: shares cd with Explosive Shot
-            if (IsSpellReady(ARCANE_SHOT_1, diff) && can_do_arcane && HasRole(BOT_ROLE_DPS) && !GetSpell(EXPLOSIVE_SHOT_1))
+            if (IsSpellReady(ARCANE_SHOT_1, diff) && can_do_arcane && HasRole(NPC_BOT_ROLE_DPS) && !GetSpell(EXPLOSIVE_SHOT_1))
             {
                 if (doCast(mytar, GetSpell(ARCANE_SHOT_1)))
                     return;
             }
             //AIMED SHOT shares cd with multishot
-            if (IsSpellReady(AIMED_SHOT_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS))
+            if (IsSpellReady(AIMED_SHOT_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS))
             {
                 if (doCast(mytar, GetSpell(AIMED_SHOT_1)))
                     return;
             }
             //STEADY SHOT
-            if (IsSpellReady(STEADY_SHOT_1, diff) && can_do_normal && HasRole(BOT_ROLE_DPS))
+            if (IsSpellReady(STEADY_SHOT_1, diff) && can_do_normal && HasRole(NPC_BOT_ROLE_DPS))
             {
                 if (doCast(mytar, GetSpell(STEADY_SHOT_1)))
                     return;

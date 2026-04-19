@@ -258,7 +258,7 @@ public:
 
             static const auto frenzy_pred_bot = [](Creature const* bot, Unit const* nec) -> bool {
                 return (IsMeleeClass(bot->GetBotClass()) && bot->GetVictim() && !bot->GetBotAI()->IsTank(bot) &&
-                    bot->GetBotAI()->HasRole(BOT_ROLE_DPS) && !bot->GetBotAI()->HasRole(BOT_ROLE_RANGED) &&
+                    bot->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS) && !bot->GetBotAI()->HasRole(NPC_BOT_ROLE_RANGED) &&
                     nec->GetDistance(bot) < 30 && bot->GetDistance(bot->GetVictim()) < 15 &&
                     bot->getAttackers().empty() && !CCed(bot, true) &&
                     !bot->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE) && bot->GetHealth() >= nec->GetMaxHealth());
@@ -270,7 +270,7 @@ public:
             if (!IsTank(master) && frenzy_pred_player(master, me))
                 target = master;
             //minions
-            else if (HasRole(BOT_ROLE_DPS) && !_minions.empty())
+            else if (HasRole(NPC_BOT_ROLE_DPS) && !_minions.empty())
             {
                 for (Unit* minion : _minions)
                 {
@@ -378,7 +378,7 @@ public:
 
             MoveBehind(mytar);
 
-            if (!HasRole(BOT_ROLE_DPS))
+            if (!HasRole(NPC_BOT_ROLE_DPS))
                 return;
 
             if (GC_Timer > diff)

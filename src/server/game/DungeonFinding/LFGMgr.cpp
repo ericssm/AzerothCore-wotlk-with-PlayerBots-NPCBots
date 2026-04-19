@@ -932,11 +932,11 @@ namespace lfg
                         uint8 broles = PLAYER_ROLE_DAMAGE;
                         if (bot->GetBotClass() == CLASS_WARRIOR || bot->GetBotClass() == CLASS_PALADIN ||
                             bot->GetBotClass() == CLASS_DEATH_KNIGHT || bot->GetBotClass() == CLASS_DRUID ||
-                            (bot->GetBotRoles() & BOT_ROLE_TANK))
+                            (bot->GetBotRoles() & NPC_BOT_ROLE_TANK))
                             broles |= PLAYER_ROLE_TANK;
                         if (bot->GetBotClass() == CLASS_PRIEST || bot->GetBotClass() == CLASS_DRUID ||
                             bot->GetBotClass() == CLASS_SHAMAN || bot->GetBotClass() == CLASS_PALADIN ||
-                            (bot->GetBotRoles() & BOT_ROLE_HEAL))
+                            (bot->GetBotRoles() & NPC_BOT_ROLE_HEAL))
                             broles |= PLAYER_ROLE_HEALER;
                         //remove unneeded / occupied roles so players can go with role they choose
                         if (roles & PLAYER_ROLE_TANK)

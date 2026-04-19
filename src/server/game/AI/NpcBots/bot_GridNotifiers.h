@@ -123,7 +123,7 @@ class NearestHostileUnitCheck
                 return INVALID;
             if (berserk && std::fabs(me->GetPositionZ() - u->GetPositionZ()) > (m_range * 0.25f + 5.0f))
                 return INVALID;
-            if (me->HasUnitState(UNIT_STATE_ROOT) && (ai->HasRole(BOT_ROLE_RANGED) == me->IsWithinDistInMap(u, 8.f)))
+            if (me->HasUnitState(UNIT_STATE_ROOT) && (ai->HasRole(NPC_BOT_ROLE_RANGED) == me->IsWithinDistInMap(u, 8.f)))
                 return INVALID;
             if (!berserk && !u->IsInCombat())
                 return INVALID;
@@ -859,7 +859,7 @@ class NearbyHostileUnitCheck
                 return false;
             if ((m_CCoption & 2) && u->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE))
                 return false;
-            if (me->HasUnitState(UNIT_STATE_ROOT) && (ai->HasRole(BOT_ROLE_RANGED) == me->IsWithinDistInMap(u, 8.f)))
+            if (me->HasUnitState(UNIT_STATE_ROOT) && (ai->HasRole(NPC_BOT_ROLE_RANGED) == me->IsWithinDistInMap(u, 8.f)))
                 return false;
             if (!_botPvP && me->IsPvP() && u->IsControlledByPlayer())
                 return false;
@@ -907,7 +907,7 @@ class NearbyHostileUnitInConeCheck
         {
             if (u == me)
                 return false;
-            //if (me->HasUnitState(UNIT_STATE_ROOT) && (ai->HasRole(BOT_ROLE_RANGED) == me->IsWithinDistInMap(u, 8.f)))
+            //if (me->HasUnitState(UNIT_STATE_ROOT) && (ai->HasRole(NPC_BOT_ROLE_RANGED) == me->IsWithinDistInMap(u, 8.f)))
             //    return false;
             if (/*!free && */!u->IsInCombat())
                 return false;
@@ -1237,13 +1237,13 @@ private:
         switch (skill)
         {
             case SKILL_MINING:
-                return (_skillMask & BOT_ROLE_GATHERING_MINING);
+                return (_skillMask & NPC_BOT_ROLE_GATHERING_MINING);
             case SKILL_HERBALISM:
-                return (_skillMask & BOT_ROLE_GATHERING_HERBALISM);
+                return (_skillMask & NPC_BOT_ROLE_GATHERING_HERBALISM);
             case SKILL_SKINNING:
-                return (_skillMask & BOT_ROLE_GATHERING_SKINNING);
+                return (_skillMask & NPC_BOT_ROLE_GATHERING_SKINNING);
             case SKILL_ENGINEERING:
-                return (_skillMask & BOT_ROLE_GATHERING_ENGINEERING);
+                return (_skillMask & NPC_BOT_ROLE_GATHERING_ENGINEERING);
             default:
                 return false;
         }

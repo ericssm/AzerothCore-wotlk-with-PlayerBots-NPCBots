@@ -384,7 +384,7 @@ public:
         {
             if (me->GetVictim())
             {
-                if (HasRole(BOT_ROLE_DPS))
+                if (HasRole(NPC_BOT_ROLE_DPS))
                     DoBMMeleeAttackIfReady();
             }
         }
@@ -425,7 +425,7 @@ public:
             //if (IAmFree())
             //    return;
             if (!IsSpellReady(MIRROR_IMAGE_1, diff) || !me->IsInCombat() || !illusionsCount || illusion_Fade ||
-                !HasRole(BOT_ROLE_DPS) || IsCasting() || Rand() > 20)
+                !HasRole(NPC_BOT_ROLE_DPS) || IsCasting() || Rand() > 20)
                 return;
 
             uint8 pct = GetHealthPCT(me);
@@ -729,7 +729,7 @@ public:
                     aura->SetMaxDuration(dur);
                 }
 
-                if (GetHealthPCT(me) < 25 || !HasRole(BOT_ROLE_DPS))
+                if (GetHealthPCT(me) < 25 || !HasRole(NPC_BOT_ROLE_DPS))
                     me->AttackStop();
 
                 //SpellEffectSanctuary
