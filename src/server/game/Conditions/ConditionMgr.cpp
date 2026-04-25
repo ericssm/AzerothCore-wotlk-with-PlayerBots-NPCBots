@@ -654,6 +654,12 @@ bool Condition::Meets(ConditionSourceInfo& sourceInfo)
             condMeets = unit->IsCharmed();
         break;
     }
+    case CONDITION_UNIT_IN_COMBAT:
+    {
+        if (Unit* unit = object->ToUnit())
+            condMeets = unit->IsInCombat();
+        break;
+    }
     case CONDITION_WORLD_SCRIPT:
     {
         condMeets = sWorldState->IsConditionFulfilled(ConditionValue1, ConditionValue2);
@@ -865,6 +871,9 @@ uint32 Condition::GetSearcherTypeMaskForCondition()
         mask |= GRID_MAP_TYPE_MASK_PLAYER;
         break;
     case CONDITION_CHARMED:
+        mask |= GRID_MAP_TYPE_MASK_CREATURE | GRID_MAP_TYPE_MASK_PLAYER;
+        break;
+    case CONDITION_UNIT_IN_COMBAT:
         mask |= GRID_MAP_TYPE_MASK_CREATURE | GRID_MAP_TYPE_MASK_PLAYER;
         break;
     case CONDITION_PLAYER_QUEUED_RANDOM_DUNGEON:
