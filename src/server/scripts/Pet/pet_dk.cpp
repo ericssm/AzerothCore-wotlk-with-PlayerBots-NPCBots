@@ -235,6 +235,16 @@ struct npc_pet_dk_ebon_gargoyle : ScriptedAI
             _decisionTimer -= diff;
             if (!UpdateVictimWithGaze())
             {
+                // Re-engage if we still have a valid victim but lost engagement
+                // (e.g., PvP combat reference expired during CC like Cyclone)
+                if (Unit* victim = me->GetVictim())
+                {
+                    if (me->IsValidAttackTarget(victim))
+                    {
+                        me->EngageWithTarget(victim);
+                        return;
+                    }
+                }
                 MySelectNextTarget();
                 return;
             }
@@ -363,7 +373,7 @@ struct npc_pet_dk_army_of_the_dead : public AggressorAI
         return AggressorAI::CanAIAttack(target);
     }
 
-    // Owner started attacking a target ¡ª engage immediately.
+    // Owner started attacking a target ?? engage immediately.
     // We bypass OnOwnerCombatInteraction because CanStartAttack -> CanAIAttack
     // may reject the target before combat refs are established.
     void OwnerAttacked(Unit* target) override
@@ -374,13 +384,33 @@ struct npc_pet_dk_army_of_the_dead : public AggressorAI
             AttackStart(target);
     }
 
-    // Owner was attacked ¡ª help defend.
+    // Owner was attacked ?? help defend.
     void OwnerAttackedBy(Unit* attacker) override
     {
         if (!attacker || !me->IsAlive() || me->HasReactState(REACT_PASSIVE))
             return;
         if (me->IsValidAttackTarget(attacker))
             AttackStart(attacker);
+    }
+
+    void UpdateAI(uint32 /*diff*/) override
+    {
+        if (!UpdateVictim())
+        {
+            // Re-engage if we still have a valid victim but lost engagement
+            // (e.g., combat reference expired during CC like knockback)
+            if (Unit* victim = me->GetVictim())
+            {
+                if (me->IsValidAttackTarget(victim))
+                {
+                    me->EngageWithTarget(victim);
+                    return;
+                }
+            }
+            return;
+        }
+
+        DoMeleeAttackIfReady();
     }
 };
 

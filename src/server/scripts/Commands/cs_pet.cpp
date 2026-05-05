@@ -17,6 +17,8 @@
 
 #include "Chat.h"
 #include "CommandScript.h"
+#include "DatabaseEnv.h"
+#include <algorithm>
 #include "Language.h"
 #include "Log.h"
 #include "ObjectMgr.h"
@@ -36,9 +38,11 @@ public:
     {
         static ChatCommandTable petCommandTable =
         {
-            { "create",  HandlePetCreateCommand,  SEC_GAMEMASTER, Console::No },
-            { "learn",   HandlePetLearnCommand,   SEC_GAMEMASTER, Console::No },
-            { "unlearn", HandlePetUnlearnCommand, SEC_GAMEMASTER, Console::No }
+			{ "create",  HandlePetCreateCommand,  SEC_GAMEMASTER, Console::No  },
+            { "delete",  HandlePetDeleteCommand,  SEC_GAMEMASTER, Console::Yes },
+            { "learn",   HandlePetLearnCommand,   SEC_GAMEMASTER, Console::No  },
+            { "list",    HandlePetListCommand,    SEC_GAMEMASTER, Console::Yes },
+            { "unlearn", HandlePetUnlearnCommand, SEC_GAMEMASTER, Console::No  }
         };
 
         static ChatCommandTable commandTable =
@@ -121,6 +125,103 @@ public:
 
         pet->learnSpell(spell->Id);
         handler->PSendSysMessage("Pet has learned spell {}", spell->Id);
+
+        return true;
+    }
+
+    static bool HandlePetDeleteCommand(ChatHandler* handler, PlayerIdentifier owner, uint32 petNumber)
+    {
+        ObjectGuid ownerGuid = owner.GetGUID();
+
+        QueryResult result = CharacterDatabase.Query(
+            "SELECT entry, name FROM character_pet WHERE id = {} AND owner = {}",
+            petNumber, ownerGuid.GetCounter());
+
+        if (!result)
+        {
+            handler->SendErrorMessage(LANG_PET_DELETE_NOT_FOUND, petNumber, owner.GetName(),
+                                      ownerGuid.GetCounter());
+            return false;
+        }
+
+        if (Player* online = owner.GetConnectedPlayer())
+        {
+            if (Pet* activePet = online->GetPet())
+            {
+                if (activePet->GetCharmInfo() &&
+                    activePet->GetCharmInfo()->GetPetNumber() == petNumber)
+                {
+                    online->RemovePet(activePet, PET_SAVE_AS_DELETED);
+                }
+            }
+
+            // Drop the pet from the in-memory PetStable so the stable UI / call-pet
+            // logic does not reference a row that no longer exists in the database.
+            if (PetStable* stable = online->GetPetStable())
+            {
+                if (stable->CurrentPet && stable->CurrentPet->PetNumber == petNumber)
+                    stable->CurrentPet.reset();
+
+                for (Optional<PetStable::PetInfo>& stabled : stable->StabledPets)
+                    if (stabled && stabled->PetNumber == petNumber)
+                        stabled.reset();
+
+                stable->UnslottedPets.erase(
+                    std::remove_if(stable->UnslottedPets.begin(), stable->UnslottedPets.end(),
+                        [petNumber](PetStable::PetInfo const& p) { return p.PetNumber == petNumber; }),
+                    stable->UnslottedPets.end());
+            }
+        }
+
+        Field* fields    = result->Fetch();
+        uint32 entry     = fields[0].Get<uint32>();
+        std::string name = fields[1].Get<std::string>();
+
+        std::string creatureName = "<unknown>";
+        if (CreatureTemplate const* cInfo = sObjectMgr->GetCreatureTemplate(entry))
+            creatureName = cInfo->Name;
+
+        Pet::DeleteFromDB(petNumber);
+
+        handler->PSendSysMessage(LANG_PET_DELETE_SUCCESS, petNumber, name, entry, creatureName,
+                                 owner.GetName(), ownerGuid.GetCounter());
+        return true;
+    }
+
+    static bool HandlePetListCommand(ChatHandler* handler, PlayerIdentifier owner)
+    {
+        ObjectGuid ownerGuid = owner.GetGUID();
+
+        QueryResult result = CharacterDatabase.Query(
+            "SELECT id, entry, level, slot, name, PetType FROM character_pet "
+            "WHERE owner = {} ORDER BY slot, id",
+            ownerGuid.GetCounter());
+
+        if (!result)
+        {
+            handler->PSendSysMessage(LANG_PET_LIST_EMPTY, owner.GetName(), ownerGuid.GetCounter());
+            return true;
+        }
+
+        handler->PSendSysMessage(LANG_PET_LIST_HEADER, owner.GetName(), ownerGuid.GetCounter());
+
+        do
+        {
+            Field* fields    = result->Fetch();
+            uint32 petNumber = fields[0].Get<uint32>();
+            uint32 entry     = fields[1].Get<uint32>();
+            uint8  level     = fields[2].Get<uint8>();
+            uint8  slot      = fields[3].Get<uint8>();
+            std::string name = fields[4].Get<std::string>();
+            uint8  petType   = fields[5].Get<uint8>();
+
+            std::string creatureName = "<unknown>";
+            if (CreatureTemplate const* cInfo = sObjectMgr->GetCreatureTemplate(entry))
+                creatureName = cInfo->Name;
+
+            handler->PSendSysMessage(LANG_PET_LIST_ENTRY, petNumber, uint32(slot), entry,
+                                     creatureName, name, uint32(level), uint32(petType));
+        } while (result->NextRow());
 
         return true;
     }
