@@ -906,6 +906,7 @@ uint32 Condition::GetMaxAvailableConditionTargets()
         case CONDITION_SOURCE_TYPE_SPELL_CLICK_EVENT:
         case CONDITION_SOURCE_TYPE_GOSSIP_MENU:
         case CONDITION_SOURCE_TYPE_GOSSIP_MENU_OPTION:
+        case CONDITION_SOURCE_TYPE_GOSSIP_HELLO:
         case CONDITION_SOURCE_TYPE_NPC_VENDOR:
         case CONDITION_SOURCE_TYPE_SPELL_PROC:
         case CONDITION_SOURCE_TYPE_OBJECT_VISIBILITY:
@@ -2696,6 +2697,7 @@ bool ConditionMgr::isConditionTypeValid(Condition* cond)
     case CONDITION_TAXI:
     case CONDITION_IN_WATER:
     case CONDITION_CHARMED:
+    case CONDITION_UNIT_IN_COMBAT:
     default:
         break;
     }

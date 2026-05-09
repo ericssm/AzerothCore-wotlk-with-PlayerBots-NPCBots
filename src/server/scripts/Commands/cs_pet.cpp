@@ -24,6 +24,7 @@
 #include "ObjectMgr.h"
 #include "Pet.h"
 #include "Player.h"
+#include "RBAC.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 
@@ -38,11 +39,11 @@ public:
     {
         static ChatCommandTable petCommandTable =
         {
-			{ "create",  HandlePetCreateCommand,  SEC_GAMEMASTER, Console::No  },
-            { "delete",  HandlePetDeleteCommand,  SEC_GAMEMASTER, Console::Yes },
-            { "learn",   HandlePetLearnCommand,   SEC_GAMEMASTER, Console::No  },
-            { "list",    HandlePetListCommand,    SEC_GAMEMASTER, Console::Yes },
-            { "unlearn", HandlePetUnlearnCommand, SEC_GAMEMASTER, Console::No  }
+            { "create",  HandlePetCreateCommand,  rbac::RBAC_PERM_COMMAND_PET_CREATE,  Console::No  },
+            { "delete",  HandlePetDeleteCommand,  rbac::RBAC_PERM_COMMAND_PET_DELETE,  Console::Yes },
+            { "learn",   HandlePetLearnCommand,   rbac::RBAC_PERM_COMMAND_PET_LEARN,   Console::No  },
+            { "list",    HandlePetListCommand,    rbac::RBAC_PERM_COMMAND_PET_LIST,    Console::Yes },
+            { "unlearn", HandlePetUnlearnCommand, rbac::RBAC_PERM_COMMAND_PET_UNLEARN, Console::No  }
         };
 
         static ChatCommandTable commandTable =

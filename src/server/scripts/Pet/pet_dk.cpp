@@ -373,7 +373,7 @@ struct npc_pet_dk_army_of_the_dead : public AggressorAI
         return AggressorAI::CanAIAttack(target);
     }
 
-    // Owner started attacking a target ?? engage immediately.
+    // Owner started attacking a target ¡ª engage immediately.
     // We bypass OnOwnerCombatInteraction because CanStartAttack -> CanAIAttack
     // may reject the target before combat refs are established.
     void OwnerAttacked(Unit* target) override
@@ -384,7 +384,7 @@ struct npc_pet_dk_army_of_the_dead : public AggressorAI
             AttackStart(target);
     }
 
-    // Owner was attacked ?? help defend.
+    // Owner was attacked ¡ª help defend.
     void OwnerAttackedBy(Unit* attacker) override
     {
         if (!attacker || !me->IsAlive() || me->HasReactState(REACT_PASSIVE))
