@@ -3391,6 +3391,16 @@ DungeonAccessRequirements.OptionalStringID = 0
 JoinBGAndLFG.Enable = 0
 
 #
+#     LFG.MailItemOnFullInventory
+#        Description: When a player wins a group roll but their inventory is full, mail
+#                     the item to them instead of leaving it on the corpse.
+#        Default:     0 - Disabled
+#                     1 - Only in LFG/RDF groups
+#                     2 - In all group types
+
+LFG.MailItemOnFullInventory = 0
+
+#
 #     DungeonFinder.OptionsMask
 #        Description: Dungeon and raid finder system.
 #        Value is a bitmask consisting of:
@@ -4380,14 +4390,6 @@ AllowTwoSide.Interaction.Calendar = 0
 AllowTwoSide.Interaction.Chat = 0
 
 #
-#    AllowTwoSide.Interaction.Emote
-#        Description: Allow emote messages between factions (e.g. "/e looks into the sky")
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
-
-AllowTwoSide.Interaction.Emote = 0
-
-#
 #    AllowTwoSide.Interaction.Channel
 #        Description: Allow channel chat between factions.
 #        Default:     0 - (Disabled)
@@ -4427,38 +4429,6 @@ AllowTwoSide.Interaction.Arena = 0
 #                     1 - (Enabled)
 
 AllowTwoSide.Interaction.Auction = 0
-
-#
-#    AllowTwoSide.Interaction.Mail
-#        Description: Allow sending mails between factions.
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
-
-AllowTwoSide.Interaction.Mail = 0
-
-#
-#    AllowTwoSide.WhoList
-#        Description: Show characters from both factions in the /who list.
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
-
-AllowTwoSide.WhoList = 0
-
-#
-#    AllowTwoSide.AddFriend
-#        Description: Allow adding friends from other faction the friends list.
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
-
-AllowTwoSide.AddFriend = 0
-
-#
-#    AllowTwoSide.Trade
-#        Description: Allow trading between factions.
-#        Default:     0 - (Disabled)
-#                     1 - (Enabled)
-
-AllowTwoSide.Trade = 0
 
 #
 #    TalentsInspecting
