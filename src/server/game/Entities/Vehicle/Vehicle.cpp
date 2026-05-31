@@ -27,11 +27,10 @@
 #include "Unit.h"
 #include "Util.h"
 #include <algorithm>
-#ifdef MOD_NPCERBOTS
+
 //npcbot
 #include "botmgr.h"
 //end npcbot
-#endif
 
 Vehicle::Vehicle(Unit* unit, VehicleEntry const* vehInfo, uint32 creatureEntry) :
     _me(unit), _vehicleInfo(vehInfo), _usableSeatNum(0), _creatureEntry(creatureEntry), _status(STATUS_NONE),
@@ -392,8 +391,6 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
         else
             _me->SetNpcFlag(_me->IsPlayer() ?  UNIT_NPC_FLAG_PLAYER_VEHICLE : UNIT_NPC_FLAG_SPELLCLICK);
     }
-
-#ifdef MOD_NPCERBOTS
         //npcbot: do not allow other passengers on bot vehicles
         if (unit->IsNPCBot()/* &&
             (Seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)*/)
@@ -404,7 +401,6 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
                 _me->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK);
         }
         //end npcbot
-#endif
 
     if (!_me || !_me->IsInWorld() || _me->IsDuringRemoveFromWorld())
         return false;
@@ -430,12 +426,10 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
     unit->m_movementInfo.transport.seat = seat->first;
     unit->m_movementInfo.transport.guid = _me->GetGUID();
 
-#ifdef MOD_NPCERBOTS
     //npcbot
     if (unit->GetTypeId() == TYPEID_UNIT && unit->ToCreature()->GetBotAI())
         BotMgr::OnBotEnterVehicle(unit->ToCreature(), this);
     //end npcbot
-#endif
 
     // xinef: removed seat->first == 0 check...
     if (_me->IsCreature()
@@ -457,14 +451,13 @@ bool Vehicle::AddPassenger(Unit* unit, int8 seatId)
             LOG_INFO("vehicles", "Crash recovered in Unit::SetCharmedBy(). Unit {}, typeid: {}, in world: {}, duringremove: {} has wrong CharmType! Charmer {}, typeid: {}, in world: {}, duringremove: {}.", _me->GetName(), _me->GetTypeId(), _me->IsInWorld(), _me->IsDuringRemoveFromWorld(), unit->GetName(), unit->GetTypeId(), unit->IsInWorld(), unit->IsDuringRemoveFromWorld());
             return false;
         }
-#ifdef MOD_NPCERBOTS
+
         //npcbot
         if (unit->ToPlayer()->HaveBot())
             BotMgr::OnBotOwnerEnterVehicle(unit->ToPlayer(), this);
         //end npcbot
-#endif
-
     }
+
 
     if (_me->IsInWorld())
     {
@@ -536,12 +529,10 @@ void Vehicle::RemovePassenger(Unit* unit)
     if (seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_PASSENGER_NOT_SELECTABLE && !seat->second.Passenger.IsUnselectable)
         unit->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
 
-#ifdef MOD_NPCERBOTS
     //npcbot
     if (unit->GetTypeId() == TYPEID_UNIT && unit->ToCreature()->GetBotAI())
         BotMgr::OnBotExitVehicle(unit->ToCreature(), this);
     //end npcbot
-#endif
 
     seat->second.Passenger.Reset();
 
@@ -549,17 +540,13 @@ void Vehicle::RemovePassenger(Unit* unit)
     bool wasFlying = _me->IsFlying();
 
     if (_me->IsCreature() && unit->IsPlayer() && seat->second.SeatInfo->m_flags & VEHICLE_SEAT_FLAG_CAN_CONTROL)
-#ifdef MOD_NPCERBOTS
-        //npcbot
     {
+        //npcbot
         if (unit->ToPlayer()->HaveBot())
             BotMgr::OnBotOwnerExitVehicle(unit->ToPlayer(), this);
-         _me->RemoveCharmedBy(unit);
-    }
         //end npcbot
-#else
-         _me->RemoveCharmedBy(unit);
-#endif
+        _me->RemoveCharmedBy(unit);
+    }
 
     if (_me->IsInWorld())
     {
@@ -672,21 +659,17 @@ void Vehicle::InitMovementInfoForBase()
         _me->AddExtraUnitMovementFlag(MOVEMENTFLAG2_FULL_SPEED_PITCHING);
 }
 
-#ifdef MOD_NPCERBOTS
-//npcbot
-VehicleSeatEntry const* Vehicle::GetSeatForPassenger(Unit const* passenger) const
-//end npcbot
-#else
 VehicleSeatEntry const* Vehicle::GetSeatForPassenger(Unit const* passenger)
-#endif
+//npcbot
+const
+//end npcbot
 {
-#ifdef MOD_NPCERBOTS
     //npcbot
+    /*
+    SeatMap::iterator itr;
+    */
     SeatMap::const_iterator itr;
     //end npcbot
-#else
-    SeatMap::iterator itr;
-#endif
     for (itr = Seats.begin(); itr != Seats.end(); ++itr)
         if (itr->second.Passenger.Guid == passenger->GetGUID())
             return itr->second.SeatInfo;

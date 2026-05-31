@@ -194,14 +194,12 @@ enum BattlegroundStatus
     STATUS_WAIT_LEAVE               = 4                      // means some faction has won BG and it is ending
 };
 
-#ifdef MOD_NPCERBOTS
 //npcbot
 struct BattlegroundBot
 {
     TeamId Team;                                             // bot's team
 };
 //end npcbot
-#endif
 
 struct BattlegroundObjectInfo
 {
@@ -416,12 +414,10 @@ public:
     [[nodiscard]] bool isRated() const        { return m_IsRated; }
 
     typedef std::map<ObjectGuid, Player*> BattlegroundPlayerMap;
-#ifdef MOD_NPCERBOTS
     //npcbot
     typedef std::map<ObjectGuid, BattlegroundBot> BattlegroundBotMap;
     [[nodiscard]] BattlegroundBotMap const& GetBots() const { return m_Bots; }
     //end npcbot
-#endif
     [[nodiscard]] BattlegroundPlayerMap const& GetPlayers() const { return m_Players; }
     [[nodiscard]] uint32 GetPlayersSize() const { return m_Players.size(); }
 
@@ -544,7 +540,6 @@ public:
 
     void AddOrSetPlayerToCorrectBgGroup(Player* player, TeamId teamId);
 
-#ifdef MOD_NPCERBOTS
     //npcbot
     [[nodiscard]] std::size_t GetBotScoresSize() const { return BotScores.size(); }
     void RemoveBotFromResurrectQueue(ObjectGuid guid);
@@ -567,7 +562,6 @@ public:
     virtual void EventBotClickedOnFlag(Creature* /*bot*/, GameObject* /*target_obj*/) { }
     virtual void HandleBotAreaTrigger(Creature* /*bot*/, uint32 /*trigger*/) { }
     //end npcbot
-#endif
 
     virtual void RemovePlayerAtLeave(Player* player);
     // can be extended in in BG subclass
@@ -660,12 +654,10 @@ protected:
 
     // Scorekeeping
     BattlegroundScoreMap PlayerScores;                // Player scores
-#ifdef MOD_NPCERBOTS
     //npcbot
     BattlegroundScoreMap BotScores;
     BattlegroundBotMap m_Bots;
     //end npcbot
-#endif
     // must be implemented in BG subclass
     virtual void RemovePlayer(Player* /*player*/) {}
 

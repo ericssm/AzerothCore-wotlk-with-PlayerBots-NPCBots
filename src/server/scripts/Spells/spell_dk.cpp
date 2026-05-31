@@ -26,12 +26,10 @@
 #include "Totem.h"
 #include "UnitAI.h"
 
-#ifdef MOD_NPCERBOTS
-
 //npcbot
 #include "botmgr.h"
 //end npcbot
-#endif
+
 /*
  * Scripts for spells with SPELLFAMILY_DEATHKNIGHT and SPELLFAMILY_GENERIC spells used by deathknight players.
  * Ordered alphabetically using scriptname.
@@ -577,16 +575,17 @@ class spell_dk_rune_of_the_fallen_crusader : public SpellScript
     {
         std::list<TargetInfo>* targetsInfo = GetSpell()->GetUniqueTargetInfo();
         for (std::list<TargetInfo>::iterator ihit = targetsInfo->begin(); ihit != targetsInfo->end(); ++ihit)
+        {
             if (ihit->targetGUID == GetCaster()->GetGUID())
-
-#ifdef MOD_NPCERBOTS
+            {
                 //npcbot: get bot's crit
                 if (GetCaster()->IsNPCBot())
                     ihit->crit = roll_chance_f(GetCaster()->ToCreature()->GetCreatureCritChance());
                 else
                 //end npcbot
-#endif
                 ihit->crit = roll_chance_f(GetCaster()->GetFloatValue(PLAYER_CRIT_PERCENTAGE));
+            }
+        }
     }
 
     void Register() override
@@ -675,7 +674,6 @@ class spell_dk_dancing_rune_weapon : public AuraScript
 
     bool CheckProc(ProcEventInfo& eventInfo)
     {
-#ifdef MOD_NPCERBOTS
         //npcbot
         if (eventInfo.GetActor() && eventInfo.GetActor()->IsNPCBot())
         {
@@ -692,7 +690,7 @@ class spell_dk_dancing_rune_weapon : public AuraScript
             return true;
         }
         //end npcbot
-#endif
+
         if (!eventInfo.GetActor() || !eventInfo.GetActionTarget() || !eventInfo.GetActionTarget()->IsAlive() || !eventInfo.GetActor()->IsPlayer())
             return false;
 
@@ -781,7 +779,6 @@ class spell_dk_dancing_rune_weapon_visual : public AuraScript
     void HandleEffectApply(AuraEffect const*  /*aurEff*/, AuraEffectHandleModes /*mode*/)
     {
         PreventDefaultAction();
-#ifdef MOD_NPCERBOTS
         //npcbot
         if (GetUnitOwner()->ToTempSummon()->GetSummonerGUID().IsCreature())
         {
@@ -794,7 +791,6 @@ class spell_dk_dancing_rune_weapon_visual : public AuraScript
         }
         else
         //end npcbot
-#endif
         if (Unit* owner = GetUnitOwner()->ToTempSummon()->GetSummonerUnit())
         {
             GetUnitOwner()->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID, owner->GetUInt32Value(PLAYER_VISIBLE_ITEM_16_ENTRYID));
@@ -839,13 +835,11 @@ class spell_dk_pet_scaling : public AuraScript
         // xinef: dk ghoul inherits 70% of strength and 30% of stamina
         if (GetUnitOwner()->GetEntry() != NPC_RISEN_GHOUL)
         {
-#ifdef MOD_NPCERBOTS
             //npcbot
             if (GetUnitOwner()->GetEntry() == NPC_EBON_GARGOYLE && stat == STAT_STAMINA && GetUnitOwner()->GetCreator() && GetUnitOwner()->GetCreator()->IsNPCBot())
                 amount = CalculatePct(std::max<int32>(0, BotMgr::GetBotStat(GetUnitOwner()->GetCreator()->ToCreature(), stat)), 30);
             else
             //end npcbot
-#endif
             // xinef: ebon garogyle - inherit 30% of stamina
             if (GetUnitOwner()->GetEntry() == NPC_EBON_GARGOYLE && stat == STAT_STAMINA)
                 if (Unit* owner = GetUnitOwner()->GetOwner())
@@ -1107,7 +1101,6 @@ class spell_dk_anti_magic_shell_raid : public AuraScript
         /// @todo: this should absorb limited amount of damage, but no info on calculation formula
         amount = -1;
 
-#ifdef MOD_NPCERBOTS
         SpellInfo const* talentSpell = sSpellMgr->AssertSpellInfo(SPELL_DK_ANTI_MAGIC_SHELL_TALENT);
         Unit* owner = GetCaster()->GetOwner();
         if (!owner)
@@ -1123,7 +1116,6 @@ class spell_dk_anti_magic_shell_raid : public AuraScript
             }
         }
         //end npcbot
-#endif
     }
 
     void Absorb(AuraEffect* /*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
@@ -2390,7 +2382,6 @@ class spell_dk_spell_deflection : public AuraScript
         if (GetTarget()->IsNonMeleeSpellCast(false, false, true) || GetTarget()->HasUnitState(UNIT_STATE_CONTROLLED))
             chance = 0.0f;
 
-#ifdef MOD_NPCERBOTS
         //npcbot handle creature case (and prevent crashes)
         Unit* target = GetTarget();
         if (target->GetTypeId() == TYPEID_UNIT)
@@ -2401,8 +2392,6 @@ class spell_dk_spell_deflection : public AuraScript
         }
         else
         //end npcbot
-#endif
-
         if ((dmgInfo.GetDamageType() == SPELL_DIRECT_DAMAGE) && roll_chance_f(chance))
             absorbAmount = CalculatePct(dmgInfo.GetDamage(), absorbPct);
     }

@@ -65,11 +65,9 @@ class PlayerSocial;
 class SpellCastTargets;
 class UpdateMask;
 
-#ifdef MOD_NPCERBOTS
 // NpcBot mod
 class BotMgr;
 // end NpcBot mod
-#endif
 
 typedef std::deque<Mail*> PlayerMails;
 typedef void(*bgZoneRef)(Battleground*, WorldPackets::WorldState::InitWorldStates&);
@@ -2682,7 +2680,6 @@ public:
     void SetMapChangeOrderCounter() { _mapChangeOrderCounter = GetSession()->GetOrderCounter(); }
     uint32 GetMapChangeOrderCounter() { return _mapChangeOrderCounter; }
 
-#ifdef MOD_NPCERBOTS
     /*****************************************************************/
     /***                        NPCBOT SYSTEM                      ***/
     /*****************************************************************/
@@ -2694,7 +2691,6 @@ public:
     /*****************************************************************/
     /***                      END NPCBOT SYSTEM                    ***/
     /*****************************************************************/
-#endif
 
     /*********************************************************/
     /***               SPELL QUEUE SYSTEM                  ***/
@@ -2993,7 +2989,6 @@ protected:
     bool m_needZoneUpdate;
 
 private:
-#ifdef MOD_NPCERBOTS
     /*****************************************************************/
     /***                        NPCBOT SYSTEM                      ***/
     /*****************************************************************/
@@ -3001,7 +2996,6 @@ private:
     /*****************************************************************/
     /***                      END NPCBOT SYSTEM                    ***/
     /*****************************************************************/
-#endif
 
     // internal common parts for CanStore/StoreItem functions
     InventoryResult CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, Item* pSrcItem) const;

@@ -30,11 +30,10 @@
 #include <cmath>
 
 #include "ItemPackets.h"
-#ifdef MOD_NPCERBOTS
+
 // npcbot
 #include "botmgr.h"
 //end npcbot
-#endif
 
 void WorldSession::HandleSplitItemOpcode(WorldPackets::Item::SplitItem& packet)
 {
@@ -913,7 +912,6 @@ void WorldSession::SendListInventory(ObjectGuid vendorGuid, uint32 vendorEntry)
         {
             if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(item->item))
             {
-#ifdef MOD_NPCERBOTS
                 // npcbot
                 if (_player->HaveBot())
                 {
@@ -923,7 +921,6 @@ void WorldSession::SendListInventory(ObjectGuid vendorGuid, uint32 vendorEntry)
                 }
                 else
                 // end npcbot
-#endif
                 if (!(itemTemplate->AllowableClass & _player->getClassMask()) && itemTemplate->Bonding == BIND_WHEN_PICKED_UP && !_player->IsGameMaster())
                 {
                     continue;
@@ -1086,12 +1083,13 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket& recvData)
     {
         std::string Name = pName->name;
         LocaleConstant loc_idx = GetSessionDbLocaleIndex();
-#ifdef MOD_NPCERBOTS
         //npcbot: pointless check, see AccountInfo()
+        /*
         //end npcbot
-#else
         if (loc_idx >= 0)
-#endif        
+        //npcbot
+        */
+        //end npcbot
             if (ItemSetNameLocale const* isnl = sObjectMgr->GetItemSetNameLocale(itemid))
                 ObjectMgr::GetLocaleString(isnl->Name, loc_idx, Name);
 

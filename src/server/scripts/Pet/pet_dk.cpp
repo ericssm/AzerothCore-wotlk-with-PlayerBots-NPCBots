@@ -115,7 +115,6 @@ struct npc_pet_dk_ebon_gargoyle : ScriptedAI
 
     void MySelectNextTarget()
     {
-#ifdef MOD_NPCERBOTS
             //npcbot: allow bot summons to select bot's target without being engaged themselves
             Unit* creator = me->GetCreator();
             if (creator && creator->IsCreature())
@@ -139,7 +138,6 @@ struct npc_pet_dk_ebon_gargoyle : ScriptedAI
                 return;
             }
             //end npcbot
-#endif
 
         Unit* owner = me->GetOwner();
         if (owner && owner->IsPlayer() && (!me->GetVictim() || me->GetVictim()->IsImmunedToSpell(sSpellMgr->GetSpellInfo(SPELL_GARGOYLE_STRIKE)) || !me->IsValidAttackTarget(me->GetVictim()) || !owner->CanSeeOrDetect(me->GetVictim())))
@@ -373,7 +371,7 @@ struct npc_pet_dk_army_of_the_dead : public AggressorAI
         return AggressorAI::CanAIAttack(target);
     }
 
-    // Owner started attacking a target ¡ª engage immediately.
+    // Owner started attacking a target â€” engage immediately.
     // We bypass OnOwnerCombatInteraction because CanStartAttack -> CanAIAttack
     // may reject the target before combat refs are established.
     void OwnerAttacked(Unit* target) override
@@ -384,7 +382,7 @@ struct npc_pet_dk_army_of_the_dead : public AggressorAI
             AttackStart(target);
     }
 
-    // Owner was attacked ¡ª help defend.
+    // Owner was attacked â€” help defend.
     void OwnerAttackedBy(Unit* attacker) override
     {
         if (!attacker || !me->IsAlive() || me->HasReactState(REACT_PASSIVE))

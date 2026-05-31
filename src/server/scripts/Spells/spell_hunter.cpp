@@ -773,7 +773,6 @@ class spell_hun_sniper_training : public AuraScript
 
     void HandleUpdatePeriodic(AuraEffect* aurEff)
     {
-#ifdef MOD_NPCERBOTS
         //npcbot: handle creatures, remove dead trigger
         if (!GetUnitOwner()->IsAlive())
             return;
@@ -790,7 +789,6 @@ class spell_hun_sniper_training : public AuraScript
             return;
         }
         //end npcbot
-#endif
         if (Player* playerTarget = GetUnitOwner()->ToPlayer())
         {
             int32 baseAmount = aurEff->GetBaseAmount();

@@ -453,7 +453,6 @@ void MotionTransport::UnloadNonStaticPassengers()
             ++itr;
             continue;
         }
-#ifdef MOD_NPCERBOTS
         //npcbot: do not unload bots
         if ((*itr)->IsNPCBotOrPet())
         {
@@ -461,7 +460,6 @@ void MotionTransport::UnloadNonStaticPassengers()
             continue;
         }
         //end npcbot
-#endif
         PassengerSet::iterator itr2 = itr++;
         (*itr2)->AddObjectToRemoveList();
     }
@@ -572,12 +570,10 @@ void MotionTransport::DelayedTeleportTransport()
         switch (obj->GetTypeId())
         {
             case TYPEID_UNIT:
-#ifdef MOD_NPCERBOTS
                 //npcbot: do not add bots to transport (handled inside AI)
                 if (obj->IsNPCBotOrPet())
                     break;
                 //end npcbot
-#endif
                 _passengers.erase(obj);
                 if (!obj->ToCreature()->IsPet())
                     obj->ToCreature()->DespawnOrUnsummon();

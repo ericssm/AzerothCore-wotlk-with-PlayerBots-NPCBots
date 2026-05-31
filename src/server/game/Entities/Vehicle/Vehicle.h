@@ -56,13 +56,13 @@ public:
 
     SeatMap Seats;
 
-#ifdef MOD_NPCERBOTS
     //npcbot
+    /*
+    VehicleSeatEntry const* GetSeatForPassenger(Unit const* passenger);
+    */
     VehicleSeatEntry const* GetSeatForPassenger(Unit const* passenger) const;
     //end npcbot
-#else
-    VehicleSeatEntry const* GetSeatForPassenger(Unit const* passenger);
-#endif
+
     SeatMap::iterator GetSeatIteratorForPassenger(Unit* passenger);
 
 protected:

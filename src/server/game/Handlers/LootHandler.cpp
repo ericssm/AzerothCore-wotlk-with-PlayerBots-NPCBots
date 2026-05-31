@@ -30,11 +30,10 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
-#ifdef MOD_NPCERBOTS
 //npcbot
+#include "botconfig.h"
 #include "botmgr.h"
 //end npcbot
-#endif
 
 void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
 {
@@ -187,10 +186,8 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
     {
         sScriptMgr->OnPlayerBeforeLootMoney(player, loot);
         loot->NotifyMoneyRemoved();
-
-#ifdef MOD_NPCERBOTS
         //npcbot
-        if (shareMoney && player->GetGroup() && BotMgr::GetNpcBotMoneyShareEnabled())
+        if (shareMoney && player->GetGroup() && BotCfg::GetNpcBotMoneyShareEnabled())
         {
             Group* group = player->GetGroup();
             std::vector<Player*> playersNear;
@@ -211,7 +208,7 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
                 for (auto const& kv : *botMap)
                 {
                     Creature const* bot = kv.second;
-                    if (bot && bot->IsAlive() && bot->IsInMap(player) && (group->IsMember(kv.first) || !BotMgr::GetNpcBotMoneyShareGroupOnly()) &&
+                    if (bot && bot->IsAlive() && bot->IsInMap(player) && (group->IsMember(kv.first) || !BotCfg::GetNpcBotMoneyShareGroupOnly()) &&
                         (member->GetMap()->IsDungeon() || player->GetDistance(bot) <= sWorld->getFloatConfig(CONFIG_GROUP_XP_DISTANCE)))
                         ++bots_count;
                 }
@@ -233,7 +230,6 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
         }
         else
         //end npcbot
-#endif
         if (shareMoney && player->GetGroup())      //item, pickpocket and players can be looted only single player
         {
             Group* group = player->GetGroup();

@@ -28,11 +28,10 @@
  * Ordered alphabetically using scriptname.
  * Scriptnames of files in this file should be prefixed with "spell_pal_".
  */
-#ifdef MOD_NPCERBOTS
+
 //npcbot
 #include "Creature.h"
 //end npcbot
-#endif
 
 enum PaladinSpells
 {
@@ -344,12 +343,12 @@ private:
     {
         healPct = GetSpellInfo()->Effects[EFFECT_1].CalcValue();
         absorbPct = GetSpellInfo()->Effects[EFFECT_0].CalcValue();
-#ifdef MOD_NPCERBOTS
+
         //npcbot - allow for npcbots
         if (GetUnitOwner()->IsNPCBot())
             return true;
         //end npcbot
-#endif
+
         return GetUnitOwner()->IsPlayer();
     }
 
@@ -364,7 +363,7 @@ private:
         Unit* victim = GetTarget();
         int32 remainingHealth = victim->GetHealth() - dmgInfo.GetDamage();
         uint32 allowedHealth = victim->CountPctFromMaxHealth(35);
-#ifdef MOD_NPCERBOTS
+
         //npcbot - calc for bots
         if (victim->GetTypeId() == TYPEID_UNIT/* && victim->ToCreature()->IsNPCBot()*/)
         {
@@ -396,7 +395,7 @@ private:
             return;
         }
         //end npcbot
-#endif
+
         // If damage kills us
         if (remainingHealth <= 0 && !victim->ToPlayer()->HasAura(PAL_SPELL_ARDENT_DEFENDER_DEBUFF))
         {
@@ -649,7 +648,6 @@ class spell_pal_divine_sacrifice : public AuraScript
     {
         if (Unit* caster = GetCaster())
         {
-#ifdef MOD_NPCERBOTS
             //npcbot: handle for bots
             if (caster->IsNPCBot())
             {
@@ -667,7 +665,6 @@ class spell_pal_divine_sacrifice : public AuraScript
                 return true;
             }
             //end npcbot
-#endif
             if (caster->IsPlayer())
             {
                 if (caster->ToPlayer()->GetGroup())
@@ -1191,11 +1188,9 @@ class spell_pal_righteous_defense : public SpellScript
     {
         Unit* caster = GetCaster();
         if (!caster->IsPlayer())
-#ifdef MOD_NPCERBOTS
             //npcbot: this player check makes no sense
             if (!caster->IsNPCBot())
             //end npcbot
-#endif
             return SPELL_FAILED_DONT_REPORT;
 
         if (Unit* target = GetExplTargetUnit())

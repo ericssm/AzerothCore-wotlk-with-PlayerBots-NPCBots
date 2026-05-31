@@ -24,11 +24,9 @@
 #include "SpellMgr.h"
 #include "UnitAI.h"
 
-#ifdef MOD_NPCERBOTS
 //npcbot
-#include "botmgr.h"
+#include "botconfig.h"
 //end npcbot
-#endif
 
 namespace
 {
@@ -76,11 +74,9 @@ void ScriptMgr::Initialize()
 
     AddSC_SmartScripts();
 
-#ifdef MOD_NPCERBOTS
     //npcbot: load bot scripts here
     AddNpcBotScripts();
     //end npcbot
-#endif
 
     // LFGScripts
     lfg::AddSC_LFGScripts();

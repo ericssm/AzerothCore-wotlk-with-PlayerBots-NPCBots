@@ -200,7 +200,6 @@ public:
     bool   Create(Player* leader);
     bool   LoadGroupFromDB(Field* field);
     void   LoadMemberFromDB(ObjectGuid::LowType guidLow, uint8 memberFlags, uint8 subgroup, uint8 roles);
-#ifdef MOD_NPCERBOTS
     //npcbot
     bool Create(Creature* leader);
     bool AddMember(Creature* creature);
@@ -211,7 +210,6 @@ public:
     GroupBotReference* GetFirstBotMember() { return m_botMemberMgr.getFirst(); }
     GroupBotReference const* GetFirstBotMember() const { return m_botMemberMgr.getFirst(); }
     //end npcbot
-#endif
     bool   AddInvite(Player* player);
     void   RemoveInvite(Player* player);
     void   RemoveAllInvites();
@@ -346,12 +344,10 @@ public:
     void DoForAllMembers(std::function<void(Player*)> const& worker);
 
     DataMap CustomData;
-#ifdef MOD_NPCERBOTS
+
     //npcbots
     ObjectGuid const* GetTargetIcons() const { return m_targetIcons; }
     //end npcbots
-#endif
-
 
 protected:
     void _homebindIfInstance(Player* player);
@@ -366,11 +362,9 @@ protected:
 
     MemberSlotList      m_memberSlots;
     GroupRefMgr     m_memberMgr;
-#ifdef MOD_NPCERBOTS
     //npcbot
     GroupBotRefManager  m_botMemberMgr;
     //end npcbot
-#endif
     InvitesList         m_invitees;
     ObjectGuid          m_leaderGuid;
     std::string         m_leaderName;

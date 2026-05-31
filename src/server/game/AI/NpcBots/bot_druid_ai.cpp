@@ -1,4 +1,6 @@
 #include "bot_ai.h"
+#include "botdatamgr.h"
+#include "botlogtraits.h"
 #include "botmgr.h"
 #include "bottext.h"
 #include "bottraits.h"
@@ -21,7 +23,7 @@ TODO: Resolve remaining bugs with wrong power type after death
 TODO2: PvP behaviour revamp (again, it's like 5th time?)
 */
 
-#define MAX_TREANTS 3
+static constexpr uint8 MAX_TREANTS = 3;
 
 enum DruidBaseSpells
 {
@@ -183,30 +185,21 @@ enum DruidSpecial
     INFECTED_WOUNDS_EFFECT              = 58181,//rank 3
     PRIMAL_FURY_EFFECT_ENERGIZE         = 16959,//5 rage
 
-    FORCE_OF_NATURE_1                   = 33831 //not casted
+    FORCE_OF_NATURE_1                   = 33831, //not casted
+    PRE_PULL_HEAL_TIMER                 = 1100
 };
 
-static const uint32 Druid_spells_damage_arr[] =
+static const std::vector<uint32> Druid_spells_damage
 { FAERIE_FIRE_FERAL_1, CLAW_1, FEROCIOUS_BITE_1, MAIM_1, MANGLE_CAT_1, POUNCE_1, RAKE_1, RAVAGE_1, RIP_1, SHRED_1,
 SWIPE_CAT_1, LACERATE_1, MANGLE_BEAR_1, MAUL_1,SWIPE_BEAR_1, ENTANGLING_ROOTS_1, HURRICANE_1, INSECT_SWARM_1,
 WRATH_1, MOONFIRE_1, STARFALL_1, STARFIRE_1, TYPHOON_1, THORNS_1 };
-
-static const uint32 Druid_spells_cc_arr[] =
-{ BASH_1, CYCLONE_1, ENTANGLING_ROOTS_1, FERAL_CHARGE_BEAR_1, HIBERNATE_1, MAIM_1, POUNCE_1, TYPHOON_1 };
-
-static const uint32 Druid_spells_heal_arr[] =
-{ HEALING_TOUCH_1, LIFEBLOOM_1, NOURISH_1, REGROWTH_1, REJUVENATION_1, SWIFTMEND_1, TRANQUILITY_1, WILD_GROWTH_1 };
-
-static const uint32 Druid_spells_support_arr[] =
+static const std::vector<uint32> Druid_spells_cc{ BASH_1, CYCLONE_1, ENTANGLING_ROOTS_1, FERAL_CHARGE_BEAR_1, HIBERNATE_1, MAIM_1, POUNCE_1, TYPHOON_1 };
+static const std::vector<uint32> Druid_spells_heal{ HEALING_TOUCH_1, LIFEBLOOM_1, NOURISH_1, REGROWTH_1, REJUVENATION_1, SWIFTMEND_1, TRANQUILITY_1, WILD_GROWTH_1 };
+static const std::vector<uint32> Druid_spells_support
 { ABOLISH_POISON_1, BARKSKIN_1, BERSERK_1, CHALLENGING_ROAR_1, COWER_1, CURE_POISON_1, DASH_1, ENRAGE_1,
 FAERIE_FIRE_NORMAL_1, FAERIE_FIRE_FERAL_1, FERAL_CHARGE_BEAR_1, FERAL_CHARGE_CAT_1, FRENZIED_REGENERATION_1,
 GROWL_1, INNERVATE_1, MARK_OF_THE_WILD_1, NATURES_GRASP_1, NATURES_SWIFTNESS_1, PROWL_1, REMOVE_CURSE_1,
 REBIRTH_1, REVIVE_1, SAVAGE_ROAR_1, SURVIVAL_INSTINCTS_1, THORNS_1, TIGERS_FURY_1 };
-
-static const std::vector<uint32> Druid_spells_damage(FROM_ARRAY(Druid_spells_damage_arr));
-static const std::vector<uint32> Druid_spells_cc(FROM_ARRAY(Druid_spells_cc_arr));
-static const std::vector<uint32> Druid_spells_heal(FROM_ARRAY(Druid_spells_heal_arr));
-static const std::vector<uint32> Druid_spells_support(FROM_ARRAY(Druid_spells_support_arr));
 
 static float rageLossMult;
 
@@ -347,21 +340,21 @@ public:
         {
             if (!bot_ai::StartAttack(u, force))
                 return;
-            if (_form == DRUID_BEAR_FORM && HasRole(NPC_BOT_ROLE_RANGED) && IsSpellReady(BASH_1, GetLastDiff(), false))
+            if (_form == DRUID_BEAR_FORM && HasRole(BOT_ROLE_RANGED) && IsSpellReady(BASH_1, GetLastDiff(), false))
                 return;
             GetInPosition(force, u);
         }
 
         bool MassGroupHeal(Player* gPlayer, uint32 diff)
         {
-            if (!HasRole(NPC_BOT_ROLE_HEAL)) return false;
+            if (!HasRole(BOT_ROLE_HEAL)) return false;
             if (!gPlayer || GC_Timer > diff || IAmFree()) return false;
             if (IsCasting()) return false; // if I'm already casting
             if (Rand() > 30 + 50 * (me->GetMap()->IsRaid())) return false;
             if (!gPlayer->GetGroup()) return false;
 
             bool tranq = IsSpellReady(TRANQUILITY_1, diff, false) && master->GetBotMgr()->IsPartyInCombat(false);
-            bool growt = IsSpellReady(WILD_GROWTH_1, diff, false) && !HasRole(NPC_BOT_ROLE_DPS);
+            bool growt = IsSpellReady(WILD_GROWTH_1, diff, false) && !HasRole(BOT_ROLE_DPS);
             if (!tranq && !growt)
                 return false;
 
@@ -501,32 +494,14 @@ public:
             if (!(_form == DRUID_MOONKIN_FORM || _form == BOT_STANCE_NONE))
                 return;
             //Skip Tranquility, Hurricane
-            if (GC_Timer > diff || Rand() > 35 || IsChanneling() || (HasRole(NPC_BOT_ROLE_HEAL) && IsCasting()))
+            if (GC_Timer > diff || Rand() > 35 || (!IAmFree() && IsChanneling()) || (HasRole(BOT_ROLE_HEAL) && IsCasting()))
                 return;
 
-            if (IsSpellReady(CYCLONE_1, diff))
-            {
-                if (Unit* target = FindCastingTarget(20, 0, CYCLONE_1))
-                {
-                    bool cast = false;
-                    for (uint8 i = CURRENT_GENERIC_SPELL; i != CURRENT_AUTOREPEAT_SPELL; ++i)
-                    {
-                        Spell const* spell = target->GetCurrentSpell(CurrentSpellTypes(i));
-                        if (spell && spell->GetTimer() > 1500 &&
-                            (IAmFree() ? (spell->m_targets.GetUnitTarget() == me) : (master->GetGroup() && master->GetGroup()->IsMember(spell->m_targets.GetObjectTargetGUID()))))
-                        {
-                            cast = true;
-                            break;
-                        }
-                    }
-                    if (cast)
-                    {
-                        me->InterruptNonMeleeSpells(false);
-                        if (doCast(target, GetSpell(CYCLONE_1)))
+            if (IsSpellReady(CYCLONE_1, diff, false) && !HasQueuedSpellAction(CYCLONE_1))
+                if (Unit const* target = FindCastingTarget(20, 0, CYCLONE_1))
+                    if (IsCastingOnMyParty(target, 1500))
+                        if (EnqueueCounterSpellAction(target->GetGUID(), CYCLONE_1, true))
                             return;
-                    }
-                }
-            }
         }
 
         void UpdateAI(uint32 diff) override
@@ -580,7 +555,7 @@ public:
             else
                 DoNonCombatActions(diff);
 
-            if (HasRole(NPC_BOT_ROLE_RANGED) || !me->IsInCombat() || !me->GetVictim() ||
+            if (HasRole(BOT_ROLE_RANGED) || !me->IsInCombat() || !me->GetVictim() ||
                 (_form != DRUID_BEAR_FORM && (_form != DRUID_CAT_FORM || !me->GetMap()->IsRaid())))
                 BuffAndHealGroup(diff);
             if (_form != DRUID_BEAR_FORM && _form != DRUID_CAT_FORM)
@@ -588,6 +563,8 @@ public:
                 CureGroup(GetSpell(CURE_POISON_1), diff);
                 CureGroup(GetSpell(REMOVE_CURSE_1), diff);
             }
+
+            DoPrePullTankHealing(diff);
 
             if (ProcessImmediateNonAttackTarget())
                 return;
@@ -627,7 +604,7 @@ public:
             //NOT all forms abilities (prioritized)
             //Cat Instaheal
             if (_form == DRUID_CAT_FORM && GC_Timer <= diff && Rand() < 60 &&
-                HasRole(NPC_BOT_ROLE_HEAL) && GetHealthPCT(me) < 45 &&
+                HasRole(BOT_ROLE_HEAL) && GetHealthPCT(me) < 45 &&
                 (me->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DRUID, 0x0, 0x80000, 0x0) ||/*me->HasAura(PREDATORS_SWIFTNESS_BUFF)*/
                 (IsSpellReady(NATURES_SWIFTNESS_1, diff, false) && doCast(me, GetSpell(NATURES_SWIFTNESS_1)))))
             {
@@ -645,14 +622,14 @@ public:
             }
             //Roots
             if (_form != DRUID_BEAR_FORM && _form != DRUID_TREE_FORM && Rand() < 35 &&
-                (HasRole(NPC_BOT_ROLE_DPS) || IAmFree()) && IsSpellReady(ENTANGLING_ROOTS_1, diff) &&
+                (HasRole(BOT_ROLE_DPS) || IAmFree()) && IsSpellReady(ENTANGLING_ROOTS_1, diff) &&
                 (_form != DRUID_CAT_FORM || IAmFree() || me->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DRUID, 0x0, 0x80000, 0x0)
                 /*me->HasAura(PREDATORS_SWIFTNESS_BUFF)*/))
                 CheckRoots();
 
             //ALL forms abilities
             //Nature's Grasp (no shapeshift)
-            if (IsSpellReady(NATURES_GRASP_1, diff) && HasRole(NPC_BOT_ROLE_DPS) && HasRole(NPC_BOT_ROLE_RANGED) && Rand() < 70 &&
+            if (IsSpellReady(NATURES_GRASP_1, diff) && HasRole(BOT_ROLE_DPS) && HasRole(BOT_ROLE_RANGED) && Rand() < 70 &&
                 !me->getAttackers().empty())
             {
                 if (doCast(me, GetSpell(NATURES_GRASP_1)))
@@ -697,7 +674,7 @@ public:
                         break;
                     case DRUID_MOONKIN_FORM:
                     case BOT_STANCE_NONE:
-                        if (HasRole(NPC_BOT_ROLE_DPS))
+                        if (HasRole(BOT_ROLE_DPS))
                             doBalanceActions(mytar, diff);
                         break;
                     default:
@@ -729,12 +706,12 @@ public:
             //GROWL //No GCD
             Unit* u = mytar->GetVictim();
             if (IsSpellReady(GROWL_1, diff, false) && u && u != me && Rand() < 40 && dist < 30 &&
-                mytar->GetTypeId() == TYPEID_UNIT && !mytar->IsControlledByPlayer() &&
+                mytar->IsCreature() && !mytar->IsControlledByPlayer() &&
                 !CCed(mytar) && !mytar->HasAuraType(SPELL_AURA_MOD_TAUNT) &&
                 (!IsTank(u) || (IsTank() && GetHealthPCT(me) > 67 &&
                 (GetHealthPCT(u) < 30 || (IsOffTank() && !IsOffTank(u) && IsPointedOffTankingTarget(mytar)) ||
                 (!IsOffTank() && IsOffTank(u) && IsPointedTankingTarget(mytar))))) &&
-                ((!IsTankingClass(u->GetClass()) && GetHealthPCT(u) < 80) || IsTank()) &&
+                ((!BotDataMgr::IsTankingClass(u->GetClass()) && GetHealthPCT(u) < 80) || IsTank()) &&
                 IsInBotParty(u))
             {
                 if (doCast(mytar, GetSpell(GROWL_1)))
@@ -742,8 +719,8 @@ public:
             }
             //GROWL 2 (distant)
             if (IsSpellReady(GROWL_1, diff, false) && !IAmFree() && u == me &&  Rand() < 20 && IsTank() &&
-                (IsOffTank() || master->GetBotMgr()->GetNpcBotsCountByRole(NPC_BOT_ROLE_TANK_OFF) == 0) &&
-                !(me->GetLevel() >= 40 && mytar->GetTypeId() == TYPEID_UNIT &&
+                (IsOffTank() || master->GetBotMgr()->GetNpcBotsCountByRole(BOT_ROLE_TANK_OFF) == 0) &&
+                !(me->GetLevel() >= 40 && mytar->IsCreature() &&
                 (mytar->ToCreature()->IsDungeonBoss() || mytar->ToCreature()->isWorldBoss())))
             {
                 if (Unit* tUnit = FindDistantTauntTarget())
@@ -754,13 +731,13 @@ public:
             }
             //Challenging Roar
             if (IsSpellReady(CHALLENGING_ROAR_1, diff) &&
-                !(u == me && me->GetLevel() >= 40 && mytar->GetTypeId() == TYPEID_UNIT &&
+                !(u == me && me->GetLevel() >= 40 && mytar->IsCreature() &&
                 (mytar->ToCreature()->IsDungeonBoss() || mytar->ToCreature()->isWorldBoss())) &&
                 rage >= acost(CHALLENGING_ROAR_1))
             {
                 u = mytar->GetVictim();
                 if (u && u != me && !IsTank(u) && IsInBotParty(u) && !CCed(mytar) && dist <= 10 && Rand() < 25 &&
-                    (!IsTankingClass(u->GetClass()) || IsTank()))
+                    (!BotDataMgr::IsTankingClass(u->GetClass()) || IsTank()))
                 {
                     if (doCast(me, GetSpell(CHALLENGING_ROAR_1)))
                         return;
@@ -770,9 +747,9 @@ public:
                     std::list<Unit*> targets;
                     GetNearbyTargetsList(targets, 9.f, 1);
                     uint8 count = 0;
-                    for (std::list<Unit*>::const_iterator itr = targets.begin(); itr != targets.end(); ++itr)
+                    for (Unit const* u : targets)
                     {
-                        if (!((*itr)->GetVictim() && IsTank((*itr)->GetVictim())))
+                        if (!(u->GetVictim() && IsTank(u->GetVictim())))
                             if (++count > 1)
                                 break;
                     }
@@ -805,7 +782,7 @@ public:
             if (dist > 5) return;
 
             //Berserk (Bear)
-            if (IsSpellReady(BERSERK_1, diff) && !HasRole(NPC_BOT_ROLE_HEAL) && rage > 400 && Rand() < 40 &&
+            if (IsSpellReady(BERSERK_1, diff) && !HasRole(BOT_ROLE_HEAL) && rage > 400 && Rand() < 40 &&
                 me->getAttackers().size() > 2)
             {
                 if (doCast(me, GetSpell(BERSERK_1)))
@@ -951,9 +928,9 @@ public:
             }
             //Berserk can be used After Tiger's Fury without dispelling it
             //Berserk (Cat)
-            if (IsSpellReady(BERSERK_1, diff) && Rand() < 80 && !IsSpellReady(TIGERS_FURY_1, diff, false) && (!HasRole(NPC_BOT_ROLE_HEAL) || me->HasAuraType(SPELL_AURA_MOD_FEAR)) &&
+            if (IsSpellReady(BERSERK_1, diff) && Rand() < 80 && !IsSpellReady(TIGERS_FURY_1, diff, false) && (!HasRole(BOT_ROLE_HEAL) || me->HasAuraType(SPELL_AURA_MOD_FEAR)) &&
                 (!me->HasAuraType(SPELL_AURA_MOD_STEALTH) || energy >= 40 || me->GetAuraEffect(SPELL_AURA_ADD_PCT_MODIFIER, SPELLFAMILY_DRUID, 0x0, 0x200000, 0x0)) &&
-                (mytar->GetTypeId() == TYPEID_PLAYER || mytar->GetHealth() + 5000 > me->GetHealth()))
+                (mytar->IsPlayer() || mytar->GetHealth() + 5000 > me->GetHealth()))
             {
                 if (doCast(me, GetSpell(BERSERK_1)))
                     return;
@@ -966,7 +943,7 @@ public:
                     GetSpell(POUNCE_1) &&
                     !mytar->HasAuraType(SPELL_AURA_MOD_STUN) &&
                     mytar->GetDiminishing(DIMINISHING_OPENING_STUN) < DIMINISHING_LEVEL_3 &&
-                    (mytar->GetTypeId() == TYPEID_PLAYER || (!IAmFree() && master->GetNpcBotsCount() > 1)) ? POUNCE_1 :
+                    (mytar->IsPlayer() || (!IAmFree() && master->GetNpcBotsCount() > 1)) ? POUNCE_1 :
                     GetSpell(RAVAGE_1) ? RAVAGE_1 :
                     GetSpell(SHRED_1) ? SHRED_1 : 0;
 
@@ -1063,7 +1040,7 @@ public:
         {
             MoveBehind(mytar);
 
-            if (HasRole(NPC_BOT_ROLE_HEAL) && GetManaPCT(me) < 25)
+            if (HasRole(BOT_ROLE_HEAL) && GetManaPCT(me) < 25)
                 return;
 
             //BOT_ROLE_DPS is checked in Attack(uint32)
@@ -1084,7 +1061,7 @@ public:
             //Starfall
             if (IsSpellReady(STARFALL_1, diff) && Rand() < 40)
             {
-                bool cast = (mytar->GetTypeId() == TYPEID_PLAYER || me->getAttackers().size() > 1);
+                bool cast = (mytar->IsPlayer() || me->getAttackers().size() > 1);
                 if (!cast)
                 {
                     std::list<Unit*> targets;
@@ -1174,7 +1151,7 @@ public:
         void BreakCC(uint32 diff) override
         {
             if (GC_Timer <= diff && Rand() < 25 && GetManaPCT(me) > 15 &&
-                (me->IsPolymorphed() || me->HasAuraWithMechanic((1<<MECHANIC_SNARE)|(1<<MECHANIC_ROOT))))
+                (me->IsPolymorphed() || me->HasAuraWithMechanic((1u<<MECHANIC_SNARE)|(1u<<MECHANIC_ROOT))))
             {
                 uint32 sshift;
                 switch (_form)
@@ -1198,7 +1175,7 @@ public:
                     return;
                 }
             }
-            if (IsSpellReady(BERSERK_1, diff) && Rand() < 10 && me->HasAuraWithMechanic(1<<MECHANIC_FEAR))
+            if (IsSpellReady(BERSERK_1, diff) && Rand() < 10 && me->HasAuraWithMechanic(1u<<MECHANIC_FEAR))
             {
                 if (doCast(me, GetSpell(BERSERK_1)))
                     return;
@@ -1234,7 +1211,7 @@ public:
             if (IsSpellReady(NATURES_SWIFTNESS_1, diff, false) && Rand() < 80 &&
                 (me->IsInCombat() || target->IsInCombat()) &&//may just revive
                 hp <= 20 && xppct <= 0 && xphploss > _heals[HEALING_TOUCH_1] / 2 &&
-                (target->GetTypeId() == TYPEID_PLAYER || IsTank(target) || target->IsInCombat() || !target->getAttackers().empty()))
+                (target->IsPlayer() || IsTank(target) || target->IsInCombat() || !target->getAttackers().empty()))
             {
                 me->InterruptNonMeleeSpells(false);
                 if (doCast(me, GetSpell(NATURES_SWIFTNESS_1)))
@@ -1245,12 +1222,10 @@ public:
             }
             if (IsSpellReady(NOURISH_1, diff) && xppct <= 65 && xphploss > _heals[REJUVENATION_1])
             {
-                static uint8 minHots = 2;
+                const uint8 minHots = 2;
                 uint8 hots = 0;
-                Unit::AuraEffectList const& effectList = target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_HEAL);
-                for (Unit::AuraEffectList::const_iterator itr = effectList.begin(); itr != effectList.end(); ++itr)
+                for (AuraEffect const* eff : target->GetAuraEffectsByType(SPELL_AURA_PERIODIC_HEAL))
                 {
-                    AuraEffect const* eff = *itr;
                     if (eff->GetCasterGUID() != me->GetGUID())
                         continue;
                     SpellInfo const* spellInfo = eff->GetSpellInfo();
@@ -1266,7 +1241,7 @@ public:
                 if (hots >= minHots && doCast(target, GetSpell(NOURISH_1)))
                     return true;
             }
-            if (IsSpellReady(SWIFTMEND_1, diff, false) && !HasRole(NPC_BOT_ROLE_DPS| NPC_BOT_ROLE_TANK) && hp < 60 &&
+            if (IsSpellReady(SWIFTMEND_1, diff, false) && !HasRole(BOT_ROLE_DPS|BOT_ROLE_TANK) && hp < 60 &&
                 (xppct <= 15 || int32(GetLostHP(target)) > _heals[REJUVENATION_1]) &&
                 //rejuv,regro
                 target->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_DRUID, 0x50, 0x0, 0x0, me->GetGUID())
@@ -1379,6 +1354,57 @@ public:
             }
         }
 
+        void DoPrePullTankHealing(uint32 diff)
+        {
+            if (prePullHealTimer > diff || GC_Timer > diff || Rand() > 75)
+                return;
+
+            prePullHealTimer = PRE_PULL_HEAL_TIMER;
+
+            if (me->IsMounted() || me->GetVehicle() || !HasRole(BOT_ROLE_HEAL) || HasRole(BOT_ROLE_TANK) || IAmFree() || !master->GetGroup() || GetManaPCT(me) < 55 || IsCasting())
+                return;
+
+            for (Unit* member : BotMgr::GetAllGroupMembers(master))
+            {
+                if (member == me || !member->IsAlive() || me->GetMap() != member->FindMap() || !IsTank(member) || me->GetDistance(member) > 40.f)
+                    continue;
+
+                Unit const* target = !member->getAttackers().empty() ? *member->getAttackers().begin() : member->GetVictim();
+                if (!target || !target->IsCreature() || member->GetExactDistSq(target) > 50 * 50)
+                    continue;
+
+                //check if combat is starting
+                const bool engaged = (!member->IsInCombat() || !target->IsInCombat()) && target == member->GetVictim(); //BotActionTypes::BOT_ACTION_PULL / master attacks
+                const bool engaged_by = target->ToCreature()->CanHaveThreatList() && target->GetThreatMgr().GetThreat(member) < member->GetMaxHealth() / 4;
+
+                if (!engaged && !engaged_by)
+                    continue;
+
+                if (IsSpellReady(REJUVENATION_1, diff) && !member->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_DRUID, 0x10, 0x0, 0x0, me->GetGUID()))
+                {
+                    if (doCast(member, GetSpell(REJUVENATION_1)))
+                        return;
+                }
+
+                // Healing spells with cast time will be interrupted when cast on target with full hp
+                //if (IsSpellReady(REGROWTH_1, diff) && !member->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_DRUID, 0x40, 0x0, 0x0, me->GetGUID()))
+                //{
+                //    if (doCast(member, GetSpell(REGROWTH_1)))
+                //        return;
+                //}
+
+                if (IsSpellReady(LIFEBLOOM_1, diff))
+                {
+                    AuraEffect const* bloom = member->GetAuraEffect(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_DRUID, 0x0, 0x10, 0x0, me->GetGUID());
+                    if (!bloom || bloom->GetBase()->GetStackAmount() < 3 || bloom->GetBase()->GetDuration() < 3500)
+                    {
+                        if (doCast(member, GetSpell(LIFEBLOOM_1)))
+                            return;
+                    }
+                }
+            }
+        }
+
         void DoNonCombatActions(uint32 diff)
         {
             if (GC_Timer > diff || me->IsMounted() || IsCasting())
@@ -1430,10 +1456,8 @@ public:
                 Group const* group = master->GetGroup();
                 if (!iTarget && !group) //first check master's bots
                 {
-                    BotMap const* map = master->GetBotMgr()->GetBotMap();
-                    for (BotMap::const_iterator itr = map->begin(); itr != map->end(); ++itr)
+                    for (auto const& [_, bot] : *master->GetBotMgr()->GetBotMap())
                     {
-                        Creature* bot = itr->second;
                         if (bot && !bot->IsTempBot() && _isValidInnervateTarget(bot))
                         {
                             iTarget = bot;
@@ -1444,8 +1468,10 @@ public:
                 if (!iTarget && group) //cycle through player members...
                 {
                     std::vector<Unit*> members = BotMgr::GetAllGroupMembers(group);
-                    for (uint8 i = 0; i < 2 && !iTarget; ++i)
+                    for (auto i : NPCBots::index_array<uint8, 2>)
                     {
+                        if (iTarget)
+                            break;
                         for (Unit* member : members)
                         {
                             if (!(i == 0 ? member->IsPlayer() : member->IsNPCBot()) || !_isValidInnervateTarget(member))
@@ -1461,7 +1487,7 @@ public:
 
             if (iTarget && doCast(iTarget, INNERVATE_1))
             {
-                if (iTarget->GetTypeId() == TYPEID_PLAYER)
+                if (iTarget->IsPlayer())
                     ReportSpellCast(INNERVATE_1, LocalizedNpcText(iTarget->ToPlayer(), BOT_TEXT__ON_YOU), iTarget->ToPlayer());
 
                 if (!IAmFree() && iTarget != master)
@@ -1536,10 +1562,8 @@ public:
                 }
             }
 
-            BotMap const* botMap = master->GetBotMgr()->GetBotMap();
-            for (BotMap::const_iterator itr = botMap->begin(); itr != botMap->end(); ++itr)
+            for (auto const& [_, bot] : *master->GetBotMgr()->GetBotMap())
             {
-                Creature* bot = itr->second;
                 if (bot && bot->IsInWorld() && !bot->IsAlive() && !bot->GetBotAI()->GetSelfRezSpell() && IsTank(bot) && me->GetDistance(bot) < 80)
                     targets.push_back(bot);
             }
@@ -1556,12 +1580,12 @@ public:
 
                 if (doCast(targetOrCorpse, GetSpell(REBIRTH_1))) //rezzing
                 {
-                    if (targetOrCorpse->GetTypeId() == TYPEID_PLAYER)
+                    if (targetOrCorpse->IsPlayer())
                         BotWhisper(LocalizedNpcText(targetOrCorpse->ToPlayer(), BOT_TEXT_REZZING_YOU), targetOrCorpse->ToPlayer());
                     if (targetOrCorpse != master)
                     {
                         std::string rezstr = LocalizedNpcText(master, BOT_TEXT_REZZING_) + targetOrCorpse->GetName();
-                        if (targetOrCorpse->GetTypeId() == TYPEID_UNIT)
+                        if (targetOrCorpse->IsCreature())
                             rezstr += " (" + LocalizedNpcText(master, BOT_TEXT_BOT_TANK) + ')';
                         BotWhisper(rezstr);
                     }
@@ -2243,7 +2267,7 @@ public:
 
             //Bash desperate use (ranged): retreat
             //Only if hit
-            if (baseId == BASH_1 && HasRole(NPC_BOT_ROLE_RANGED) && !HasBotCommandState(BOT_COMMAND_MASK_UNMOVING))
+            if (baseId == BASH_1 && HasRole(BOT_ROLE_RANGED) && !HasBotCommandState(BOT_COMMAND_MASK_UNMOVING))
             {
                 //if (GC_Timer <= lastdiff && GetSpell(TRAVEL_FORM_1))
                 //    doCast(me, GetSpell(TRAVEL_FORM_1));
@@ -2268,7 +2292,7 @@ public:
                 if (Aura* stu = target->GetAura(spellId))
                 {
                     //1 extra second on creatures
-                    uint32 dur = stu->GetDuration() + target->GetTypeId() == TYPEID_PLAYER ? 1000 : 2000;
+                    uint32 dur = stu->GetDuration() + (target->IsPlayer() ? 1000 : 2000);
                     stu->SetDuration(dur);
                     stu->SetMaxDuration(dur);
                 }
@@ -2347,7 +2371,7 @@ public:
                     mark->SetMaxDuration(dur);
 
                     //Improved Mark of the Wild: +40% effect
-                    for (uint8 i = 0; i != MAX_SPELL_EFFECTS; ++i)
+                    for (auto i : NPCBots::index_array<uint8, MAX_SPELL_EFFECTS>)
                         if (AuraEffect* app = mark->GetEffect(i))
                             app->ChangeAmount((app->GetAmount() * 14) / 10);
                 }
@@ -2504,7 +2528,7 @@ public:
 
         uint8 GetPetPositionNumber(Creature const* summon) const override
         {
-            for (uint8 i = 0; i != MAX_TREANTS; ++i)
+            for (auto i : NPCBots::index_array<uint8, MAX_TREANTS>)
                 if (_treants[i] == summon->GetGUID())
                     return i;
 
@@ -2515,9 +2539,9 @@ public:
         {
             UnsummonTreants();
 
-            uint32 entry = BOT_PET_FORCE_OF_NATURE;
+            const uint32 entry = BOT_PET_FORCE_OF_NATURE;
 
-            for (uint8 i = 0; i != MAX_TREANTS; ++i)
+            for ([[maybe_unused]] auto i : NPCBots::index_array<uint8, MAX_TREANTS>)
             {
                 //Position pos;
 
@@ -2545,7 +2569,7 @@ public:
             if (summon->GetEntry() == BOT_PET_FORCE_OF_NATURE)
             {
                 bool found = false;
-                for (uint8 i = 0; i != MAX_TREANTS; ++i)
+                for (auto i : NPCBots::index_array<uint8, MAX_TREANTS>)
                 {
                     if (!_treants[i])
                     {
@@ -2570,7 +2594,7 @@ public:
             if (summon->GetEntry() == BOT_PET_FORCE_OF_NATURE)
             {
                 //bool found = false;
-                for (uint8 i = 0; i != MAX_TREANTS; ++i)
+                for (auto i : NPCBots::index_array<uint8, MAX_TREANTS>)
                 {
                     if (_treants[i] == summon->GetGUID())
                     {
@@ -2589,7 +2613,7 @@ public:
 
         void UnsummonTreants()
         {
-            for (uint8 i = 0; i != MAX_TREANTS; ++i)
+            for (auto i : NPCBots::index_array<uint8, MAX_TREANTS>)
             {
                 if (_treants[i])
                 {
@@ -2603,7 +2627,7 @@ public:
 
         void UnsummonAll(bool /*savePets*/ = true) override
         {
-            for (uint8 i = 0; i != MAX_TREANTS; ++i)
+            for (auto i : NPCBots::index_array<uint8, MAX_TREANTS>)
             {
                 if (_treants[i])
                     if (Unit* tr = ObjectAccessor::GetUnit(*me, _treants[i]))
@@ -2627,7 +2651,7 @@ public:
         void Reset() override
         {
             UnsummonAll(false);
-            for (uint8 i = 0; i != MAX_TREANTS; ++i)
+            for (auto i : NPCBots::index_array<uint8, MAX_TREANTS>)
                 _treants[i] = ObjectGuid::Empty;
 
             //_form = BOT_STANCE_NONE;
@@ -2640,6 +2664,7 @@ public:
 
             hibery = false;
             hiberyCheckTimer = 0;
+            prePullHealTimer = 0;
 
             me->SetMaxPower(POWER_ENERGY, 100); //for regeneration
             rageLossMult = sWorld->getRate(RATE_POWER_RAGE_LOSS);
@@ -2654,6 +2679,7 @@ public:
             if (ragetimer > diff)                   ragetimer -= diff;
 
             if (hiberyCheckTimer > diff)            hiberyCheckTimer -= diff;
+            if (prePullHealTimer > diff)            prePullHealTimer -= diff;
         }
 
         void InitPowers() override
@@ -2839,9 +2865,9 @@ public:
                 case TYPHOON_1:
                 case STARFALL_1:
                 case MOONKIN_FORM_1:
-                    return (GetBotRoles() & NPC_BOT_ROLE_MASK_MAIN) == (NPC_BOT_ROLE_DPS| NPC_BOT_ROLE_RANGED);
+                    return (GetBotRoles() & BOT_ROLE_MASK_MAIN) == (BOT_ROLE_DPS|BOT_ROLE_RANGED);
                 case TREE_OF_LIFE_FORM_1:
-                    return ((GetBotRoles() & NPC_BOT_ROLE_MASK_MAIN) & ~NPC_BOT_ROLE_RANGED) == NPC_BOT_ROLE_HEAL;
+                    return ((GetBotRoles() & BOT_ROLE_MASK_MAIN) & ~BOT_ROLE_RANGED) == BOT_ROLE_HEAL;
                 case SURVIVAL_INSTINCTS_1:
                 case FRENZIED_REGENERATION_1:
                 case ENRAGE_1:
@@ -2853,7 +2879,7 @@ public:
                     return _form == DRUID_CAT_FORM;
                 case BERSERK_1:
                     return (_form == DRUID_BEAR_FORM || _form == DRUID_CAT_FORM) &&
-                        (((GetBotRoles() & NPC_BOT_ROLE_MASK_MAIN) & NPC_BOT_ROLE_TANK) || (GetBotRoles() & NPC_BOT_ROLE_MASK_MAIN) == NPC_BOT_ROLE_DPS);
+                        (((GetBotRoles() & BOT_ROLE_MASK_MAIN) & BOT_ROLE_TANK) || (GetBotRoles() & BOT_ROLE_MASK_MAIN) == BOT_ROLE_DPS);
                 default:
                     return false;
             }
@@ -2967,18 +2993,18 @@ public:
                 bool has_bear_form_spell = !!GetSpell(_baseSpellForShapeshift(DRUID_BEAR_FORM));
                 if ((IsTank() || (IsWanderer() && !has_cat_form_spell)) && has_bear_form_spell)
                     form = DRUID_BEAR_FORM;
-                else if (HasRole(NPC_BOT_ROLE_DPS))
+                else if (HasRole(BOT_ROLE_DPS))
                     form = has_cat_form_spell ? DRUID_CAT_FORM : has_bear_form_spell ? DRUID_BEAR_FORM : BOT_STANCE_NONE;
             }
-            if (form == BOT_STANCE_NONE && HasRole(NPC_BOT_ROLE_DPS))
-                form = (!HasRole(NPC_BOT_ROLE_HEAL) && !!GetSpell(_baseSpellForShapeshift(DRUID_MOONKIN_FORM))) ? DRUID_MOONKIN_FORM : BOT_STANCE_NONE;
-            if (form == BOT_STANCE_NONE && HasRole(NPC_BOT_ROLE_HEAL))
-                form = (!HasRole(NPC_BOT_ROLE_DPS) && !!GetSpell(_baseSpellForShapeshift(DRUID_TREE_FORM))) ? DRUID_TREE_FORM : BOT_STANCE_NONE;
+            if (form == BOT_STANCE_NONE && HasRole(BOT_ROLE_DPS))
+                form = (!HasRole(BOT_ROLE_HEAL) && !!GetSpell(_baseSpellForShapeshift(DRUID_MOONKIN_FORM))) ? DRUID_MOONKIN_FORM : BOT_STANCE_NONE;
+            if (form == BOT_STANCE_NONE && HasRole(BOT_ROLE_HEAL))
+                form = (!HasRole(BOT_ROLE_DPS) && !!GetSpell(_baseSpellForShapeshift(DRUID_TREE_FORM))) ? DRUID_TREE_FORM : BOT_STANCE_NONE;
             return form;
         }
 
         //Treants
-        ObjectGuid _treants[MAX_TREANTS];
+        std::array<ObjectGuid, MAX_TREANTS> _treants;
         //Timers/other
 /*Form*/BotStances _form;
 /*Misc*/mutable bool primalFuryProc;
@@ -2986,9 +3012,10 @@ public:
 /*Misc*/uint32 ragetimer;
         bool hibery;
         uint32 hiberyCheckTimer;
+        uint32 prePullHealTimer;
 /*Misc*/int32 rage, energy;
 
-        typedef std::unordered_map<uint32 /*baseId*/, int32 /*amount*/> HealMap;
+        using HealMap = std::unordered_map<uint32 /*baseId*/, int32 /*amount*/>;
         HealMap _heals;
     };
 };

@@ -1,4 +1,5 @@
 #include "bot_ai.h"
+#include "botdatamgr.h"
 #include "botmgr.h"
 #include "bottext.h"
 #include "bottraits.h"
@@ -167,22 +168,15 @@ enum RogueSpecial
     THISTLE_TEA                         = 9512 //'Restore Energy' 1 min cd
 };
 
-static const uint32 Rogue_spells_damage_arr[] =
+static const std::vector<uint32> Rogue_spells_damage
 { AMBUSH_1, BACKSTAB_1, DEADLY_THROW_1, EVISCERATE_1, ENVENOM_1, FAN_OF_KNIVES_1, GARROTE_1, GHOSTLY_STRIKE_1, GOUGE_1,
 HEMORRHAGE_1, KILLING_SPREE_1, MUTILATE_1, RIPOSTE_1, RUPTURE_1, SINISTER_STRIKE_1 };
-
-static const uint32 Rogue_spells_cc_arr[] =
-{ BLIND_1, CHEAP_SHOT_1, /*DEADLY_THROW_1, */DISMANTLE_1, GOUGE_1, KICK_1, KIDNEY_SHOT_1, /*SAP_1*/ };
-
-static const uint32 Rogue_spells_support_arr[] =
+static const std::vector<uint32> Rogue_spells_cc{ BLIND_1, CHEAP_SHOT_1, /*DEADLY_THROW_1, */DISMANTLE_1, GOUGE_1, KICK_1, KIDNEY_SHOT_1, /*SAP_1*/ };
+static const std::vector<uint32> Rogue_spells_support
 { /*EXPOSE_ARMOR_1, DISTRACT_1, PICK_LOCK_1,*/ STEALTH_1, ADRENALINE_RUSH_1, BLADE_FLURRY_1, CLOAK_OF_SHADOWS_1,
 COLD_BLOOD_1, DISMANTLE_1, EVASION_1, FEINT_1, HUNGER_FOR_BLOOD_1, PREMEDITATION_1, PREPARATION_1, SHADOW_DANCE_1,
 SHADOWSTEP_1, SLICE_DICE_1, SPRINT_1, TRICKS_OF_THE_TRADE_1, VANISH_1, DISARM_TRAP_1, THISTLE_TEA,
 /*CRIPPLING_POISON_1, INSTANT_POISON_1, DEADLY_POISON_1, WOUND_POISON_1, MIND_NUMBING_POISON_1, ANESTHETIC_POISON_1*/ };
-
-static const std::vector<uint32> Rogue_spells_damage(FROM_ARRAY(Rogue_spells_damage_arr));
-static const std::vector<uint32> Rogue_spells_cc(FROM_ARRAY(Rogue_spells_cc_arr));
-static const std::vector<uint32> Rogue_spells_support(FROM_ARRAY(Rogue_spells_support_arr));
 
 class rogue_bot : public CreatureScript
 {
@@ -261,6 +255,26 @@ public:
             return 0;
         }
 
+        void Counter(uint32 diff)
+        {
+            if (Rand() > 50 || me->HasAuraType(SPELL_AURA_MOD_STEALTH))
+                return;
+
+            if (Unit const* u = me->GetVictim(); u && u->IsNonMeleeSpellCast(false,false,true))
+            {
+                if (IsSpellReady(KICK_1, diff, false) && Rand() && !HasQueuedSpellAction(KICK_1))
+                    if (EnqueueCounterSpellAction(u->GetGUID(), KICK_1, true))
+                        return;
+                if (IsSpellReady(GOUGE_1, diff, false) && HasRole(BOT_ROLE_DPS) && !HasQueuedSpellAction(GOUGE_1) && u->HasInArc(float(M_PI), me))
+                    if (EnqueueCounterSpellAction(u->GetGUID(), GOUGE_1, true))
+                        return;
+            }
+            if (IsSpellReady(BLIND_1, diff, false) && !HasQueuedSpellAction(BLIND_1))
+                if (Unit const* target = FindCastingTarget(CalcSpellMaxRange(BLIND_1), 0, BLIND_1))
+                    if (EnqueueCounterSpellAction(target->GetGUID(), BLIND_1, true))
+                        return;
+        }
+
         void UpdateAI(uint32 diff) override
         {
             if (combopointsSpent)
@@ -289,6 +303,8 @@ public:
             if (!me->IsInCombat())
                 DoNonCombatActions(diff);
 
+            Counter(diff);
+
             if (IsCasting())
                 return;
 
@@ -305,7 +321,7 @@ public:
             {
                 if (!me->IsInCombat() && Rand() < 5 && me->HasAuraType(SPELL_AURA_MOD_STEALTH) &&
                     !me->GetAuraEffect(SPELL_AURA_MOD_INCREASE_SPEED, SPELLFAMILY_ROGUE, 0x800, 0x0, 0x0) && //vanish
-                    !(!HasRole(NPC_BOT_ROLE_DPS) && GetLastWMOArea() == 29476))
+                    !(!HasRole(BOT_ROLE_DPS) && GetLastWMOArea() == 29476))
                     me->RemoveAurasDueToSpell(STEALTH_1);
                 return;
             }
@@ -334,7 +350,7 @@ public:
             //Stealth (for Cooldown handling see bot_ai::ReleaseSpellCooldown)
             //we don't want rogue to swith into stealth for no purpose
             if (IsSpellReady(STEALTH_1, diff, false) && !me->IsInCombat() && !IsTank() && Rand() < 50 && dist < 28 &&
-                (!me->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE) || (mytar->GetTypeId() == TYPEID_PLAYER && dist < 6)) &&
+                (!me->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE) || (mytar->IsPlayer() && dist < 6)) &&
                 (me->GetLevel() >= 35 || (energy >= 40 && me->GetLevel() >= 30) || dist > 8) && !IsFlagCarrier(me))
             {
                 if (doCast(me, GetSpell(STEALTH_1)))
@@ -348,7 +364,7 @@ public:
             bool shadowdance = me->HasAuraType(SPELL_AURA_MOD_IGNORE_SHAPESHIFT);
 
             //Hunger for Blood
-            if (IsSpellReady(HUNGER_FOR_BLOOD_1, diff) && !shadowdance && HasRole(NPC_BOT_ROLE_DPS) && Rand() < 50 && dist < 30 &&
+            if (IsSpellReady(HUNGER_FOR_BLOOD_1, diff) && !shadowdance && HasRole(BOT_ROLE_DPS) && Rand() < 50 && dist < 30 &&
                 mytar->HasAuraState(AURA_STATE_BLEEDING) && energy >= ecost(HUNGER_FOR_BLOOD_1) &&
                 !me->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, SPELLFAMILY_ROGUE, 0x0, 0x1000000, 0x0))
             {
@@ -357,21 +373,14 @@ public:
             }
             //Premeditation
             if (IsSpellReady(PREMEDITATION_1, diff, false) && (stealthed || shadowdance) &&
-                HasRole(NPC_BOT_ROLE_DPS) && comboPoints < 4 && dist < 15 &&
+                HasRole(BOT_ROLE_DPS) && comboPoints < 4 && dist < 15 &&
                 (comboPoints == 0 || mytar->GetHealth() > me->GetMaxHealth() / 4))
             {
                 if (doCast(mytar, GetSpell(PREMEDITATION_1)))
                 {}
             }
-            //Kick
-            if (IsSpellReady(KICK_1, diff, false) && !stealthed && dist <= 5 && Rand() < 70 &&
-                energy >= ecost(KICK_1) && mytar->IsNonMeleeSpellCast(false,false,true))
-            {
-                if (doCast(mytar, GetSpell(KICK_1)))
-                    getenergy();
-            }
             //Killing Spree
-            if (IsSpellReady(KILLING_SPREE_1, diff) && !stealthed && !shadowdance && HasRole(NPC_BOT_ROLE_DPS) &&
+            if (IsSpellReady(KILLING_SPREE_1, diff) && !stealthed && !shadowdance && HasRole(BOT_ROLE_DPS) &&
                 Rand() < (70 - energy) && dist < 10 && GetHealthPCT(me) > 25 && (!CCed(mytar) || dist > 5) &&
                 (mytar->getAttackers().size() < 4 || mytar->GetMaxHealth() > me->GetMaxHealth() * 2) &&
                 (mytar->GetHealth() > me->GetMaxHealth() / 2 || me->getAttackers().size() > 1))
@@ -380,10 +389,9 @@ public:
                     return;
             }
              //Gouge: if mytar is trying to attack/cast on us he will always try to face us
-            if (IsSpellReady(GOUGE_1, diff) && !stealthed && !shadowdance && HasRole(NPC_BOT_ROLE_DPS) && dist <= 5 &&
-                Rand() < 30 && !CCed(mytar) && energy >= ecost(GOUGE_1) &&
-                ((energy < 55 && mytar->getAttackers().size() <= 1 && !mytar->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE)) ||
-                mytar->IsNonMeleeSpellCast(false,false,true)) && mytar->HasInArc(float(M_PI), me))
+            if (IsSpellReady(GOUGE_1, diff) && !stealthed && !shadowdance && HasRole(BOT_ROLE_DPS) && dist <= 5 &&
+                Rand() < 30 && !CCed(mytar) && energy >= ecost(GOUGE_1) && energy < 55 && mytar->getAttackers().size() <= 1 &&
+                !mytar->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE) && mytar->HasInArc(float(M_PI), me))
             {
                 if (doCast(mytar, GetSpell(GOUGE_1)))
                     return;
@@ -391,28 +399,23 @@ public:
             //Blind: in pvp only for restealth
             if (IsSpellReady(BLIND_1, diff) && !stealthed && !shadowdance && dist <= 15 && Rand() < 30 &&
                 !CCed(mytar) && !mytar->IsTotem() && energy >= ecost(BLIND_1) &&
-                ((energy <= 30 && mytar->GetTarget() == me->GetGUID() &&
-                mytar->getAttackers().size() <= 1 &&
-                !mytar->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE) &&
-                !me->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE)) ||
-                (mytar->GetTypeId() == TYPEID_UNIT &&
-                !IsSpellReady(KICK_1, diff) && !IsSpellReady(GOUGE_1, diff) &&
-                mytar->IsNonMeleeSpellCast(false,false,true))))
+                ((energy <= 30 && mytar->GetTarget() == me->GetGUID() && mytar->getAttackers().size() <= 1 &&
+                !mytar->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE) && !me->HasAuraType(SPELL_AURA_PERIODIC_DAMAGE))))
             {
                 if (doCast(mytar, GetSpell(BLIND_1)))
                     return;
             }
             //Blade Flurry
-            if (IsSpellReady(BLADE_FLURRY_1, diff) && HasRole(NPC_BOT_ROLE_DPS) && !stealthed && !shadowdance &&
+            if (IsSpellReady(BLADE_FLURRY_1, diff) && HasRole(BOT_ROLE_DPS) && !stealthed && !shadowdance &&
                 dist <= 5 && Rand() < 50 && energy >= ecost(BLADE_FLURRY_1) && !CCed(mytar) &&
                 !me->GetAuraEffect(SPELL_AURA_MOD_MELEE_HASTE, SPELLFAMILY_ROGUE, 0x40000000, 0x800, 0x0) &&
-                (mytar->GetTypeId() == TYPEID_PLAYER || mytar->GetHealth() > me->GetHealth() || FindSplashTarget(7, mytar)))
+                (mytar->IsPlayer() || mytar->GetHealth() > me->GetHealth() || FindSplashTarget(7, mytar)))
             {
                 if (doCast(me, GetSpell(BLADE_FLURRY_1)))
                     return;
             }
             //Slice and Dice
-            if (IsSpellReady(SLICE_DICE_1, diff) && !shadowdance && HasRole(NPC_BOT_ROLE_DPS) && comboPoints > 0 &&
+            if (IsSpellReady(SLICE_DICE_1, diff) && !shadowdance && HasRole(BOT_ROLE_DPS) && comboPoints > 0 &&
                 Rand() < 110 && energy >= ecost(SLICE_DICE_1) && dist < 10 &&
                 (me->getAttackers().size() <= 1 || !IsSpellReady(BLADE_FLURRY_1, diff)) &&
                 !me->GetAuraEffect(SPELL_AURA_MOD_MELEE_HASTE, SPELLFAMILY_ROGUE, 0x40000, 0x0, 0x0))
@@ -425,7 +428,7 @@ public:
                 mytar->GetHealth() >= me->GetHealth() / 2 && energy >= ecost(DISMANTLE_1) && dist <= 5 &&
                 !CCed(mytar) && Rand() < (30 + 90*mytar->HasAuraType(SPELL_AURA_ALLOW_ONLY_ABILITY)) &&
                 !mytar->HasAuraType(SPELL_AURA_MOD_DISARM) &&
-                (mytar->GetTypeId() == TYPEID_PLAYER ?
+                (mytar->IsPlayer() ?
                 mytar->ToPlayer()->GetWeaponForAttack(BASE_ATTACK) && mytar->ToPlayer()->GetWeaponForAttack(WeaponAttackType(BASE_ATTACK), true) :
                 mytar->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID) && mytar->CanUseAttackType(BASE_ATTACK)))
             {
@@ -433,11 +436,11 @@ public:
                     return;
             }
             //Shadowstep
-            if (IsSpellReady(SHADOWSTEP_1, diff, false) && !IsTank() && HasRole(NPC_BOT_ROLE_DPS) &&
+            if (IsSpellReady(SHADOWSTEP_1, diff, false) && !IsTank() && HasRole(BOT_ROLE_DPS) &&
                 Rand() < 50 && dist < 25 && energy >= ecost(SHADOWSTEP_1) &&
-                (mytar->GetTypeId() != TYPEID_PLAYER || dist > 12 || CCed(me, true)) &&
-                (mytar->GetTypeId() == TYPEID_PLAYER || mytar->GetVictim() != me) &&
-                ((!stealthed && !shadowdance) || me->HasAuraWithMechanic(1<<MECHANIC_SNARE)))
+                (!mytar->IsPlayer() || dist > 12 || CCed(me, true)) &&
+                (mytar->IsPlayer() || mytar->GetVictim() != me) &&
+                ((!stealthed && !shadowdance) || me->HasAuraWithMechanic(1u<<MECHANIC_SNARE)))
             {
                 if (doCast(mytar, GetSpell(SHADOWSTEP_1)))
                     getenergy();
@@ -460,9 +463,9 @@ public:
                     return; //custom: do not skip animation
             }
             //Deadly Throw
-            if (IsSpellReady(DEADLY_THROW_1, diff) && !stealthed && !shadowdance && HasRole(NPC_BOT_ROLE_DPS) &&
+            if (IsSpellReady(DEADLY_THROW_1, diff) && !stealthed && !shadowdance && HasRole(BOT_ROLE_DPS) &&
                 comboPoints > 0 && Rand() < 55 && dist < 30 && dist > 5 && energy >= ecost(DEADLY_THROW_1) &&
-                ((_spec != BOT_SPEC_ROGUE_COMBAT) || mytar->IsNonMeleeSpellCast(false,false,true)))
+                (_spec != BOT_SPEC_ROGUE_COMBAT || mytar->IsNonMeleeSpellCast(false,false,true)))
             {
                 Item const* thrown = GetEquips(BOT_SLOT_RANGED);
                 if (thrown && thrown->GetTemplate()->Class == ITEM_CLASS_WEAPON &&
@@ -475,31 +478,29 @@ public:
             bool hasnormalstun = false;
             int32 duration = 0;
             //sizes of theese are typically 1, sometimes maybe 2
-            Unit::AuraEffectList const& stunAuras = mytar->GetAuraEffectsByType(SPELL_AURA_MOD_STUN);
-            for (Unit::AuraEffectList::const_iterator itr = stunAuras.begin(); itr != stunAuras.end(); ++itr)
+            for (AuraEffect const* aeff : mytar->GetAuraEffectsByType(SPELL_AURA_MOD_STUN))
             {
-                if (!((*itr)->GetSpellInfo()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_TAKE_DAMAGE) &&
-                    (*itr)->GetBase()->GetDuration() > 2000)
+                if (!(aeff->GetSpellInfo()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_TAKE_DAMAGE) &&
+                    aeff->GetBase()->GetDuration() > 2000)
                 {
                     hasnormalstun = true;
                     break;
                 }
-                if ((*itr)->GetBase()->GetDuration() > duration)
-                    duration = (*itr)->GetBase()->GetDuration();
+                if (aeff->GetBase()->GetDuration() > duration)
+                    duration = aeff->GetBase()->GetDuration();
             }
             if (!hasnormalstun)
             {
-                Unit::AuraEffectList const& confuseAuras = mytar->GetAuraEffectsByType(SPELL_AURA_MOD_CONFUSE);
-                for (Unit::AuraEffectList::const_iterator itr = confuseAuras.begin(); itr != confuseAuras.end(); ++itr)
+                for (AuraEffect const* aeff : mytar->GetAuraEffectsByType(SPELL_AURA_MOD_CONFUSE))
                 {
-                    if (!((*itr)->GetSpellInfo()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_TAKE_DAMAGE) &&
-                        (*itr)->GetBase()->GetDuration() > 2000)
+                    if (!(aeff->GetSpellInfo()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_TAKE_DAMAGE) &&
+                        aeff->GetBase()->GetDuration() > 2000)
                     {
                         hasnormalstun = true;
                         break;
                     }
-                    if ((*itr)->GetBase()->GetDuration() > duration)
-                        duration = (*itr)->GetBase()->GetDuration();
+                    if (aeff->GetBase()->GetDuration() > duration)
+                        duration = aeff->GetBase()->GetDuration();
                 }
             }
 
@@ -561,7 +562,7 @@ public:
             }
 
             //Adrenaline Rush
-            if (GetSpell(ADRENALINE_RUSH_1) && !stealthed && !shadowdance && HasRole(NPC_BOT_ROLE_DPS) && (hasnormalstun || duration < 1300) && Rand() < 40 &&
+            if (GetSpell(ADRENALINE_RUSH_1) && !stealthed && !shadowdance && HasRole(BOT_ROLE_DPS) && (hasnormalstun || duration < 1300) && Rand() < 40 &&
                 energy < 50 && GetHealthPCT(me) > 35 &&
                 (mytar->getAttackers().size() < 3 || mytar->GetMaxHealth() > me->GetMaxHealth() * 2) &&
                 (mytar->GetHealth() > me->GetMaxHealth() / 2 || me->getAttackers().size() > 1))
@@ -575,13 +576,13 @@ public:
             bool hasHunger = me->GetAuraEffect(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, SPELLFAMILY_ROGUE, 0x0, 0x1000000, 0x0);
 
             //Rupture: little troll with applying rupture on target without breaking gouge (creatures only, pvp - restealth)
-            if (GetSpell(RUPTURE_1) && !stealthed && !shadowdance && HasRole(NPC_BOT_ROLE_DPS) &&
+            if (GetSpell(RUPTURE_1) && !stealthed && !shadowdance && HasRole(BOT_ROLE_DPS) &&
                 comboPoints > ((hasHunger || !GetSpell(HUNGER_FOR_BLOOD_1)) ? 1 : 0) &&
                 !(hasHunger && GetSpec() == BOT_SPEC_ROGUE_ASSASINATION && GetSpell(ENVENOM_1)) &&
                 (hasnormalstun || (mytar->CanHaveThreatList() && duration < 2000)) &&
                 (comboPoints < 4 || !GetSpell(KIDNEY_SHOT_1) || stunDivider > DIMINISHING_LEVEL_2) &&
                 energy >= ecost(RUPTURE_1) && mytar->GetHealth() > me->GetMaxHealth() / 4 * (1 + mytar->getAttackers().size()) &&
-                Rand() < (40 + 40 * (mytar->GetTypeId() == TYPEID_PLAYER && IsMeleeClass(mytar->GetClass()))) &&
+                Rand() < (40 + 40 * (mytar->IsPlayer() && BotDataMgr::IsMeleeClass(mytar->GetClass()))) &&
                 !mytar->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x100000, 0x0, 0x0, me->GetGUID()))
             {
                 if (doCast(mytar, GetSpell(RUPTURE_1)))
@@ -601,7 +602,7 @@ public:
                 if (GetSpell(KIDNEY_SHOT_1) && !stealthed && stunDivider < DIMINISHING_LEVEL_4 &&
                     Rand() < 80 && !CCed(mytar) && !mytar->IsImmunedToSpell(sSpellMgr->GetSpellInfo(KIDNEY_SHOT_1)) &&
                     ((comboPoints >= 4 && stunDivider < DIMINISHING_LEVEL_3 &&
-                    (mytar->GetHealth() > me->GetMaxHealth() / 2 || mytar->GetTypeId() == TYPEID_PLAYER)) ||
+                    (mytar->GetHealth() > me->GetMaxHealth() / 2 || mytar->IsPlayer())) ||
                     mytar->IsNonMeleeSpellCast(false,false,true)) &&
                     energy >= ecost(KIDNEY_SHOT_1))
                 {
@@ -611,7 +612,7 @@ public:
                 //Envenom / Eviscerate
                 uint32 envescerate = (GetSpec() == BOT_SPEC_ROGUE_ASSASINATION && GetSpell(ENVENOM_1) &&
                     (mytar->GetHealth() > me->GetMaxHealth() / 5 || !GetSpell(EVISCERATE_1))) ? ENVENOM_1 : GetSpell(EVISCERATE_1) ? EVISCERATE_1 : 0;
-                if (envescerate && IsSpellReady(envescerate, diff) && !stealthed && !shadowdance && HasRole(NPC_BOT_ROLE_DPS) &&
+                if (envescerate && IsSpellReady(envescerate, diff) && !stealthed && !shadowdance && HasRole(BOT_ROLE_DPS) &&
                     (comboPoints >= 4  || (envescerate == EVISCERATE_1 && mytar->GetHealth() < me->GetMaxHealth() / 4)) &&
                     (envescerate != ENVENOM_1 ||
                     (mytar->GetAuraEffect(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, SPELLFAMILY_ROGUE, 0x10000, 0x0, 0x0, me->GetGUID()) &&
@@ -628,10 +629,10 @@ public:
             }
 
             //Shadow Dance: if have energy or under effect of Adrenaline Rush
-            if (IsSpellReady(SHADOW_DANCE_1, diff, false) && !stealthed && HasRole(NPC_BOT_ROLE_DPS) && Rand() < 55 &&
+            if (IsSpellReady(SHADOW_DANCE_1, diff, false) && !stealthed && HasRole(BOT_ROLE_DPS) && Rand() < 55 &&
                 GetHealthPCT(me) > 40 && (stunDivider == DIMINISHING_LEVEL_1 || CCed(mytar)) &&
                 (energy >= 60 || (energy >= 40 && me->GetAuraEffect(SPELL_AURA_MOD_POWER_REGEN_PERCENT, SPELLFAMILY_ROGUE, 0x0, 0x80, 0x0))) &&
-                (mytar->GetTypeId() == TYPEID_PLAYER || mytar->GetHealth() > (me->GetMaxHealth() / 4) * mytar->getAttackers().size()))
+                (mytar->IsPlayer() || mytar->GetHealth() > (me->GetMaxHealth() / 4) * mytar->getAttackers().size()))
             {
                 if (doCast(me, GetSpell(SHADOW_DANCE_1)))
                 {}
@@ -643,19 +644,19 @@ public:
                 uint32 opener =
                     GetSpell(CHEAP_SHOT_1) &&
                     !mytar->HasAuraType(SPELL_AURA_MOD_STUN) && stunDivider < DIMINISHING_LEVEL_3 &&
-                    (mytar->GetTypeId() == TYPEID_PLAYER || (!IAmFree() && master->GetNpcBotsCount() > 1)) ? CHEAP_SHOT_1 :
-                    GetSpell(GARROTE_1) && HasRole(NPC_BOT_ROLE_DPS) && mytar->GetHealth() > me->GetMaxHealth() / 4 &&
+                    (mytar->IsPlayer() || (!IAmFree() && master->GetNpcBotsCount() > 1)) ? CHEAP_SHOT_1 :
+                    GetSpell(GARROTE_1) && HasRole(BOT_ROLE_DPS) && mytar->GetHealth() > me->GetMaxHealth() / 4 &&
                     !IsImmunedToMySpellEffect(mytar, sSpellMgr->GetSpellInfo(GARROTE_1), EFFECT_0) &&
-                    (!isdaggerMH || (mytar->GetTypeId() == TYPEID_PLAYER &&
+                    (!isdaggerMH || (mytar->IsPlayer() &&
                     (mytar->GetClass() == CLASS_MAGE || mytar->GetClass() == CLASS_PRIEST || mytar->GetClass() == CLASS_WARLOCK))) &&
                     !mytar->GetAuraEffect(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x100, 0x0, 0x0, me->GetGUID()) ? GARROTE_1 :
-                    GetSpell(AMBUSH_1) && HasRole(NPC_BOT_ROLE_DPS) && isdaggerMH ? AMBUSH_1 :
-                    GetSpell(BACKSTAB_1) && HasRole(NPC_BOT_ROLE_DPS) && isdaggerMH ? BACKSTAB_1 : 0;
+                    GetSpell(AMBUSH_1) && HasRole(BOT_ROLE_DPS) && isdaggerMH ? AMBUSH_1 :
+                    GetSpell(BACKSTAB_1) && HasRole(BOT_ROLE_DPS) && isdaggerMH ? BACKSTAB_1 : 0;
 
                 //all opener spells disabled/unusable
                 if (!opener)
                 {
-                    if (stealthed && HasRole(NPC_BOT_ROLE_DPS))
+                    if (stealthed && HasRole(BOT_ROLE_DPS))
                         me->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
                     //if (shadowdance)
                     //    me->RemoveAurasByType(SPELL_AURA_MOD_IGNORE_SHAPESHIFT);
@@ -676,7 +677,7 @@ public:
                 return;
             }
 
-            if (!HasRole(NPC_BOT_ROLE_DPS))
+            if (!HasRole(BOT_ROLE_DPS))
                 return;
 
             //Fan of Knives
@@ -739,7 +740,7 @@ public:
             {
                 bool canVanish = IsSpellReady(VANISH_1, diff, false) && !IsFlagCarrier(me);
                 bool canSprint = (GetSpec() == BOT_SPEC_ROGUE_COMBAT) && me->GetLevel() >= 25 && !HasBotCommandState(BOT_COMMAND_STAY) && IsSpellReady(SPRINT_1, diff, false);
-                if ((canVanish || canSprint) && me->HasAuraWithMechanic((1<<MECHANIC_SNARE)|(1<<MECHANIC_ROOT)))
+                if ((canVanish || canSprint) && me->HasAuraWithMechanic((1u<<MECHANIC_SNARE)|(1u<<MECHANIC_ROOT)))
                 {
                     uint32 Spanish = canSprint ? SPRINT_1 : VANISH_1;
                     if (doCast(me, GetSpell(Spanish)))
@@ -843,13 +844,12 @@ public:
 
             //dispel debuffs
             uint32 const dispelMask = DISPEL_ALL_MASK;
-            Unit::AuraApplicationMap const& Auras = me->GetAppliedAuras();
-            for (Unit::AuraApplicationMap::const_iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
+            for (auto const& [_, auraApp] : me->GetAppliedAuras())
             {
                 // remove all harmful spells on you...
-                SpellInfo const* spellInfo = iter->second->GetBase()->GetSpellInfo();
+                SpellInfo const* spellInfo = auraApp->GetBase()->GetSpellInfo();
                 if ((spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC || (spellInfo->GetDispelMask() & dispelMask)) &&
-                    !iter->second->IsPositive() && !iter->second->GetBase()->IsPassive())
+                    !auraApp->IsPositive() && !auraApp->GetBase()->IsPassive())
                 {
                     if (spellInfo->HasAura(SPELL_AURA_PERIODIC_DAMAGE) ||
                         spellInfo->HasAura(SPELL_AURA_MOD_SPEED_SLOW_ALL) ||
@@ -1724,7 +1724,7 @@ public:
 
         void CheckAttackState() override
         {
-            if (me->GetVictim() && HasRole(NPC_BOT_ROLE_DPS) && !me->HasAuraType(SPELL_AURA_MOD_STEALTH) &&
+            if (me->GetVictim() && HasRole(BOT_ROLE_DPS) && !me->HasAuraType(SPELL_AURA_MOD_STEALTH) &&
                 (me->isAttackReady() || me->isAttackReady(OFF_ATTACK)) &&
                 (!me->GetVictim()->GetAuraEffect(SPELL_AURA_MOD_STUN, SPELLFAMILY_ROGUE, 0x8, 0x0, 0x0) &&
                 !me->GetVictim()->GetAuraEffect(SPELL_AURA_MOD_CONFUSE, SPELLFAMILY_ROGUE, 0x01000000, 0x0, 0x0)))

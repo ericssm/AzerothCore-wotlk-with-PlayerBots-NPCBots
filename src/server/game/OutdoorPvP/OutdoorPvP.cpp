@@ -354,7 +354,6 @@ bool OPvPCapturePoint::Update(uint32 diff)
     if (factDiff == 0.f)
         return false;
 
-#ifdef MOD_NPCERBOTS
     //npcbots - count bots as players but 2 times less affect and only if there is a players difference
     uint32 botsCount[2];
 
@@ -371,7 +370,6 @@ bool OPvPCapturePoint::Update(uint32 diff)
 
     factDiff += 0.5f * ((float)botsCount[0] - (float)botsCount[1]) * diff / OUTDOORPVP_OBJECTIVE_UPDATE_INTERVAL;
     //end npcbot
-#endif
 
     TeamId ChallengerId = TEAM_NEUTRAL;
     float maxDiff = (_maxSpeed * float(diff)) * sWorld->getFloatConfig(CONFIG_OUTDOOR_PVP_CAPTURE_RATE);

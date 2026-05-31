@@ -192,7 +192,7 @@ public:
 
             if (Unit* u = me->GetVictim())
             {
-                if (petOwner->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS) && me->IsWithinMeleeRange(u) && me->isAttackReady())
+                if (petOwner->GetBotAI()->HasRole(BOT_ROLE_DPS) && me->IsWithinMeleeRange(u) && me->isAttackReady())
                 {
                     me->resetAttackTimer();
                     SpellInfo const* spellInfo = sSpellMgr->AssertSpellInfo(SPELL_SOUL_BITE);
@@ -208,7 +208,7 @@ public:
                         float dist = CONTACT_DISTANCE + me->GetCombatReach() * frand(1.0f, 3.0f);
                         float angle = frand(0.001f, float(M_PI * 2));
                         Position nearpos = u->GetNearPosition(dist, angle);
-                        me->GetMotionMaster()->MovePoint(1, nearpos.GetPositionX(), nearpos.GetPositionY(), nearpos.GetPositionZ(), FORCED_MOVEMENT_NONE, 0.0f, 0.0f, false);
+                        me->GetMotionMaster()->MovePoint(1, nearpos, FORCED_MOVEMENT_NONE, 0.0f, false);
                     }
                     return;
                 }
@@ -247,17 +247,17 @@ public:
                 _targetRecheckTimer = urand(1000, 1500);
 
                 std::list<Unit*> targets;
-                if (petOwner->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS) && !is_full && !expired)
+                if (petOwner->GetBotAI()->HasRole(BOT_ROLE_DPS) && !is_full && !expired)
                 {
                     Bcore::AnyUnfriendlyUnitInObjectRangeCheck check(petOwner, petOwner, LOCUST_SWARM_EFFECTIVE_RADIUS);
                     Bcore::UnitListSearcher searcher(petOwner, targets, check);
                     Cell::VisitObjects(petOwner, searcher, LOCUST_SWARM_EFFECTIVE_RADIUS);
 
-                    targets.remove_if([poguid = petOwner->GetGUID(), combat = petOwner->IsInCombat(), max_attackers = _attackers](Unit const* unit) {
+                    std::erase_if(targets, [poguid = petOwner->GetGUID(), combat = petOwner->IsInCombat(), max_attackers = _attackers](Unit const* unit) {
                         Unit::AttackerSet const& attackers = unit->getAttackers();
                         if (!(unit->IsInCombat() || (combat && !attackers.empty())))
                             return true;
-                        return max_attackers <= std::count_if(std::cbegin(attackers), std::cend(attackers), [oguid = poguid](Unit const* attacker) {
+                        return max_attackers <= std::ranges::count_if(attackers, [oguid = poguid](Unit const* attacker) {
                             return attacker->GetEntry() == BOT_PET_LOCUST_SWARM && attacker->GetOwnerGUID() == oguid;
                         });
                     });
@@ -281,7 +281,7 @@ public:
                     float dist = (expired || is_full) ? 0.0f : frand(3.0f, 20.0f);
                     float angle = frand(0.001f, float(M_PI * 2));
                     Position nearpos = petOwner->GetNearPosition(dist, angle);
-                    me->GetMotionMaster()->MovePoint(1, nearpos.GetPositionX(), nearpos.GetPositionY(), nearpos.GetPositionZ(), FORCED_MOVEMENT_NONE, 0.0f, 0.0f, false);
+                    me->GetMotionMaster()->MovePoint(1, nearpos, FORCED_MOVEMENT_NONE, 0.0f, false);
                 }
             }
         }

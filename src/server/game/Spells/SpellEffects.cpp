@@ -479,7 +479,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         damage += int32(energy * multiple);
                         damage += int32(CalculatePct(m_caster->GetComboPoints() * ap, 7));
                     }
-#ifdef MOD_NPCERBOTS
                     //npcbot: Ferocious Bite support
                     else if (m_caster->IsNPCBot() && (m_spellInfo->SpellFamilyFlags[0] & 0x800000) && m_spellInfo->SpellVisual[0] == 6587)
                     {
@@ -491,7 +490,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                         damage += int32(CalculatePct(m_caster->ToCreature()->GetCreatureComboPoints() * ap, 7));
                     }
                     //end npcbot
-#endif
                     // Wrath
                     else if (m_spellInfo->SpellFamilyFlags[0] & 0x00000001)
                     {
@@ -551,7 +549,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                                     damage += combo * 40;
                             }
                         }
-#ifdef MOD_NPCERBOTS
                         //npcbot: Envenom support
                         else if (m_caster->IsNPCBot())
                         {
@@ -598,7 +595,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             }
                         }
                         //end npcbot
-#endif
                     }
                     // Eviscerate
                     else if (m_spellInfo->SpellFamilyFlags[0] & 0x00020000)
@@ -615,7 +611,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                                     damage += combo * 40;
                             }
                         }
-#ifdef MOD_NPCERBOTS
                         //npcbot: Eviscerate support
                         else if (m_caster->IsNPCBot())
                         {
@@ -630,7 +625,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             }
                         }
                         //end npcbot
-#endif
                     }
                     break;
                 }
@@ -682,7 +676,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             }
                             damage += int32(caster->GetAmmoDPS() * caster->GetAttackTime(RANGED_ATTACK) * 0.001f);
                         }
-#ifdef MOD_NPCERBOTS
                         //npcbot: calculate bot weapon damage
                         if (m_caster->IsNPCBot())
                         {
@@ -704,7 +697,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             }
                         }
                         //end npcbot
-#endif
                     }
                     break;
                 }
@@ -730,7 +722,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             int32 count = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, EFFECT_2);
                             damage += count * int32(average * IN_MILLISECONDS) / m_caster->GetAttackTime(BASE_ATTACK);
                         }
-#ifdef MOD_NPCERBOTS
                         //npcbot: creature weaoin damage
                         else if (m_caster->IsNPCBot())
                         {
@@ -751,7 +742,6 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             damage += count * int32(average * IN_MILLISECONDS) / m_caster->GetAttackTime(BASE_ATTACK);
                         }
                         //end npcbot
-#endif
                         break;
                     }
                     // Shield of Righteousness
@@ -920,7 +910,6 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         // special cases
         switch (triggered_spell_id)
         {
-#ifdef MOD_NPCERBOTS
             //npcbot: triggered heal/energize calculation (effect)
             // Quest - Self Healing from resurrect (invisible in log)
             case 25155:
@@ -977,7 +966,6 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
                 break;
             }
             //end npcbot
-#endif
             // Mirror Image
             case 58832:
                 {
@@ -1079,11 +1067,9 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         return;
     }
 
-#ifdef MOD_NPCERBOTS
     //npcbot: override spellInfo
     spellInfo = spellInfo->TryGetSpellInfoOverride(GetCaster());
     //end npcbot
-#endif
 
     SpellCastTargets targets;
     if (effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
@@ -1142,11 +1128,9 @@ void Spell::EffectTriggerMissileSpell(SpellEffIndex effIndex)
         return;
     }
 
-#ifdef MOD_NPCERBOTS
     //npcbot: override spellInfo
     spellInfo = spellInfo->TryGetSpellInfoOverride(GetCaster());
     //end npcbot
-#endif
 
     SpellCastTargets targets;
     if (effectHandleMode == SPELL_EFFECT_HANDLE_HIT_TARGET)
@@ -1563,12 +1547,10 @@ void Spell::EffectPowerDrain(SpellEffIndex effIndex)
     if (PowerType == POWER_MANA)
         power -= unitTarget->GetSpellCritDamageReduction(power);
 
-#ifdef MOD_NPCERBOTS
     //npcbot: handle Obsidian Destroyer's Drain Mana (target is friendly, amount is only limited by caster's max mana)
     if (m_caster->GetTypeId() == TYPEID_UNIT && m_caster->ToCreature()->GetBotClass() == 13 && PowerType == POWER_MANA)
         power = m_caster->GetMaxPower(PowerType);
     //end npcbot
-#endif
 
     int32 newDamage = -(unitTarget->ModifyPower(PowerType, -int32(power)));
 
@@ -2294,7 +2276,6 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
         return;
 
-#ifdef MOD_NPCERBOTS
     //npcbot
     if (m_caster->IsNPCBot() && gameObjTarget)
     {
@@ -2333,7 +2314,6 @@ void Spell::EffectOpenLock(SpellEffIndex effIndex)
         return;
     }
     //end npcbot
-#endif
 
     if (!m_caster->IsPlayer())
     {
@@ -3675,7 +3655,6 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                             if (item->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
                                 AddPct(totalDamagePercentMod, 50.0f);
 
-#ifdef MOD_NPCERBOTS
                     //npcbot: handle bot weapons
                     // 50% more damage with daggers
                     if (m_caster->IsNPCBot())
@@ -3683,7 +3662,6 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                             if (weapon->GetTemplate()->SubClass == ITEM_SUBCLASS_WEAPON_DAGGER)
                                 totalDamagePercentMod *= 1.5f;
                     //end npcbot
-#endif
                 }
                 // Mutilate (for each hand)
                 else if (m_spellInfo->SpellFamilyFlags[1] & 0x6)
@@ -4061,7 +4039,6 @@ void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
             if (Battleground* bg = player->GetBattleground())
                 bg->SetDroppedFlagGUID(pGameObj->GetGUID(), player->GetTeamId() == TEAM_ALLIANCE ? TEAM_HORDE : TEAM_ALLIANCE);
 
-#ifdef MOD_NPCERBOTS
     //npcbot
     if (m_caster->IsNPCBot() && pGameObj->GetGoType() == GAMEOBJECT_TYPE_FLAGDROP)
     {
@@ -4069,7 +4046,6 @@ void Spell::EffectSummonObjectWild(SpellEffIndex effIndex)
             bg->SetDroppedFlagGUID(pGameObj->GetGUID(), bg->GetOtherTeamId(bg->GetBotTeamId(m_caster->GetGUID())));
     }
     //end npcbot
-#endif
 
     if (GameObject* linkedTrap = pGameObj->GetLinkedTrap())
     {
@@ -5158,6 +5134,11 @@ void Spell::EffectSkinning(SpellEffIndex /*effIndex*/)
     int32 targetLevel = creature->GetLevel();
 
     uint32 skill = creature->GetCreatureTemplate()->GetRequiredLootSkill();
+
+    //npcbot: skinning nobody's kill
+    if (!creature->hasLootRecipient())
+        creature->SetLootRecipient(m_caster);
+    //end npcbot
 
     creature->RemoveUnitFlag(UNIT_FLAG_SKINNABLE);
     creature->SetDynamicFlag(UNIT_DYNFLAG_LOOTABLE);
@@ -6310,7 +6291,6 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
     if (Player* modOwner = m_originalCaster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DURATION, duration);
 
-#ifdef MOD_NPCERBOTS
     //npcbot: most bot summons are botpets, we have no place to put summon duration mods, keep them here for now
     if (m_originalCaster->IsNPCBot())
     {
@@ -6325,7 +6305,6 @@ void Spell::SummonGuardian(uint32 i, uint32 entry, SummonPropertiesEntry const* 
         }
     }
     //end npcbot
-#endif
 
     //TempSummonType summonType = (duration == 0) ? TEMPSUMMON_DEAD_DESPAWN : TEMPSUMMON_TIMED_DESPAWN;
     Map* map = caster->GetMap();

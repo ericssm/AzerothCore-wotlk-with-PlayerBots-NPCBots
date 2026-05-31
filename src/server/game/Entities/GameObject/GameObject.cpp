@@ -37,12 +37,10 @@
 #include <G3D/Box.h>
 #include <G3D/CoordinateFrame.h>
 #include <G3D/Quat.h>
-#ifdef MOD_NPCERBOTS
+
 //npcbot
 #include "botmgr.h"
 //end npcbot
-#endif
-
 
 bool QuaternionData::IsUnit() const
 {
@@ -729,7 +727,7 @@ void GameObject::Update(uint32 diff)
                             Acore::PlayerSearcher<Acore::AnyPlayerInObjectRangeCheck> searcher(this, player, checker);
                             Cell::VisitObjects(this, searcher, radius);
                             target = player;
-#ifdef MOD_NPCERBOTS
+
                         //npcbot
                         if (!target)
                         {
@@ -740,8 +738,6 @@ void GameObject::Update(uint32 diff)
                             target = bot;
                         }
                         //end npcbot
-#endif
-
                         }
 
                         if (target)
@@ -829,14 +825,12 @@ void GameObject::Update(uint32 diff)
                                 if (Player* player = target->ToPlayer())
                                     if (Battleground* bg = player->GetBattleground())
                                         bg->HandleTriggerBuff(this);
-#ifdef MOD_NPCERBOTS
+
                         //npcbot
                         if (target->IsNPCBot() && !goInfo->trap.diameter && goInfo->trap.cooldown == 3)
                             if (Battleground* bg = target->ToCreature()->GetBotBG())
                                 bg->HandleTriggerBuff(this);
                         //end npcbot
-#endif
-
                         }
                         break;
                     }
@@ -1835,7 +1829,6 @@ void GameObject::Use(Unit* user)
 
         case GAMEOBJECT_TYPE_SUMMONING_RITUAL:              //18
             {
-#ifdef MOD_NPCERBOTS
                 //npcbot
                 if (user->IsNPCBot())
                 {
@@ -1844,10 +1837,7 @@ void GameObject::Use(Unit* user)
                     spellCaster = botOwner;
 
                     if (info->summoningRitual.animSpell)
-                    {
                         user->CastSpell(user, info->summoningRitual.animSpell, true);
-                        triggeredFlags = TRIGGERED_FULL_MASK;
-                    }
 
                     spellId = info->summoningRitual.spellId;
                     if (spellId == 62330)
@@ -1868,7 +1858,6 @@ void GameObject::Use(Unit* user)
                     break;
                 }
                 //end npcbot
-#endif
 
                 if (!user->IsPlayer())
                     return;
@@ -1985,7 +1974,6 @@ void GameObject::Use(Unit* user)
 
         case GAMEOBJECT_TYPE_FLAGSTAND:                     // 24
             {
-#ifdef MOD_NPCERBOTS
                 //npcbot
                 if (user->IsNPCBot())
                 {
@@ -1999,7 +1987,6 @@ void GameObject::Use(Unit* user)
                     }
                 }
                 //end npcbot
-#endif
 
                 if (!user->IsPlayer())
                     return;
@@ -2045,7 +2032,6 @@ void GameObject::Use(Unit* user)
 
         case GAMEOBJECT_TYPE_FLAGDROP:                      // 26
             {
-#ifdef MOD_NPCERBOTS
                 //npcbot
                 if (user->IsNPCBot())
                 {
@@ -2077,7 +2063,6 @@ void GameObject::Use(Unit* user)
                     }
                 }
                 //end npcbot
-#endif
 
                 if (!user->IsPlayer())
                     return;

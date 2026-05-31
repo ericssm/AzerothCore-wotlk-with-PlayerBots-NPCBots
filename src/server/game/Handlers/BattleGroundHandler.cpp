@@ -34,12 +34,11 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
-#ifdef MOD_NPCERBOTS
 //npcbot
+#include "botconfig.h"
 #include "botdatamgr.h"
 #include "botmgr.h"
 //end npcbot
-#endif
 
 void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recvData)
 {
@@ -208,7 +207,6 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
             return;
         }
 
-#ifdef MOD_NPCERBOTS
         //npcbot: do not allow entering as group if there are bots in group
         if (_player->GetGroup() && _player->HaveBot())
         {
@@ -224,7 +222,6 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
             }
         }
         //end npcbot
-#endif
 
         GroupQueueInfo* ginfo = bgQueue.AddGroup(_player, nullptr, bgTypeId, bracketEntry, 0, false, isPremade, 0, 0);
         uint32 avgWaitTime = bgQueue.GetAverageQueueWaitTime(ginfo);
@@ -295,12 +292,10 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
         }
 
         isPremade = (grp->GetMembersCount() >= bg->GetMinPlayersPerTeam() && bgTypeId != BATTLEGROUND_RB);
-#ifdef MOD_NPCERBOTS
         //npcbot: check premade for bots
-        if (isPremade && !BotMgr::IsNpcBotsPremadeEnabled() && grp->GetFirstBotMember() != nullptr)
+        if (isPremade && !BotCfg::IsNpcBotsPremadeEnabled() && grp->GetFirstBotMember() != nullptr)
             isPremade = false;
         //end npcbot
-#endif
         uint32 avgWaitTime = 0;
 
         GroupQueueInfo* ginfo = bgQueue.AddGroup(_player, grp, bgTypeId, bracketEntry, 0, false, isPremade, 0, 0);
@@ -319,7 +314,6 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
 
             sScriptMgr->OnPlayerJoinBG(member);
         });
-#ifdef MOD_NPCERBOTS
         //npcbot: debug report
         for (GroupReference* itr = grp->GetFirstMember(); itr != nullptr; itr = itr->next())
         {
@@ -345,7 +339,6 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recvData)
             }
         }
         //end npcbot
-#endif
     }
 
     sBattlegroundMgr->ScheduleQueueUpdate(0, 0, bgQueueTypeId, bgTypeId, bracketEntry->GetBracketId());
@@ -363,19 +356,16 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket& /*recvDa
     Player* allianceFlagCarrier = nullptr;
     Player* hordeFlagCarrier = nullptr;
 
-#ifdef MOD_NPCERBOTS
     //npcbot
     Creature const* afcbot = nullptr;
     Creature const* hfcbot = nullptr;
     //end npcbot
-#endif
 
     if (ObjectGuid guid = bg->GetFlagPickerGUID(TEAM_ALLIANCE))
     {
         allianceFlagCarrier = ObjectAccessor::FindPlayer(guid);
         if (allianceFlagCarrier)
             ++flagCarrierCount;
-#ifdef MOD_NPCERBOTS
         //npcbot
         else if (guid.IsCreature())
         {
@@ -384,7 +374,6 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket& /*recvDa
                 ++flagCarrierCount;
         }
         //end npcbot
-#endif
     }
 
     if (ObjectGuid guid = bg->GetFlagPickerGUID(TEAM_HORDE))
@@ -392,7 +381,6 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket& /*recvDa
         hordeFlagCarrier = ObjectAccessor::FindPlayer(guid);
         if (hordeFlagCarrier)
             ++flagCarrierCount;
-#ifdef MOD_NPCERBOTS
         //npcbot
         else if (guid.IsCreature())
         {
@@ -401,7 +389,6 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket& /*recvDa
                 ++flagCarrierCount;
         }
         //end npcbot
-#endif
     }
 
     WorldPacket data(MSG_BATTLEGROUND_PLAYER_POSITIONS, 4 + 4 + 16 * flagCarrierCount);
@@ -418,8 +405,6 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket& /*recvDa
         data << float(allianceFlagCarrier->GetPositionX());
         data << float(allianceFlagCarrier->GetPositionY());
     }
-
-#ifdef MOD_NPCERBOTS
     //npcbot
     else if (afcbot)
     {
@@ -428,7 +413,6 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket& /*recvDa
         data << float(afcbot->GetPositionY());
     }
     //end npcbot
-#endif
 
     if (hordeFlagCarrier)
     {
@@ -436,8 +420,6 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket& /*recvDa
         data << float(hordeFlagCarrier->GetPositionX());
         data << float(hordeFlagCarrier->GetPositionY());
     }
-
-#ifdef MOD_NPCERBOTS
     //npcbot
     else if (hfcbot)
     {
@@ -446,7 +428,6 @@ void WorldSession::HandleBattlegroundPlayerPositionsOpcode(WorldPacket& /*recvDa
         data << float(hfcbot->GetPositionY());
     }
     //end npcbot
-#endif
 
     SendPacket(&data);
 }
@@ -862,7 +843,6 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
         return;
     }
 
-#ifdef MOD_NPCERBOTS
     //npcbot
     bool have_bots_in_group = false;
     if (_player->GetGroup() && _player->HaveBot())
@@ -877,7 +857,6 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
         }
     }
     //end npcbot
-#endif
 
     BattlegroundQueueTypeId bgQueueTypeId = BattlegroundMgr::BGQueueTypeId(bgTypeId, arenatype);
     BattlegroundQueue& bgQueue = sBattlegroundMgr->GetBattlegroundQueue(bgQueueTypeId);
@@ -912,7 +891,6 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
         if (!_player->HasFreeBattlegroundQueueId())
             return;
 
-#ifdef MOD_NPCERBOTS
         //npcbot: do not allow entering as group if there are bots in group
         if (have_bots_in_group)
         {
@@ -922,7 +900,6 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
             return;
         }
         //end npcbot
-#endif
 
         GroupQueueInfo* ginfo = bgQueue.AddGroup(_player, nullptr, bgTypeId, bracketEntry, arenatype, isRated != 0, false, arenaRating, matchmakerRating, ateamId, previousOpponents);
         uint32 avgWaitTime = bgQueue.GetAverageQueueWaitTime(ginfo);
@@ -961,7 +938,6 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
                 return;
             }
 
-#ifdef MOD_NPCERBOTS
             //npcbot: do not allow bots in rated matches
             if (have_bots_in_group)
             {
@@ -971,7 +947,6 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
                 return;
             }
             //end npcbot
-#endif
 
             // get team rating for queueing
             arenaRating = at->GetRating();
@@ -1042,7 +1017,6 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
 
             sScriptMgr->OnPlayerJoinArena(member);
 
-#ifdef MOD_NPCERBOTS
             //npcbot: list bots
             if (!member->HaveBot())
                 continue;
@@ -1058,7 +1032,6 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recvData)
                     bgQueueTypeId, bgTypeId, bot->GetGUID().ToString(), bot->GetName(), member->GetName());
             }
             //end npcbot
-#endif
         }
     }
 

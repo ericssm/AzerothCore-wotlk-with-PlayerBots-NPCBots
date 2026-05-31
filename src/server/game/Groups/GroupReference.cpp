@@ -33,7 +33,7 @@ void GroupReference::sourceObjectDestroyLink()
 {
     // called from invalidate()
 }
-#ifdef MOD_NPCERBOTS
+
 //npcbot
 void GroupBotReference::targetObjectBuildLink()
 {
@@ -53,4 +53,3 @@ void GroupBotReference::sourceObjectDestroyLink()
     //getTarget()->DelinkMember(this);
 }
 //end npcbot
-#endif

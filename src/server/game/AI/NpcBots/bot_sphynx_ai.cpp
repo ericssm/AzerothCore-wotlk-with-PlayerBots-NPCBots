@@ -47,18 +47,9 @@ enum SphynxSpecial
     SPLASH_ATTACK_COST      = BASE_MANA_SPHYNX/16//6.25%
 };
 
-static const uint32 Sphynx_spells_damage_arr[] =
-{ /*MAIN_ATTACK_1, */SPLASH_ATTACK_1 };
-
-static const uint32 Sphynx_spells_heal_arr[] =
-{ REPLENISH_HEALTH_1 };
-
-static const uint32 Sphynx_spells_support_arr[] =
-{ DEVOUR_MAGIC_1, /*DRAIN_MANA_1, */REPLENISH_HEALTH_1, REPLENISH_MANA_1 };
-
-static const std::vector<uint32> Sphynx_spells_damage(FROM_ARRAY(Sphynx_spells_damage_arr));
-static const std::vector<uint32> Sphynx_spells_heal(FROM_ARRAY(Sphynx_spells_heal_arr));
-static const std::vector<uint32> Sphynx_spells_support(FROM_ARRAY(Sphynx_spells_support_arr));
+static const std::vector<uint32> Sphynx_spells_damage{ /*MAIN_ATTACK_1, */SPLASH_ATTACK_1 };
+static const std::vector<uint32> Sphynx_spells_heal{ REPLENISH_HEALTH_1 };
+static const std::vector<uint32> Sphynx_spells_support{ DEVOUR_MAGIC_1, /*DRAIN_MANA_1, */REPLENISH_HEALTH_1, REPLENISH_MANA_1 };
 
 class sphynx_bot : public CreatureScript
 {
@@ -193,7 +184,7 @@ public:
 
             MoveBehind(mytar);
 
-            if (!HasRole(NPC_BOT_ROLE_DPS))
+            if (!HasRole(BOT_ROLE_DPS))
                 return;
 
             if (GC_Timer > diff)
@@ -224,7 +215,7 @@ public:
         {
             if (DevourcheckTimer > diff || !IsSpellReady(DEVOUR_MAGIC_1, diff, false) || IsCasting() ||
                 (GetHealthPCT(me) > 75 && Rand() > 15 &&
-                (!HasRole(NPC_BOT_ROLE_DPS) || me->GetPower(POWER_MANA) >= SPLASH_ATTACK_COST * 6)))
+                (!HasRole(BOT_ROLE_DPS) || me->GetPower(POWER_MANA) >= SPLASH_ATTACK_COST * 6)))
                 return;
 
             DevourcheckTimer = urand(350, 700);
@@ -236,7 +227,7 @@ public:
 
         void CheckDrainMana(uint32 diff)
         {
-            if (DraincheckTimer > diff || Rand() > 40 || IAmFree() || !HasRole(NPC_BOT_ROLE_DPS) || IsCasting() ||
+            if (DraincheckTimer > diff || Rand() > 40 || IAmFree() || !HasRole(BOT_ROLE_DPS) || IsCasting() ||
                 !IsSpellReady(DRAIN_MANA_1, diff, false) || me->GetPower(POWER_MANA) >= SPLASH_ATTACK_COST)
                 return;
 
@@ -244,7 +235,7 @@ public:
 
             std::list<Unit*> targets;
             GetNearbyFriendlyTargetsList(targets, 40);
-            targets.remove_if(BOTAI_PRED::DrainTargetExclude());
+            std::erase_if(targets, BOTAI_PRED::DrainTargetExclude());
 
             if (targets.empty())
                 return;
@@ -257,8 +248,8 @@ public:
         void CheckReplenishHealth(uint32 diff)
         {
             if (ReplHealthcheckTimer > diff || !IsSpellReady(REPLENISH_HEALTH_1, diff) || IAmFree() ||
-                !HasRole(NPC_BOT_ROLE_HEAL) || IsCasting() ||
-                (HasRole(NPC_BOT_ROLE_DPS) && me->GetPower(POWER_MANA) > 0))
+                !HasRole(BOT_ROLE_HEAL) || IsCasting() ||
+                (HasRole(BOT_ROLE_DPS) && me->GetPower(POWER_MANA) > 0))
                 return;
 
             ReplHealthcheckTimer = 1000;
@@ -291,7 +282,7 @@ public:
         void CheckReplenishMana(uint32 diff)
         {
             if (ReplManacheckTimer > diff || !IsSpellReady(REPLENISH_MANA_1, diff) || IAmFree() || IsCasting() ||
-                (HasRole(NPC_BOT_ROLE_DPS) && me->GetPower(POWER_MANA) > 0))
+                (HasRole(BOT_ROLE_DPS) && me->GetPower(POWER_MANA) > 0))
                 return;
 
             ReplManacheckTimer = 1000;

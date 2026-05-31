@@ -73,12 +73,10 @@
 //  see: https://github.com/azerothcore/azerothcore-wotlk/issues/9766
 #include "GridNotifiersImpl.h"
 
-#ifdef MOD_NPCERBOTS
 //npcbot
 #include "botdatamgr.h"
 #include "botmgr.h"
 //end npcbot
-#endif
 
 /*********************************************************/
 /***                    STORAGE SYSTEM                 ***/
@@ -5716,11 +5714,11 @@ bool Player::LoadFromDB(ObjectGuid playerGuid, CharacterDatabaseQueryHolder cons
         if (!HasAuraState((AuraStateType)m_spellInfo->CasterAuraState))
             aura->HandleAllEffects(itr->second, AURA_EFFECT_HANDLE_REAL, false);
     }
-#ifdef MOD_NPCERBOTS
+
     //npcbots: load BotManager data
     _botMgr->LoadData();
     //end npcbots
-#endif
+
     return true;
 }
 
@@ -6244,6 +6242,32 @@ Item* Player::_LoadMailedItem(ObjectGuid const& playerGuid, Player* player, uint
         CharacterDatabaseTransaction temp = CharacterDatabaseTransaction(nullptr);
         item->SaveToDB(temp);
         return nullptr;
+    }
+
+    // Rehydrate looters for BoP-tradeable mail items; only the LFG mail path writes this flag, gated on the same config.
+    if (item->IsBOPTradable() && sWorld->getBoolConfig(CONFIG_SET_BOP_ITEM_TRADEABLE))
+    {
+        CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ITEM_BOP_TRADE);
+        stmt->SetData(0, item->GetGUID().GetCounter());
+
+        if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
+        {
+            AllowedLooterSet looters;
+            for (std::string_view guidStr : Acore::Tokenize((*result)[0].Get<std::string_view>(), ' ', false))
+            {
+                if (Optional<ObjectGuid::LowType> guid = Acore::StringTo<ObjectGuid::LowType>(guidStr))
+                    looters.insert(ObjectGuid::Create<HighGuid::Player>(*guid));
+                else
+                    LOG_WARN("entities.player.loading", "Player::_LoadMailedItem: invalid item_soulbound_trade_data GUID '{}' for item {}. Skipped.", guidStr, item->GetGUID().ToString());
+            }
+
+            if (looters.size() > 1 && proto->GetMaxStackSize() == 1 && item->IsSoulBound())
+                item->SetSoulboundTradeable(looters);
+            else
+                item->RemoveFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_BOP_TRADEABLE);
+        }
+        else
+            item->RemoveFlag(ITEM_FIELD_FLAGS, ITEM_FIELD_FLAG_BOP_TRADEABLE);
     }
 
     if (mail)
@@ -7229,13 +7253,12 @@ void Player::SaveToDB(CharacterDatabaseTransaction trans, bool create, bool logo
     // save pet (hunter pet level and experience and all type pets health/mana).
     if (Pet* pet = GetPet())
         pet->SavePetToDB(PET_SAVE_AS_CURRENT);
-#ifdef MOD_NPCERBOTS
+
     //npcbot: save player-related npcbot data
     BotDataMgr::SaveNpcBotStoredGear(GetGUID(), trans);
     BotDataMgr::SaveNpcBotItemSets(GetGUID(), trans);
     BotDataMgr::SaveNpcBotMgrData(GetGUID(), trans);
     //end npcbot
-#endif
 }
 
 // fast save function for item/money cheating preventing - save only inventory and money state

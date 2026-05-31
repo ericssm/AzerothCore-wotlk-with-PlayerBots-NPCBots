@@ -28,13 +28,11 @@
 
 class SpellInfo;
 
-#ifdef MOD_NPCERBOTS
 // npcbot
 class bot_ai;
 class bot_pet_ai;
 class Battleground;
 //end npcbot
-#endif
 
 class CreatureAI;
 class Quest;
@@ -114,13 +112,12 @@ public:
     bool isCanInteractWithBattleMaster(Player* player, bool msg) const;
     bool CanResetTalents(Player* player) const;
     bool CanCreatureAttack(Unit const* victim, bool skipDistCheck = false) const;
-#ifdef MOD_NPCERBOTS
     //npcbot
+    /*
+    bool IsImmunedToSpell(SpellInfo const* spellInfo, Spell const* spell = nullptr) override;
+    */
     bool IsImmunedToSpell(SpellInfo const* spellInfo, Spell const* spell = nullptr) const override;
     //end npcbot
-#else
-    bool IsImmunedToSpell(SpellInfo const* spellInfo, Spell const* spell = nullptr) override;
-#endif
 
     [[nodiscard]] bool HasMechanicTemplateImmunity(uint64 mask) const;
     // redefine Unit::IsImmunedToSpell
@@ -169,16 +166,12 @@ public:
         float Orientation = 0.0f; // the creature's "real" orientation while casting
     } _spellFocusInfo;
 
-#ifdef MOD_NPCERBOTS
-    //npcbot
-    [[nodiscard]] uint32 GetShieldBlockValue() const override;
-    //end npcbot
-#else
     [[nodiscard]] uint32 GetShieldBlockValue() const override
+    ;/*
     {
         return (GetLevel() / 2 + uint32(GetStat(STAT_STRENGTH) / 20));
     }
-#endif
+    */
 
     [[nodiscard]] SpellSchoolMask GetMeleeDamageSchoolMask(WeaponAttackType /*attackType*/ = BASE_ATTACK, uint8 /*damageIndex*/ = 0) const override { return m_meleeDamageSchoolMask; }
     void SetMeleeDamageSchool(SpellSchools school) { m_meleeDamageSchoolMask = SpellSchoolMask(1 << school); }
@@ -475,7 +468,6 @@ public:
 
     bool IsUpdateNeeded() override;
 
-#ifdef MOD_NPCERBOTS
     //NPCBots
     bool LoadBotCreatureFromDB(ObjectGuid::LowType guid, Map* map, bool addToMap = true, bool generated = false, uint32 entry = 0, Position const* pos = nullptr);
     Player* GetBotOwner() const;
@@ -553,7 +545,6 @@ public:
     Item* GetBotEquipsByGuid(ObjectGuid itemGuid) const;
     float GetBotAverageItemLevel() const;
     //End NPCBots
-#endif
 
 protected:
     bool CreateFromProto(ObjectGuid::LowType guidlow, uint32 Entry, uint32 vehId, const CreatureData* data = nullptr);
@@ -624,12 +615,10 @@ protected:
     bool IsAlwaysDetectableFor(WorldObject const* seer) const override;
 
 private:
-#ifdef MOD_NPCERBOTS
     //bot system
     bot_ai* bot_AI;
     bot_pet_ai* bot_pet_AI;
     //end bot system
-#endif
 
     void ForcedDespawn(Milliseconds timeMSToDespawn = 0ms, Seconds forcedRespawnTimer = 0s);
 

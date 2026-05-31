@@ -1,4 +1,5 @@
 #include "bot_ai.h"
+#include "botlogtraits.h"
 #include "botmgr.h"
 #include "botspell.h"
 #include "Log.h"
@@ -40,10 +41,7 @@ enum BlademasterSpecial
     MIRROR_COST                             = 125 * 5
 };
 
-static const uint32 Blademaster_spells_support_arr[] =
-{ MIRROR_IMAGE_1, WINDWALK_1 };
-
-static const std::vector<uint32> Blademaster_spells_support(FROM_ARRAY(Blademaster_spells_support_arr));
+static const std::vector<uint32> Blademaster_spells_support{ MIRROR_IMAGE_1, WINDWALK_1 };
 
 class blademaster_bot : public CreatureScript
 {
@@ -93,7 +91,7 @@ public:
             protected:
                 bool Execute(uint64 /*e_time*/, uint32 /*p_time*/)
                 {
-                    (dynamic_cast<blademaster_botAI*>(_bot->GetAI()))->CriticalStrikeFinish(_targetGuid, _dinfo, _windwalk);
+                    (static_cast<blademaster_botAI*>(_bot->GetAI()))->CriticalStrikeFinish(_targetGuid, _dinfo, _windwalk);
 
                     if (_dinfo)
                         delete _dinfo;
@@ -105,7 +103,6 @@ public:
                 ObjectGuid _targetGuid;
                 bool _windwalk;
                 CalcDamageInfo* _dinfo;
-                DelayedMeleeDamageEvent(DelayedMeleeDamageEvent const&);
         };
 
         class EventTerminateEvent : public BasicEvent
@@ -116,13 +113,12 @@ public:
             protected:
                 bool Execute(uint64 /*e_time*/, uint32 /*p_time*/)
                 {
-                    (dynamic_cast<blademaster_botAI*>(_bot->GetAI()))->TerminateEvent();
+                    (static_cast<blademaster_botAI*>(_bot->GetAI()))->TerminateEvent();
                     return true;
                 }
 
             private:
                 Creature* _bot;
-                EventTerminateEvent(EventTerminateEvent const&);
         };
 
         class IllusionUnsummonEvent : public BasicEvent
@@ -133,14 +129,13 @@ public:
             protected:
                 bool Execute(uint64 /*e_time*/, uint32 /*p_time*/)
                 {
-                    (dynamic_cast<blademaster_botAI*>(_bot->GetAI()))->UnsummonAll(false);
+                    (static_cast<blademaster_botAI*>(_bot->GetAI()))->UnsummonAll(false);
 
                     return true;
                 }
 
             private:
                 Creature* _bot;
-                IllusionUnsummonEvent(IllusionUnsummonEvent const&);
         };
 
         class DelayedIllusionSummonEvent : public BasicEvent
@@ -151,14 +146,13 @@ public:
             protected:
                 bool Execute(uint64 /*e_time*/, uint32 /*p_time*/)
                 {
-                    (dynamic_cast<blademaster_botAI*>(_bot->GetAI()))->MirrorImageFinish();
+                    (static_cast<blademaster_botAI*>(_bot->GetAI()))->MirrorImageFinish();
 
                     return true;
                 }
 
             private:
                 Creature* _bot;
-                DelayedIllusionSummonEvent(DelayedIllusionSummonEvent const&);
         };
 
         class DisappearEvent : public BasicEvent
@@ -169,14 +163,13 @@ public:
             protected:
                 bool Execute(uint64 /*e_time*/, uint32 /*p_time*/)
                 {
-                    (dynamic_cast<blademaster_botAI*>(_bot->GetAI()))->MirrorImageMid();
+                    (static_cast<blademaster_botAI*>(_bot->GetAI()))->MirrorImageMid();
 
                     return true;
                 }
 
             private:
                 Creature* _bot;
-                DisappearEvent(DisappearEvent const&);
         };
 
         void _calcIllusionPositions()
@@ -194,7 +187,7 @@ public:
             //X - new positions (1-3 illusions + blademaster)
 
             float dist = 3.f; //not too far - 3 for x and y seems to be way to go
-            for (uint8 i = 0; i != MAX_ILLUSION_POSITIONS; ++i)
+            for (auto i : NPCBots::index_array<uint8, MAX_ILLUSION_POSITIONS>)
             {
                 _illusPos[i].m_positionX = x + ((i <= 1) ? +dist : -dist); // +2+2-2-2
                 _illusPos[i].m_positionY = y + (!(i & 1) ? +dist : -dist); // +2-2+2-2
@@ -324,7 +317,7 @@ public:
 
         void BreakCC(uint32 diff) override
         {
-            if (me->HasAuraWithMechanic((1<<MECHANIC_SNARE)|(1<<MECHANIC_ROOT)))
+            if (me->HasAuraWithMechanic((1u<<MECHANIC_SNARE)|(1u<<MECHANIC_ROOT)))
             {
                 if (IsSpellReady(WINDWALK_1, diff) && !IsTank(me) && Rand() < 30 &&
                     doCast(me, GetSpell(WINDWALK_1)))
@@ -384,7 +377,7 @@ public:
         {
             if (me->GetVictim())
             {
-                if (HasRole(NPC_BOT_ROLE_DPS))
+                if (HasRole(BOT_ROLE_DPS))
                     DoBMMeleeAttackIfReady();
             }
         }
@@ -425,7 +418,7 @@ public:
             //if (IAmFree())
             //    return;
             if (!IsSpellReady(MIRROR_IMAGE_1, diff) || !me->IsInCombat() || !illusionsCount || illusion_Fade ||
-                !HasRole(NPC_BOT_ROLE_DPS) || IsCasting() || Rand() > 20)
+                !HasRole(BOT_ROLE_DPS) || IsCasting() || Rand() > 20)
                 return;
 
             uint8 pct = GetHealthPCT(me);
@@ -453,9 +446,8 @@ public:
             //mirror image renders BM invulnerable for a short period of time,
             //removing all but passive auras
             Unit::AuraMap const auras = me->GetOwnedAuras(); //copy
-            for (Unit::AuraMap::const_iterator iter = auras.begin(); iter != auras.end(); ++iter)
+            for (auto const& [_, aura] : auras)
             {
-                Aura* aura = iter->second;
                 if (aura->GetSpellInfo()->Attributes & SPELL_ATTR0_PASSIVE)
                     continue;
                 if (aura->GetId() == SPELL_BURNING_BLADE_BLADEMASTER)
@@ -507,7 +499,7 @@ public:
 
             _calcIllusionPositions();
 
-            std::set<uint8> usedposs;
+            uint8 usedpos_mask = 0;
 
             for (uint8 i = 0; i != illusionsCount; ++i)
             {
@@ -519,7 +511,7 @@ public:
                     ASSERT(master->GetBotMgr()->AddBot(illusion));
 
                 illusion->SetCreator(master); //TempSummon* Map::SummonCreature()
-                (dynamic_cast<blademaster_botAI*>(illusion->GetAI()))->SetGUID(me->GetGUID());
+                (static_cast<blademaster_botAI*>(illusion->GetAI()))->SetGUID(me->GetGUID());
 
                 //copy visuals
                 //illusion->SetEntry(me->GetEntry());
@@ -545,11 +537,12 @@ public:
                 {
                     //move illusion to a random corner
                     uint8 j = urand(0, MAX_ILLUSION_POSITIONS - 1);
-                    if (usedposs.find(j) == usedposs.end())
+                    uint8 pos_mask = 1u << j;
+                    if (!(usedpos_mask & pos_mask))
                     {
                         illusion->GetMotionMaster()->MovePoint(me->GetMapId(), _illusPos[j]);
                         //illusion->Relocate(_illusPos[j]);
-                        usedposs.insert(j);
+                        usedpos_mask |= pos_mask;
                         break;
                     }
                 }
@@ -561,9 +554,9 @@ public:
 
             SetBotCommandState(BOT_COMMAND_COMBATRESET);
 
-            for (uint8 i = 0; i != MAX_ILLUSION_POSITIONS; ++i)
+            for (auto i : NPCBots::index_array<uint8, MAX_ILLUSION_POSITIONS>)
             {
-                if (usedposs.find(i) == usedposs.end())
+                if (!(usedpos_mask & (1u << i)))
                 {
                     //me->BotStopMovement();
                     me->GetMotionMaster()->MovePoint(me->GetMapId(), _illusPos[i]);
@@ -587,7 +580,7 @@ public:
                     ++counter;
             }
 
-            //me->GetCombatManager().EndAllPvECombat();
+            me->GetCombatManager().EndAllPvECombat();
 
             if (me->GetPhaseMask() != phaseMask)
                 me->SetPhaseMask(phaseMask, true);
@@ -675,16 +668,15 @@ public:
 
             target->PlayDistanceSound(SOUND_AXE_2H_IMPACT_FLESH_CRIT);
 
-            DamageInfo dinfo(*calcdinfo);
+            DamageInfo dinfo(*calcdinfo, 0);
 
             me->SendSpellNonMeleeDamageLog(target, sSpellMgr->GetSpellInfo(CRITICAL_STRIKE_1),
                 dinfo.GetDamage() + dinfo.GetAbsorb() + dinfo.GetResist() + dinfo.GetBlock(),
                 SPELL_SCHOOL_MASK_NORMAL, dinfo.GetAbsorb(), dinfo.GetResist(), false, dinfo.GetBlock(), true);
             CleanDamage cl(0, 0, BASE_ATTACK, MELEE_HIT_CRIT);
             Unit::DealDamage(me, target, dinfo.GetDamage(), &cl);
-            Unit::ProcSkillsAndAuras(me, dinfo.GetVictim(), calcdinfo->procAttacker, calcdinfo->procVictim, (PROC_EX_CRITICAL_HIT | PROC_EX_INTERNAL_DOT), dinfo.GetDamage(), calcdinfo->attackType);
-    
-            me->AtTargetAttacked(target, true);
+            Unit::ProcSkillsAndAuras((Unit*)me, calcdinfo->target, calcdinfo->procAttacker, calcdinfo->procVictim, dinfo.GetHitMask(), dinfo.GetDamage(), BASE_ATTACK, nullptr, nullptr, -1, nullptr, &dinfo, nullptr);
+            me->AtTargetAttacked(target, false);
 
             me->resetAttackTimer(BASE_ATTACK);
             Windwalk_Timer = 0;
@@ -729,12 +721,11 @@ public:
                     aura->SetMaxDuration(dur);
                 }
 
-                if (GetHealthPCT(me) < 25 || !HasRole(NPC_BOT_ROLE_DPS))
+                if (GetHealthPCT(me) < 25 || !HasRole(BOT_ROLE_DPS))
                     me->AttackStop();
 
                 //SpellEffectSanctuary
-                //me->GetCombatManager().SuppressPvPCombat();
-                me->GetThreatMgr().EvaluateSuppressed();
+                me->GetCombatManager().SuppressPvPCombat();
                 Unit::AttackerSet const& attackers = me->getAttackers();
                 for (Unit::AttackerSet::const_iterator itr = attackers.begin(); itr != attackers.end();)
                 {
@@ -770,7 +761,7 @@ public:
             if (IsTempBot())
             {
                 //manually add threat as if damage was done
-                if (victim->GetTypeId() == TYPEID_UNIT)
+                if (victim->IsCreature())
                     victim->GetThreatMgr().AddThreat(me, float(damage + damage));
 
                 damage = 0;
@@ -815,10 +806,9 @@ public:
                     if (bot->IsNPCBot())
                         bot->ToCreature()->OnBotDespawn(me);
 
-            bot_ai::JustDied(u);
+            UnsummonAll(false);
 
-            if (!IsTempBot())
-                UnsummonAll(false);
+            bot_ai::JustDied(u);
         }
 
         void OnBotDespawn(Creature* summon) override
@@ -952,7 +942,7 @@ public:
 
     private:
         DelayedMeleeDamageEvent* _dmdevent;
-        typedef std::set<Creature*> Summons;
+        using Summons = std::set<Creature*>;
         Summons _minions;
         Position _illusPos[MAX_ILLUSION_POSITIONS];
         ObjectGuid _summonerGUID;

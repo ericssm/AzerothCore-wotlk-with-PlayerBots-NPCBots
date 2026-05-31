@@ -6,9 +6,10 @@
 #include "Creature.h"
 #include "Log.h"
 #include "SpellAuraEffects.h"
-#include "SpellMgr.h"
 
+#include <algorithm>
 #include <array>
+#include <ranges>
 #include <tuple>
 
 namespace NPCBots
@@ -89,44 +90,13 @@ CanAffectVictimSchools(Unit const* target, Schools... schools)
         return results;
     }
 
-    if (Creature const* creature = target->ToCreature())
+    for (uint8 i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
     {
-        uint32 spellSchoolImmuneMask = 0;
-
-        if (CreatureImmunities const* immunities = sSpellMgr->GetCreatureImmunities(creature->GetCreatureTemplate()->CreatureImmunitiesId))
+        if (target->IsImmunedToDamageOrSchool(SpellSchoolMask(1u << i)))
         {
-            for (std::size_t j = 0; j < immunities->School.size(); ++j)
-                if (immunities->School[j])
-                    spellSchoolImmuneMask |= (1u << j);
-        }
-
-        if (SpellSchoolMask immune_mask = SpellSchoolMask(spellSchoolImmuneMask))
-        {
-            for (uint8 i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
-            {
-                if (immune_mask & (1 << i))
-                {
-                    arr_iter_type ri = std::find(results.begin(), results.end(), std::pair{ SpellSchools(i), true });
-                    if (ri != results.end())
-                        ri->second = false;
-                }
-            }
-        }
-    }
-
-    for (AuraEffect const* immune_effect : target->GetAuraEffectsByType(SPELL_AURA_SCHOOL_IMMUNITY))
-    {
-        if (SpellSchoolMask immune_mask = SpellSchoolMask(immune_effect->GetMiscValue()))
-        {
-            for (uint8 i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; ++i)
-            {
-                if (immune_mask & (1 << i))
-                {
-                    arr_iter_type ri = std::find(results.begin(), results.end(), std::pair{ SpellSchools(i), true });
-                    if (ri != results.end())
-                        ri->second = false;
-                }
-            }
+            arr_iter_type ri = std::ranges::find(results, std::pair{ SpellSchools(i), true });
+            if (ri != results.end())
+                ri->second = false;
         }
     }
     return results;
@@ -148,7 +118,7 @@ CanAffectVictimAny(Unit const* target, Schools... schools)
 
     arr_type bools = CanAffectVictimSchools(target, schools...);
 
-    return std::any_of(bools.cbegin(), bools.cend(), [](pair_type const& p) { return p.second; });
+    return std::ranges::any_of(bools, [](pair_type const& p) { return p.second; });
 }
 
 template<class...Schools>
@@ -160,7 +130,7 @@ CanAffectVictimAll(Unit const* target, Schools... schools)
 
     arr_type bools = CanAffectVictimSchools(target, schools...);
 
-    return std::all_of(bools.cbegin(), bools.cend(), [](pair_type const& p) { return p.second; });
+    return std::ranges::all_of(bools, [](pair_type const& p) { return p.second; });
 }
 
 #endif

@@ -198,13 +198,11 @@ public:
     // FG: some hacky helpers
     void ForceValuesUpdateAtIndex(uint32);
 
-#ifdef MOD_NPCERBOTS
     //npcbot
     virtual bool IsNPCBot() const { return false; }
     virtual bool IsNPCBotPet() const { return false; }
     virtual bool IsNPCBotOrPet() const { return false; }
     //end npcbot
-#endif
 
     [[nodiscard]] inline bool IsPlayer() const { return GetTypeId() == TYPEID_PLAYER; }
     Player* ToPlayer() { if (IsPlayer()) return reinterpret_cast<Player*>(this); else return nullptr; }
@@ -698,11 +696,9 @@ public:
     [[nodiscard]] float GetTransOffsetY() const { return m_movementInfo.transport.pos.GetPositionY(); }
     [[nodiscard]] float GetTransOffsetZ() const { return m_movementInfo.transport.pos.GetPositionZ(); }
     [[nodiscard]] float GetTransOffsetO() const { return m_movementInfo.transport.pos.GetOrientation(); }
-#ifdef MOD_NPCERBOTS
     //npcbot: TC method transfer
     [[nodiscard]] Position const& GetTransOffset() const { return m_movementInfo.transport.pos; }
     //end npcbot
-#endif
     [[nodiscard]] uint32 GetTransTime()   const { return m_movementInfo.transport.time; }
     [[nodiscard]] int8 GetTransSeat()     const { return m_movementInfo.transport.seat; }
     [[nodiscard]] virtual ObjectGuid GetTransGUID()   const;

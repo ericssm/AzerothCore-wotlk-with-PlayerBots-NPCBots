@@ -37,13 +37,11 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
-#ifdef MOD_NPCERBOTS
 //npcbot: try query bot name
 #include "CreatureData.h"
 #include "botdatamgr.h"
 #include "botmgr.h"
 //end npcbot
-#endif
 
 class Aura;
 
@@ -660,7 +658,6 @@ void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket& recvData)
         guid = sCharacterCache->GetCharacterGuidByName(name);
     }
 
-#ifdef MOD_NPCERBOTS
     //npcbot
     if (guid.IsEmpty())
     {
@@ -671,7 +668,6 @@ void WorldSession::HandleGroupChangeSubGroupOpcode(WorldPacket& recvData)
     if (guid.IsEmpty())
         return;
     //end npcbot
-#endif
 
     group->ChangeMembersGroup(guid, groupNr);
 }
@@ -975,7 +971,6 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
     ObjectGuid Guid;
     recvData >> Guid;
 
-#ifdef MOD_NPCERBOTS
     //npcbot: try send bot group member info
     if (Guid.IsCreature())
     {
@@ -1001,7 +996,6 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recvData)
         }
     }
     //end npcbot
-#endif
 
     Player* player = HashMapHolder<Player>::Find(Guid);
     if (!player || !player->IsInSameRaidWith(_player))

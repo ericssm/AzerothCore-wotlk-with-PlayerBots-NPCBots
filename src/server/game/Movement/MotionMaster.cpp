@@ -669,7 +669,6 @@ void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float spee
     if (speedXY <= 0.1f)
         return;
 
-#ifdef MOD_NPCERBOTS
     //npcbot: blademaser only (disabled)
     /*
     if (_owner->IsNPCBot())
@@ -689,7 +688,6 @@ void MotionMaster::MoveJump(float x, float y, float z, float speedXY, float spee
     }
     */
     //end npcbot
-#endif
 
     float moveTimeHalf = speedZ / Movement::gravity;
     float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -speedZ);

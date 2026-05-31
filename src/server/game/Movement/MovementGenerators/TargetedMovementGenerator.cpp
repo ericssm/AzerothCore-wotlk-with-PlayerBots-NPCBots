@@ -443,9 +443,13 @@ static float GetTargetSpeedInMotion(Unit* target)
 static Optional<float> GetVelocity(Unit* owner, Unit* target, G3D::Vector3 const& dest, bool playerPet)
 {
     Optional<float> speed = {};
-#ifdef MOD_NPCERBOTS
+    if (owner->IsInCombat() || owner->IsVehicle() || owner->HasUnitFlag(UNIT_FLAG_POSSESSED))
+        return speed;
+
+    bool isPetLike = owner->IsPet() || owner->IsGuardian() || owner->GetGUID() == target->GetCritterGUID() || owner->GetCharmerOrOwnerGUID() == target->GetGUID();
+
     //npcbot
-    if (owner->IsNPCBotPet() && !owner->IsInCombat() && !owner->HasUnitFlag(UNIT_FLAG_POSSESSED) && (target->GetGUID() == owner->GetOwnerGUID() || target->GetGUID() == owner->GetCreatorGUID()))
+    if (owner->IsNPCBotPet() && (target->GetGUID() == owner->GetOwnerGUID() || target->GetGUID() == owner->GetCreatorGUID()))
     {
         UnitMoveType moveType = Movement::SelectSpeedType(target->GetUnitMovementFlags());
         speed = target->GetSpeed(moveType);
@@ -466,12 +470,6 @@ static Optional<float> GetVelocity(Unit* owner, Unit* target, G3D::Vector3 const
     }
     else
     //end npcbot
-#endif
-    if (owner->IsInCombat() || owner->IsVehicle() || owner->HasUnitFlag(UNIT_FLAG_POSSESSED))
-        return speed;
-
-    bool isPetLike = owner->IsPet() || owner->IsGuardian() || owner->GetGUID() == target->GetCritterGUID() || owner->GetCharmerOrOwnerGUID() == target->GetGUID();
-
     // For pets/guardians/critters or creature-to-creature follow: sync with target's speed
     if (isPetLike || (owner->IsCreature() && target->IsCreature()))
     {

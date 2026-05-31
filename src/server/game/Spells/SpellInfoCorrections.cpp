@@ -40,7 +40,6 @@ void SpellMgr::LoadSpellInfoCorrections()
 {
     uint32 oldMSTime = getMSTime();
 
-#ifdef MOD_NPCERBOTS
     //npcbot: corrections for Life Tap (see Trinity-Bots issue #239)
     ApplySpellFix({1454}, [](SpellInfo* spellInfo) // Life Tap (Rank 1)
     {
@@ -102,7 +101,6 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->TargetAuraSpell = 0;
     });
     //end npcbot
-#endif
 
     ApplySpellFix({
         467,    // Thorns (Rank 1)

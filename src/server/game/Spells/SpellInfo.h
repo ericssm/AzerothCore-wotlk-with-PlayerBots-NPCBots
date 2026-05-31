@@ -299,11 +299,9 @@ public:
         ItemType(0), TriggerSpell(0), ImplicitTargetConditions(nullptr) {}
     SpellEffectInfo(SpellEntry const* spellEntry, SpellInfo const* spellInfo, uint8 effIndex);
 
-#ifdef MOD_NPCERBOTS
     //npcbot
     void OverrideSpellInfo(SpellInfo const* spellInfo) { ASSERT_NOTNULL(spellInfo); _spellInfo = spellInfo; }
     //end npcbot
-#endif
 
     bool IsEffect() const;
     bool IsEffect(SpellEffects effectName) const;
@@ -565,11 +563,9 @@ public:
     std::array<SpellEffectInfo, MAX_SPELL_EFFECTS> const& GetEffects() const { return Effects; }
     SpellEffectInfo const& GetEffect(SpellEffIndex index) const { ASSERT(index < Effects.size()); return Effects[index]; }
 
-#ifdef MOD_NPCERBOTS
     //npcbot
     SpellInfo const* TryGetSpellInfoOverride(WorldObject const* caster) const;
     //end npcbot
-#endif
 
     // loading helpers
     void _InitializeExplicitTargetMask();

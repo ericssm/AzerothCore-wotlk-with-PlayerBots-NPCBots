@@ -29,17 +29,14 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
-#ifdef MOD_NPCERBOTS
 //npcbot
 #include "CreatureData.h"
 #include "botdatamgr.h"
 #include "botmgr.h"
 //end npcbot
-#endif
 
 void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
 {
-#ifdef MOD_NPCERBOTS
     //npcbot: try query bot info
     if (guid.IsCreature())
     {
@@ -72,7 +69,6 @@ void WorldSession::SendNameQueryOpcode(ObjectGuid guid)
         }
     }
     //end npcbot
-#endif
 
     CharacterCacheEntry const* playerData = sCharacterCache->GetCharacterCacheByGuid(guid);
 
@@ -143,12 +139,13 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recvData)
         Title = ci->SubName;
 
         LocaleConstant loc_idx = GetSessionDbLocaleIndex();
-#ifdef MOD_NPCERBOTS
         //npcbot: pointless check, see AccountInfo()
+        /*
         //end npcbot
-#else
         if (loc_idx >= 0)
-#endif
+        //npcbot
+        */
+        //end npcbot
         {
             if (CreatureLocale const* cl = sObjectMgr->GetCreatureLocale(entry))
             {

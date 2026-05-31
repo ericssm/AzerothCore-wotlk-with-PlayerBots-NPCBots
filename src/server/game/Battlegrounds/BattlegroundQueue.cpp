@@ -33,14 +33,13 @@
 
 #include "BattlegroundUtils.h"
 
-#ifdef MOD_NPCERBOTS
 //npcbot
 //non-PCH
 #include "Creature.h"
-#include "botmgr.h"
+#include "botconfig.h"
 #include "botdatamgr.h"
+#include "botmgr.h"
 //end npcbot
-#endif
 
 /*********************************************************/
 /***            BATTLEGROUND QUEUE SYSTEM              ***/
@@ -191,7 +190,6 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* group, Battle
             m_QueuedPlayers[member->GetGUID()] = ginfo;
             ginfo->Players.emplace(member->GetGUID());
         });
-#ifdef MOD_NPCERBOTS
         //npcbot: queue bots (bg only)
         if (!arenaTeamId)
         {
@@ -205,7 +203,6 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* group, Battle
             }
         }
         //end npcbot
-#endif
     }
     else
     {
@@ -226,7 +223,7 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* group, Battle
 
     if (!isRated && !isPremade && sWorld->getBoolConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE))
         SendMessageBGQueue(leader, bg, bracketEntry);
-#ifdef MOD_NPCERBOTS
+
     //npcbot: try to queue wandering bots
     if (!isRated && !isPremade && !arenaType && !arenaTeamId && !sBattlegroundMgr->isTesting())
     {
@@ -237,11 +234,10 @@ GroupQueueInfo* BattlegroundQueue::AddGroup(Player* leader, Group* group, Battle
         }
     }
     //end npcbot
-#endif
+
     return ginfo;
 }
 
-#ifdef MOD_NPCERBOTS
 //npcbot
 GroupQueueInfo* BattlegroundQueue::AddBotAsGroup(ObjectGuid guid, TeamId teamId, BattlegroundTypeId bgTypeId, PvPDifficultyEntry const* bracketEntry, uint8 arenaType, bool isRated, uint32 arenaRating, uint32 matchmakerRating, uint32 arenaTeamId, uint32 opponentsArenaTeamId)
 {
@@ -304,10 +300,9 @@ GroupQueueInfo* BattlegroundQueue::AddBotAsGroup(ObjectGuid guid, TeamId teamId,
         ChatHandler(nullptr).SendWorldTextOptional(LANG_BG_QUEUE_ANNOUNCE_WORLD, ANNOUNCER_FLAG_DISABLE_BG_QUEUE, bgName.c_str(), q_min_level, q_max_level, qAlliance + qHorde, MaxPlayers);
     }
 
-     return ginfo;
- }
+    return ginfo;
+}
 //end npcbot
-#endif
 
 void BattlegroundQueue::PlayerInvitedToBGUpdateAverageWaitTime(GroupQueueInfo* ginfo)
 {
@@ -437,12 +432,12 @@ void BattlegroundQueue::RemovePlayer(ObjectGuid guid, bool decreaseInvitedCount)
             at->SaveToDB();
         }
     }
-#ifdef MOD_NPCERBOTS
+
     //npcbot: remove player's bots
     if (!groupInfo->Players.empty() && guid.IsPlayer())
     {
         std::vector<ObjectGuid> botguids;
-        botguids.reserve(BotMgr::GetMaxNpcBots(DEFAULT_MAX_LEVEL) / 2);
+        botguids.reserve(BotCfg::GetMaxNpcBots(DEFAULT_MAX_LEVEL) / 2);
         BotDataMgr::GetNPCBotGuidsByOwner(botguids, guid);
         for (std::vector<ObjectGuid>::const_iterator ci = botguids.begin(); ci != botguids.end() && !groupInfo->Players.empty(); ++ci)
         {
@@ -462,7 +457,6 @@ void BattlegroundQueue::RemovePlayer(ObjectGuid guid, bool decreaseInvitedCount)
         }
     }
     //end npcbot
-#endif
 
     // remove group queue info no players left
     if (groupInfo->Players.empty())
@@ -511,7 +505,6 @@ bool BattlegroundQueue::IsPlayerInvited(ObjectGuid pl_guid, const uint32 bgInsta
     return qItr != m_QueuedPlayers.end() && qItr->second->IsInvitedToBGInstanceGUID == bgInstanceGuid && qItr->second->RemoveInviteTime == removeTime;
 }
 
-#ifdef MOD_NPCERBOTS
 //npcbot
 bool BattlegroundQueue::IsBotInvited(ObjectGuid guid, uint32 bgInstanceGuid) const
 {
@@ -520,7 +513,6 @@ bool BattlegroundQueue::IsBotInvited(ObjectGuid guid, uint32 bgInstanceGuid) con
     return qItr != m_QueuedPlayers.end() && qItr->second->IsInvitedToBGInstanceGUID == bgInstanceGuid;
 }
 //end npcbot
-#endif
 
 bool BattlegroundQueue::GetPlayerGroupInfoData(ObjectGuid guid, GroupQueueInfo* ginfo)
 {
@@ -1451,7 +1443,6 @@ void BattlegroundQueue::InviteGroupToBG(GroupQueueInfo* ginfo, Battleground* bg,
     // loop through the players
     for (auto const& itr : ginfo->Players)
     {
-#ifdef MOD_NPCERBOTS
         //npcbot: invite bots
         if (itr.IsCreature())
         {
@@ -1460,7 +1451,6 @@ void BattlegroundQueue::InviteGroupToBG(GroupQueueInfo* ginfo, Battleground* bg,
             continue;
         }
         //end npcbot
-#endif
 
         // get the player
         Player* player = ObjectAccessor::FindConnectedPlayer(itr);

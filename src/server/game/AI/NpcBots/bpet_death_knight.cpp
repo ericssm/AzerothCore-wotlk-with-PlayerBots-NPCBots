@@ -81,7 +81,7 @@ public:
 
             float dist = me->GetDistance(opponent);
             //Unit const* u = opponent->GetVictim();
-            bool canDPS = petOwner->GetBotAI()->HasRole(NPC_BOT_ROLE_DPS);
+            bool canDPS = petOwner->GetBotAI()->HasRole(BOT_ROLE_DPS);
 
             if (myType == BOT_PET_GHOUL)
             {
@@ -102,7 +102,7 @@ public:
 
                 if (IsSpellReady(LEAP_1, diff) && energy >= 10 &&
                     !HasBotCommandState(BOT_COMMAND_STAY) &&
-                    !(opponent->GetTypeId() == TYPEID_UNIT && opponent->ToCreature()->isWorldBoss()) &&
+                    !(opponent->IsCreature() && opponent->ToCreature()->isWorldBoss()) &&
                     dist > 5 && dist < 30)
                 {
                     me->CastSpell(opponent, GetSpell(LEAP_1), false);

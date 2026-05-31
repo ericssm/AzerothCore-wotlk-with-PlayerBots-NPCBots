@@ -565,12 +565,10 @@ class spell_pri_penance : public SpellScript
 
     bool Load() override
     {
-#ifdef MOD_NPCERBOTS
         //npcbot
         if (GetCaster() && GetCaster()->IsNPCBot())
             return true;
         //end npcbot
-#endif
         return GetCaster()->IsPlayer();
     }
 
@@ -801,12 +799,10 @@ class spell_pri_renew : public AuraScript
 
     bool Load() override
     {
-#ifdef MOD_NPCERBOTS
         //npcbot
         if (GetCaster() && GetCaster()->IsNPCBot())
             return true;
         //end npcbot
-#endif
         return GetCaster() && GetCaster()->IsPlayer();
     }
 

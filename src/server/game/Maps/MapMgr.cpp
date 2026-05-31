@@ -35,12 +35,10 @@
 #include "World.h"
 #include "WorldPacket.h"
 
-#ifdef MOD_NPCERBOTS
 //npcbot
 #include "botdatamgr.h"
 #include "botmgr.h"
 //end npcbot
-#endif
 
 MapMgr::MapMgr()
 {
@@ -66,11 +64,10 @@ void MapMgr::Initialize()
     // Start mtmaps if needed
     if (num_threads > 0)
         m_updater.activate(num_threads);
-#ifdef MOD_NPCERBOTS
+
     //npcbot: load bots
     BotMgr::Initialize();
     //end npcbot
-#endif
 }
 
 void MapMgr::InitializeVisibilityDistanceInfo()
@@ -264,11 +261,9 @@ void MapMgr::Update(uint32 diff)
     for (uint8 i = 0; i < 4; ++i)
         i_timer[i].Update(diff);
 
-#ifdef MOD_NPCERBOTS
     //npcbot
     BotDataMgr::Update(diff);
     //end npcbot
-#endif
 
     // pussywizard: lfg compatibles update, schedule before maps so it is processed from the very beginning
     //if (mapUpdateStep == 0)
@@ -296,11 +291,9 @@ void MapMgr::Update(uint32 diff)
     if (m_updater.activated())
         m_updater.wait();
 
-#ifdef MOD_NPCERBOTS
     //npcbot
     BotMgr::HandleDelayedTeleports();
     //end npcbot
-#endif
 
     if (mapUpdateStep < 3)
     {

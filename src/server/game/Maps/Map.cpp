@@ -44,11 +44,10 @@
 #include "VMapMgr2.h"
 #include "Weather.h"
 #include "WeatherMgr.h"
-#ifdef MOD_NPCERBOTS
+
 //npcbot
 #include "botmgr.h"
 //end npcbot
-#endif
 
 #define MAP_INVALID_ZONE        0xFFFFFFFF
 
@@ -340,11 +339,9 @@ bool Map::AddToMap(T* obj, bool checkTransport)
     //obj->SetMap(this);
     obj->AddToWorld();
 
-#ifdef MOD_NPCERBOTS
     //npcbot: do not add bots to transport (handled inside AI)
     if (!obj->IsNPCBotOrPet())
     //end npcbot
-#endif
     if (checkTransport)
         if (!(obj->IsGameObject() && obj->ToGameObject()->IsTransport())) // dont add transport to transport ;d
             if (Transport* transport = GetTransportForPos(obj->GetPhaseMask(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj))
@@ -746,6 +743,34 @@ void Map::AfterPlayerUnlinkFromMap()
 template<class T>
 void Map::RemoveFromMap(T* obj, bool remove)
 {
+    //npcbot: tempfix for bots out of grid during remove from map
+    if constexpr (std::is_base_of_v<Creature, T>)
+    {
+        if (obj->IsNPCBot())
+        {
+            obj->RemoveFromWorld();
+
+            if (obj->IsInGrid())
+                obj->RemoveFromGrid();
+            else
+            {
+                Player const* owner = obj->ToCreature()->GetBotOwner();
+                BOT_LOG_ERROR("npcbots", "Map::Remove<Bot>FromMap() bot {} id {} is in map id {} \"{}\" instanceId {} but not in grid!\nmaster: {}\nmaster map id {} \"{}\"",
+                    obj->GetName(), obj->GetEntry(), GetId(), GetMapName(), i_InstanceId, owner ? owner->GetGUID().ToString() : std::string{ "Unknown" },
+                    (owner && owner->IsInWorld()) ? owner->GetMap()->GetId() : 0u, (owner && owner->IsInWorld()) ? std::string(owner->GetMap()->GetMapName()) : std::string{"Unknown"});
+            }
+
+            obj->ResetMap();
+            RemoveObjectFromMapUpdateList(obj);
+
+            if (remove)
+                DeleteFromWorld(obj);
+
+            return;
+        }
+    }
+    //end npcbot
+
     obj->RemoveFromWorld();
 
     obj->RemoveFromGrid();
@@ -838,7 +863,6 @@ void Map::CreatureRelocation(Creature* creature, float x, float y, float z, floa
     else
         RemoveCreatureFromMoveList(creature);
 
-#ifdef MOD_NPCERBOTS
     //npcbot:
     if (creature->IsNPCBotOrPet() && !creature->GetVehicle())
     {
@@ -853,7 +877,6 @@ void Map::CreatureRelocation(Creature* creature, float x, float y, float z, floa
             creature->RemoveAurasWithInterruptFlags(mask);
     }
     //end npcbot
-#endif
 
     creature->Relocate(x, y, z, o);
     if (creature->IsVehicle())
@@ -1855,30 +1878,22 @@ uint32 Map::GetPlayersCountExceptGMs(bool aliveOnly /*= false*/) const
     for (auto const& ref : m_mapRefMgr)
         if (Player* player = ref.GetSource())
             if (!player->IsGameMaster() && (!aliveOnly || (player->IsAlive() && !player->HasSpiritOfRedemptionAura())))
-#ifdef MOD_NPCERBOTS
-        //npcbot - count npcbots as group members (event if not in group)
-        {
-            if (ref.GetSource()->HaveBot() && BotMgr::LimitBots(this))
+            //npcbot - count npcbots (event if not in group)
             {
-                ++count;
-                BotMap const* botmap = ref.GetSource()->GetBotMgr()->GetBotMap();
-                for (BotMap::const_iterator itr = botmap->begin(); itr != botmap->end(); ++itr)
+                if (player->HaveBot() && BotMgr::LimitBots(this))
                 {
-                    Creature* cre = itr->second;
-                    if (!cre || !cre->IsInWorld() || cre->FindMap() != this || cre->IsTempBot())
-                        continue;
-                    ++count;
+                    for (auto const& [bguid, bot] : *player->GetBotMgr()->GetBotMap())
+                    {
+                        if (!bot || !bot->IsInWorld() || bot->FindMap() != this || bot->IsTempBot() || (aliveOnly && (!bot->IsAlive() || bot->HasSpiritOfRedemptionAura())))
+                            continue;
+                        ++count;
+                    }
                 }
-                continue;
+            //end npcbot
+                ++count;
+            //npcbot
             }
-        //end npcbot
-#endif
-            ++count;
-#ifdef MOD_NPCERBOTS
-        //npcbot
-        }
-        //end npcbot
-#endif
+            //end npcbot
     return count;
 }
 
@@ -2744,7 +2759,7 @@ void Map::ProcessRespawns()
     time_t now = GameTime::GetGameTime().count();
 
     // Process due respawns from the time-ordered queue.
-    // Entries are sorted by respawnTime ¡ª once we hit a future time, we're done.
+    // Entries are sorted by respawnTime â€” once we hit a future time, we're done.
     while (!_respawnQueue.empty())
     {
         auto it = _respawnQueue.begin();
@@ -2754,7 +2769,7 @@ void Map::ProcessRespawns()
         SpawnObjectType type = it->type;
         ObjectGuid::LowType spawnId = it->spawnId;
 
-        // Remove from queue first ¡ª handlers below call Remove*RespawnTime()
+        // Remove from queue first â€” handlers below call Remove*RespawnTime()
         // which also erases from queue, so we must pop before processing.
         _respawnQueue.erase(it);
 
@@ -2788,7 +2803,7 @@ void Map::ProcessCreatureRespawn(ObjectGuid::LowType spawnId)
         return;
     }
 
-    // Compat-mode creatures handle their own respawn in-place ¡ª don't interfere.
+    // Compat-mode creatures handle their own respawn in-place â€” don't interfere.
     // Clean up the stale respawn time entry since the legacy system manages these.
     SpawnGroupTemplateData const* groupData = sObjectMgr->GetSpawnGroupData(data->spawnGroupId);
     if (!groupData || (groupData->flags & SPAWNGROUP_FLAG_COMPATIBILITY_MODE))
@@ -2800,7 +2815,7 @@ void Map::ProcessCreatureRespawn(ObjectGuid::LowType spawnId)
     // Don't respawn if the spawn group is not active
     if (!IsSpawnGroupActive(data->spawnGroupId))
     {
-        // Re-queue ¡ª will be checked again next ProcessRespawns() tick
+        // Re-queue â€” will be checked again next ProcessRespawns() tick
         _respawnQueue.insert({GameTime::GetGameTime().count() + 5, SPAWN_TYPE_CREATURE, spawnId});
         return;
     }
@@ -2853,7 +2868,7 @@ void Map::ProcessGameObjectRespawn(ObjectGuid::LowType spawnId)
         return;
     }
 
-    // Compat-mode gameobjects handle their own respawn ¡ª don't interfere.
+    // Compat-mode gameobjects handle their own respawn â€” don't interfere.
     // Clean up the stale respawn time entry since the legacy system manages these.
     SpawnGroupTemplateData const* groupData = sObjectMgr->GetSpawnGroupData(data->spawnGroupId);
     if (!groupData || (groupData->flags & SPAWNGROUP_FLAG_COMPATIBILITY_MODE))

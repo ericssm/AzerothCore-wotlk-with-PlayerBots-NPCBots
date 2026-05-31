@@ -810,6 +810,11 @@ public:
 
         bool CanControlVehicle(Unit* passenger)
         {
+            //npcbot
+            if (passenger->IsNPCBot())
+                return true;
+            //end npcbot
+
             if (passenger->HasAura(SPELL_LIEUTENANT))
                 return true;
 

@@ -35,11 +35,9 @@
 #include "Vehicle.h"
 #include "WorldPacket.h"
 
-#ifdef MOD_NPCERBOTS
 //npcbot
 #include "botspell.h"
 //end npcbot
-#endif
 
 /// @todo: this import is not necessary for compilation and marked as unused by the IDE
 //  however, for some reasons removing it would cause a damn linking issue
@@ -454,13 +452,10 @@ void Aura::_ApplyForTarget(Unit* target, Unit* caster, AuraApplication* auraApp)
         {
             caster->ToCreature()->AddSpellCooldown(m_spellInfo->Id, 0, infinityCooldownDelay);
         }
-
-#ifdef MOD_NPCERBOTS
         //npcbot: infinity cd for bots
         if (caster && m_spellInfo->IsCooldownStartedOnEvent() && caster->IsNPCBot())
             caster->ToCreature()->AddBotSpellCooldown(m_spellInfo->Id, std::numeric_limits<uint32>::max());
         //end npcbot
-#endif
     }
 }
 
@@ -519,12 +514,10 @@ void Aura::_UnapplyForTarget(Unit* target, Unit* caster, AuraApplication* auraAp
             caster->ToPlayer()->SendCooldownEvent(GetSpellInfo());
         }
     }
-#ifdef MOD_NPCERBOTS
     //npcbot: release cd state for bots
     if (caster && m_spellInfo->IsCooldownStartedOnEvent() && caster->IsNPCBot())
         caster->ToCreature()->ReleaseBotSpellCooldown(m_spellInfo->Id);
     //end npcbot
-#endif
 }
 
 // removes aura from all targets
@@ -925,7 +918,6 @@ uint8 Aura::CalcMaxCharges(Unit* caster) const
     if (SpellProcEntry const* procEntry = sSpellMgr->GetSpellProcEntry(GetId()))
         maxProcCharges = procEntry->Charges;
 
-#ifdef MOD_NPCERBOTS
     //npcbot: override spell proc
     if (caster && caster->IsNPCBot())
     {
@@ -933,7 +925,6 @@ uint8 Aura::CalcMaxCharges(Unit* caster) const
             maxProcCharges = procOverride->Charges;
     }
     //end npcbot
-#endif
 
     if (caster)
         if (Player* modOwner = caster->GetSpellModOwner())
@@ -1743,7 +1734,6 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         if (removeMode != AURA_REMOVE_BY_EXPIRE)
                             break;
 
-#ifdef MOD_NPCERBOTS
                         //npcbot: handle Glyph of Guardian Spirit proc for bots
                         if (Creature* bot = caster->ToCreature())
                         {
@@ -1756,7 +1746,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             }
                         }
                         //end npcbot
-#endif
+
                         if (!caster->IsPlayer())
                             break;
 
@@ -2164,7 +2154,6 @@ void Aura::PrepareProcToTrigger(AuraApplication* aurApp, ProcEventInfo& eventInf
 
     SpellProcEntry const* procEntry = sSpellMgr->GetSpellProcEntry(GetId());
 
-#ifdef MOD_NPCERBOTS
     //npcbot: override spell proc
     Unit const* caster = aurApp && aurApp->GetBase()->GetCasterGUID().IsCreature() ? aurApp->GetBase()->GetCaster() : nullptr;
     if (caster && caster->IsNPCBot())
@@ -2173,7 +2162,6 @@ void Aura::PrepareProcToTrigger(AuraApplication* aurApp, ProcEventInfo& eventInf
             procEntry = procOverride;
     }
     //end npcbot
-#endif
 
     ASSERT(procEntry);
 
@@ -2185,7 +2173,6 @@ uint8 Aura::GetProcEffectMask(AuraApplication* aurApp, ProcEventInfo& eventInfo,
 {
     SpellProcEntry const* procEntry = sSpellMgr->GetSpellProcEntry(GetId());
 
-#ifdef MOD_NPCERBOTS
     //npcbot: override spell proc
     Unit const* caster = aurApp && aurApp->GetBase()->GetCasterGUID().IsCreature() ? aurApp->GetBase()->GetCaster() : nullptr;
     if (caster && caster->IsNPCBot())
@@ -2194,7 +2181,7 @@ uint8 Aura::GetProcEffectMask(AuraApplication* aurApp, ProcEventInfo& eventInfo,
             procEntry = procOverride;
     }
     //end npcbot
-#endif
+
     // only auras with spell proc entry can trigger proc
     if (!procEntry)
         return 0;

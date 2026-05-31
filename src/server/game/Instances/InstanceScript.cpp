@@ -33,11 +33,9 @@
 #include "Spell.h"
 #include "WorldSession.h"
 
-#ifdef MOD_NPCERBOTS
 //npcbot
 #include "botmgr.h"
 //end npcbot
-#endif
 
 BossBoundaryData::~BossBoundaryData()
 {
@@ -704,7 +702,6 @@ void InstanceScript::DoRemoveAurasDueToSpellOnPlayers(uint32 spell)
         player->RemoveAurasDueToSpell(spell);
         if (Pet* pet = player->GetPet())
             pet->RemoveAurasDueToSpell(spell);
-#ifdef MOD_NPCERBOTS
                 //npcbot: include bots
                 if (player->HaveBot())
                 {
@@ -713,7 +710,6 @@ void InstanceScript::DoRemoveAurasDueToSpellOnPlayers(uint32 spell)
                             DoRemoveAurasDueToSpellOnNPCBot(bitr.second, spell);
                 }
                 //end npcbot
-#endif
     });
 }
 
@@ -723,7 +719,6 @@ void InstanceScript::DoCastSpellOnPlayers(uint32 spell)
     instance->DoForAllPlayers([&](Player* player)
     {
         player->CastSpell(player, spell, true);
-#ifdef MOD_NPCERBOTS
         //npcbot: include bots
         if (player->HaveBot())
         {
@@ -732,11 +727,9 @@ void InstanceScript::DoCastSpellOnPlayers(uint32 spell)
                     DoCastSpellOnNPCBot(bitr.second, spell);
         }
         //end npcbot
-#endif
     });
 }
 
-#ifdef MOD_NPCERBOTS
 //npcbot: hooks
 void InstanceScript::DoRemoveAurasDueToSpellOnNPCBot(Creature* bot, uint32 spell)
 {
@@ -754,7 +747,6 @@ void InstanceScript::DoCastSpellOnNPCBot(Creature* bot, uint32 spell)
         botpet->CastSpell(botpet, spell, true);
 }
 //end npcbot
-#endif
 
 void InstanceScript::DoCastSpellOnPlayer(Player* player, uint32 spell, bool includePets /*= false*/, bool includeControlled /*= false*/)
 {

@@ -181,7 +181,6 @@ struct npc_pet_mage_mirror_image : CasterAI
             if (!owner->IsInCombat() && !me->GetVictim())
                 EnterEvadeMode(EVADE_REASON_OTHER);
         }
-#ifdef MOD_NPCERBOTS
         //npcbot: allow mirror images to attack creature owner's target
         else if (owner)
         {
@@ -198,7 +197,6 @@ struct npc_pet_mage_mirror_image : CasterAI
                 EnterEvadeMode(EVADE_REASON_NO_HOSTILES);
         }
         //end npcbot
-#endif
     }
 
     void Reset() override

@@ -29,13 +29,11 @@
  * Scriptnames of files in this file should be prefixed with "spell_dru_".
  */
 
- #ifdef MOD_NPCERBOTS
 //npcbot
 #include "Creature.h"
 #include "Group.h"
 //end npcbot
-#endif
- 
+
 enum DruidSpells
 {
     SPELL_DRUID_GLYPH_OF_WILD_GROWTH        = 62970,
@@ -863,12 +861,10 @@ class spell_dru_rip : public AuraScript
     bool Load() override
     {
         Unit* caster = GetCaster();
-#ifdef MOD_NPCERBOTS
         //npcbot
         if (caster && caster->IsNPCBot())
             return true;
         //end npcbot
-#endif
         return caster && caster->IsPlayer();
     }
 
@@ -878,8 +874,6 @@ class spell_dru_rip : public AuraScript
 
         if (Unit* caster = GetCaster())
         {
-
-#ifdef MOD_NPCERBOTS
             //npcbot
             if (caster && caster->IsNPCBot())
             {
@@ -895,7 +889,7 @@ class spell_dru_rip : public AuraScript
                 return;
             }
             //end npcbot
-#endif
+
             // 0.01 * $AP * cp
             uint8 cp = caster->ToPlayer()->GetComboPoints();
 
@@ -1174,18 +1168,15 @@ class spell_dru_t10_restoration_4p_bonus : public SpellScript
 
     bool Load() override
     {
-#ifdef MOD_NPCERBOTS
         //npcbot
         if (GetCaster()->IsNPCBot())
             return true;
         //end npcbot
-#endif
         return GetCaster()->IsPlayer();
     }
 
     void FilterTargets(std::list<WorldObject*>& targets)
     {
-#ifdef MOD_NPCERBOTS
         //npcbot
         if (Creature* bot = GetCaster()->ToCreature())
         {
@@ -1220,7 +1211,7 @@ class spell_dru_t10_restoration_4p_bonus : public SpellScript
             return;
         }
         //end npcbot
-#endif
+
         if (!GetCaster()->ToPlayer()->GetGroup())
         {
             targets.clear();

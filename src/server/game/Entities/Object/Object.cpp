@@ -1087,12 +1087,10 @@ void WorldObject::setActive(bool on)
     if (IsPlayer())
         return;
 
-#ifdef MOD_NPCERBOTS
     //npcbot: bots should never be removed from active
     if (on == false && IsNPCBotOrPet())
         return;
     //end npcbot
-#endif
 
     m_isActive = on;
 
@@ -1181,12 +1179,10 @@ void WorldObject::SetPositionDataUpdate()
     // Calls immediately for charmed units
     if (IsCreature() && ToUnit()->IsCharmedOwnedByPlayerOrPlayer())
         UpdatePositionData();
-#ifdef MOD_NPCERBOTS
     //npcbot
     else if (IsNPCBotOrPet() && ToUnit()->IsControlledByPlayer())
         UpdatePositionData();
     //end npcbot
-#endif
 }
 
 void WorldObject::UpdatePositionData()
@@ -1926,7 +1922,6 @@ bool WorldObject::CanDetect(WorldObject const* obj, bool ignoreStealth, bool che
 {
     WorldObject const* seer = this;
 
-#ifdef MOD_NPCERBOTS
     //npcbot: master's sight only partially affects bots
     if (IsNPCBot())
     {
@@ -1946,7 +1941,6 @@ bool WorldObject::CanDetect(WorldObject const* obj, bool ignoreStealth, bool che
         return true;
     }
     //end npcbot
-#endif
 
     // Pets don't have detection, they use the detection of their masters
     if (Unit const* thisUnit = ToUnit())
@@ -2287,13 +2281,11 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
             summon = new Puppet(properties, summoner ? summoner->GetGUID() : ObjectGuid::Empty);
             break;
         case UNIT_MASK_TOTEM:
-#ifdef MOD_NPCERBOTS
             //npcbot: totem emul step 1
             if (summoner && summoner->IsNPCBot())
                 summon = new Totem(properties, summoner->ToCreature()->GetBotOwner()->GetGUID());
             else
             //end npcbot
-#endif
             summon = new Totem(properties, summoner ? summoner->GetGUID() : ObjectGuid::Empty);
             break;
         case UNIT_MASK_MINION:
@@ -2310,7 +2302,6 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
         return nullptr;
     }
 
-#ifdef MOD_NPCERBOTS
     //npcbot: totem emul step 2
     if (summoner && summoner->IsNPCBot() && !summon->IsTempBot())
     {
@@ -2329,7 +2320,6 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
         }
     }
     //end npcbot
-#endif
 
     summon->SetUInt32Value(UNIT_CREATED_BY_SPELL, spellId);
 
@@ -2354,12 +2344,11 @@ TempSummon* Map::SummonCreature(uint32 entry, Position const& pos, SummonPropert
     Acore::AIRelocationNotifier notifier(*summon);
     Cell::VisitObjects(summon, notifier, GetVisibilityRange());
 
-#ifdef MOD_NPCERBOTS
     //npcbot: totem emul step 3
     if (summoner && summoner->IsNPCBot())
         summoner->ToCreature()->OnBotSummon(summon);
     //end npcbot
-#endif
+
 
     return summon;
 }
@@ -2969,7 +2958,7 @@ Position WorldObject::GetFirstCollisionPosition(float startX, float startY, floa
     return pos;
 }
 
-Position WorldObject::GetFirstCollisionPosition(float destX, float destY, float destZ) 
+Position WorldObject::GetFirstCollisionPosition(float destX, float destY, float destZ)
 {
     Position pos = GetPosition();
     auto distance = GetExactDistSq(destX,destY,destZ);

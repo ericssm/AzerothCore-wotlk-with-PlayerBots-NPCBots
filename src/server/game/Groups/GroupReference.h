@@ -38,7 +38,7 @@ public:
     [[nodiscard]] uint8 getSubGroup() const { return iSubGroup; }
     void setSubGroup(uint8 pSubGroup) { iSubGroup = pSubGroup; }
 };
-#ifdef MOD_NPCERBOTS
+
 //npcbot
 class Creature;
 
@@ -58,5 +58,4 @@ class GroupBotReference : public Reference<Group, Creature>
         void setSubGroup(uint8 pSubGroup) { iSubGroup = pSubGroup; }
 };
 //end npcbot
-#endif
 #endif
