@@ -1677,6 +1677,8 @@ public:
     */
     virtual bool IsImmunedToSpell(SpellInfo const* spellInfo, Spell const* spell = nullptr) const;
     //end npcbot
+    bool IsImmunedToSpell(SpellInfo const* spellInfo, Unit const* caster) const;
+    bool IsImmunedToSpell(SpellInfo const* spellInfo, Unit const* caster, SpellSchoolMask spellSchoolMask) const;
     //npcbot
     /*
     bool IsImmunedToSpell(SpellInfo const* spellInfo, uint32 effectMask, Unit const* caster = nullptr);
