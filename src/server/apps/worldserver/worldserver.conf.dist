@@ -4837,6 +4837,7 @@ Respawn.DynamicEscortNPC = 0
 #                     Set to 1 to force legacy behavior for all spawns.
 #        Default:     0 - (Disabled, spawn groups control respawn mode)
 
+Respawn.ForceCompatibilityMode = 0
 
 #
 ###################################################################################################
