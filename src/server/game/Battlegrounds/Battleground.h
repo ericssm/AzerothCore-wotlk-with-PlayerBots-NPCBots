@@ -291,7 +291,6 @@ enum BGHonorMode
 };
 
 #define ARENA_TIMELIMIT_POINTS_LOSS    -16
-#define ARENA_READY_MARKER_ENTRY 301337
 
 /*
     This class is used to:
@@ -395,6 +394,9 @@ public:
     void ModifyStartDelayTime(int32 diff) { m_StartDelayTime -= diff; }
     void SetStartDelayTime(int32 Time)    { m_StartDelayTime = Time; }
 
+    [[nodiscard]] uint8 GetStartingEventFlags() const { return m_Events; }
+    void AddStartingEventFlag(uint8 flag) { m_Events |= flag; }
+
     void SetMaxPlayersPerTeam(uint32 MaxPlayers) { m_MaxPlayersPerTeam = MaxPlayers; }
     void SetMinPlayersPerTeam(uint32 MinPlayers) { m_MinPlayersPerTeam = MinPlayers; }
 
@@ -430,9 +432,6 @@ public:
     //end npcbot
     [[nodiscard]] BattlegroundPlayerMap const& GetPlayers() const { return m_Players; }
     [[nodiscard]] uint32 GetPlayersSize() const { return m_Players.size(); }
-
-    void ReadyMarkerClicked(Player* p); // pussywizard
-    GuidSet readyMarkerClickedSet; // pussywizard
 
     typedef std::unordered_map<ObjectGuid::LowType, BattlegroundScore*> BattlegroundScoreMap;
     typedef std::unordered_map<ObjectGuid, ArenaLogEntryData> ArenaLogEntryDataMap; // pussywizard
