@@ -1,10 +1,8 @@
 name: nopch-build
-
 on:
   push:
     branches:
       - 'master'
-      - 'test-staging'
   pull_request:
     types:
       - opened
@@ -12,6 +10,13 @@ on:
       - synchronize
 
 concurrency:
+  # One concurrency group per workflow + ref.
+  #
+  # - PRs use `refs/pull/<PR_NUMBER>/merge`, so new commits cancel older
+  #   in-progress runs for the same PR.
+  # - When a PR is merged, a push to the target branch starts a new group,
+  #   canceling any still-running PR CI.
+  # - Branch pushes are isolated by ref.
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
@@ -25,10 +30,6 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - os: ubuntu-22.04
-            compiler:
-              CC: clang-15
-              CXX: clang++-15
           - os: ubuntu-24.04
             compiler:
               CC: clang-18
@@ -37,9 +38,13 @@ jobs:
             compiler:
               CC: gcc-14
               CXX: g++-14
+          - os: ubuntu-26.04
+            compiler:
+              CC: clang-20
+              CXX: clang++-20
     runs-on: ${{ matrix.os }}
     name: ${{ matrix.os }}-${{ matrix.compiler.CC }}-nopch
-    if: github.repository == 'mod-playerbots/azerothcore-wotlk' && !github.event.pull_request.draft
+    if: github.repository == 'azerothcore/azerothcore-wotlk' && !github.event.pull_request.draft
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/linux-build
@@ -47,4 +52,3 @@ jobs:
           CC: ${{ matrix.compiler.CC }}
           CXX: ${{ matrix.compiler.CXX }}
           pch: false
-          modules: true  # optional: include module compilation if desired
