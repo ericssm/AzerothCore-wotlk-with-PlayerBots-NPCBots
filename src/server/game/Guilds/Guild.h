@@ -379,7 +379,7 @@ public: // pussywizard: public class Member
     };
 
     // pussywizard: public GetMember
-    inline const Member* GetMember(ObjectGuid guid) const
+    inline Member const* GetMember(ObjectGuid guid) const
     {
         auto itr = m_members.find(guid.GetCounter());
         return (itr != m_members.end()) ? &itr->second : nullptr;
@@ -567,7 +567,7 @@ private:
 
         void SetInfo(std::string_view name, std::string_view icon);
         void SetText(std::string_view text);
-        void SendText(const Guild* guild, WorldSession* session) const;
+        void SendText(Guild const* guild, WorldSession* session) const;
 
         std::string const& GetName() const { return m_name; }
         std::string const& GetIcon() const { return m_icon; }
@@ -779,7 +779,7 @@ public:
 
     void ResetTimes();
 
-    [[nodiscard]] bool ModifyBankMoney(CharacterDatabaseTransaction trans, const uint64& amount, bool add) { return _ModifyBankMoney(trans, amount, add); }
+    [[nodiscard]] bool ModifyBankMoney(CharacterDatabaseTransaction trans, uint64 const& amount, bool add) { return _ModifyBankMoney(trans, amount, add); }
     [[nodiscard]] uint32 GetMemberSize() const { return m_members.size(); }
 
     bool MemberHasTabRights(ObjectGuid guid, uint8 tabId, uint32 rights) const;

@@ -45,6 +45,14 @@ void WorldSession::HandleAutostoreLootItemOpcode(WorldPacket& recvData)
 
     recvData >> lootSlot;
 
+    // full CAIS restriction blocks item pickup from every loot source (GO/gather/item/corpse),
+    // not just the creature-corpse window guarded in HandleLootOpcode
+    if (player->HasPlayerFlag(PLAYER_FLAGS_NO_PLAY_TIME))
+    {
+        player->SendLootError(lguid, LOOT_ERROR_PLAY_TIME_EXCEEDED);
+        return;
+    }
+
     if (lguid.IsGameObject())
     {
         GameObject* go = player->GetMap()->GetGameObject(lguid);
@@ -184,6 +192,15 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
 
     if (loot)
     {
+        // the money is zeroed and dropped from storage below no matter who is paid, so a fully
+        // restricted looter would destroy it rather than receive it. Bail before that teardown;
+        // reachable for windows not opened through HandleLootOpcode, e.g. chests and lockboxes.
+        if (player->HasPlayerFlag(PLAYER_FLAGS_NO_PLAY_TIME))
+        {
+            player->SendLootError(guid, LOOT_ERROR_PLAY_TIME_EXCEEDED);
+            return;
+        }
+
         sScriptMgr->OnPlayerBeforeLootMoney(player, loot);
         loot->NotifyMoneyRemoved();
         //npcbot
@@ -291,15 +308,23 @@ void WorldSession::HandleLootOpcode(WorldPacket& recvData)
     ObjectGuid guid;
     recvData >> guid;
 
+    Player* player = GetPlayer();
+
     // Check possible cheat
-    if (!GetPlayer()->IsAlive() || !guid.IsCreatureOrVehicle())
+    if (!player->IsAlive() || !guid.IsCreatureOrVehicle())
         return;
 
-    // interrupt cast
-    if (GetPlayer()->IsNonMeleeSpellCast(false))
-        GetPlayer()->InterruptNonMeleeSpells(false);
+    if (player->HasPlayerFlag(PLAYER_FLAGS_NO_PLAY_TIME))
+    {
+        player->SendLootError(guid, LOOT_ERROR_PLAY_TIME_EXCEEDED);
+        return;
+    }
 
-    GetPlayer()->SendLoot(guid, LOOT_CORPSE);
+    // interrupt cast
+    if (player->IsNonMeleeSpellCast(false))
+        player->InterruptNonMeleeSpells(false);
+
+    player->SendLoot(guid, LOOT_CORPSE);
 }
 
 void WorldSession::HandleLootReleaseOpcode(WorldPacket& recvData)
@@ -495,7 +520,7 @@ void WorldSession::HandleLootMasterGiveOpcode(WorldPacket& recvData)
         return;
     }
 
-    if (!_player->IsInRaidWith(target))
+    if (!_player->IsInRaidWith(target) || target->HasPlayerFlag(PLAYER_FLAGS_NO_PLAY_TIME))
     {
         _player->SendLootError(lootguid, LOOT_ERROR_MASTER_OTHER);
         //LOG_DEBUG("network", "MasterLootItem: Player {} tried to give an item to ineligible player {} !", GetPlayer()->GetName(), target->GetName());

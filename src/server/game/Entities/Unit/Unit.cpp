@@ -839,7 +839,7 @@ bool Unit::IsWithinRange(Unit const* obj, float dist) const
     return distsq <= dist * dist;
 }
 
-bool Unit::IsWithinBoundaryRadius(const Unit* obj) const
+bool Unit::IsWithinBoundaryRadius(Unit const* obj) const
 {
     if (!obj || !IsInMap(obj) || !InSamePhase(obj))
         return false;
@@ -965,34 +965,8 @@ const
     if (hasCheckedEffect && immuneToAllEffects)
         return true;
 
-    if (!spellInfo->HasAttribute(SPELL_ATTR2_NO_SCHOOL_IMMUNITIES))
-    {
-        if (spellInfo->Id == 42292 || spellInfo->Id == 59752 || spellInfo->Id == 19574 || spellInfo->Id == 34471)
-            return false;
-
-        SpellSchoolMask schoolMask = spellInfo->GetSchoolMask();
-        if (schoolMask != SPELL_SCHOOL_MASK_NONE)
-        {
-            SpellImmuneContainer const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
-            for (auto const& [immunitySchoolMask, immunityAuraId] : schoolList)
-            {
-                SpellInfo const* immuneSpellInfo = sSpellMgr->GetSpellInfo(immunityAuraId);
-                if (immunityAuraId == spellInfo->Id)
-                    continue;
-
-                if ((immunitySchoolMask & schoolMask) != schoolMask)
-                    continue;
-
-                if (IgnoresSchoolImmunityFromFriendlyCaster(caster, immunityAuraId, immuneSpellInfo))
-                    continue;
-
-                if (spellInfo->CanPierceImmuneAura(immuneSpellInfo))
-                    continue;
-
-                return true;
-            }
-        }
-    }
+    if (!spellInfo->HasAttribute(SPELL_ATTR2_NO_SCHOOL_IMMUNITIES) && HasSchoolImmunityForMask(spellInfo->GetSchoolMask(), caster, spellInfo))
+        return true;
 
     return false;
 }
@@ -4500,7 +4474,9 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
                 if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL] &&
                         m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != 75)
                     InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
-                AddUnitState(UNIT_STATE_CASTING);
+
+                if (!pSpell->GetSpellInfo()->IsActionAllowedChannel())
+                    AddUnitState(UNIT_STATE_CASTING);
 
                 break;
             }
@@ -5550,7 +5526,7 @@ void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint32 dispellerSpellId
                                     {
                                         noxious->SetDuration(aura->GetDuration() * aureff->GetAmount() / 100);
                                         if (aura->GetUnitOwner())
-                                            if (const std::vector<int32>* spell_triggered = sSpellMgr->GetSpellLinked(-int32(aura->GetId())))
+                                            if (std::vector<int32> const* spell_triggered = sSpellMgr->GetSpellLinked(-int32(aura->GetId())))
                                                 for (std::vector<int32>::const_iterator itr = spell_triggered->begin(); itr != spell_triggered->end(); ++itr)
                                                     aura->GetUnitOwner()->RemoveAurasDueToSpell(*itr);
                                     }
@@ -10317,6 +10293,32 @@ bool Unit::IgnoresSchoolImmunityFromFriendlyCaster(Unit const* caster, uint32 im
     return immunityAuraId == std::numeric_limits<uint32>::max();
 }
 
+bool Unit::HasSchoolImmunityForMask(SpellSchoolMask schoolMask, Unit const* caster, SpellInfo const* spellInfo) const
+{
+    if (schoolMask == SPELL_SCHOOL_MASK_NONE)
+        return false;
+
+    uint32 accumulatedMask = 0;
+    for (auto const& [immunitySchoolMask, immunityAuraId] : m_spellImmune[IMMUNITY_SCHOOL])
+    {
+        // Skip the spell's own immunity entry
+        if (spellInfo && immunityAuraId == spellInfo->Id)
+            continue;
+
+        SpellInfo const* immuneSpellInfo = sSpellMgr->GetSpellInfo(immunityAuraId);
+
+        if (IgnoresSchoolImmunityFromFriendlyCaster(caster, immunityAuraId, immuneSpellInfo))
+            continue;
+
+        if (spellInfo && immuneSpellInfo && spellInfo->CanPierceImmuneAura(immuneSpellInfo))
+            continue;
+
+        accumulatedMask |= immunitySchoolMask;
+    }
+
+    return (SpellSchoolMask(accumulatedMask) & schoolMask) == schoolMask;
+}
+
 bool Unit::IsImmunedToDamage(SpellSchoolMask schoolMask) const
 {
     if (schoolMask == SPELL_SCHOOL_MASK_NONE)
@@ -10451,9 +10453,7 @@ bool Unit::IsImmunedToSchool(Spell const* spell) const
 bool Unit::IsImmunedToDamageOrSchool(SpellSchoolMask schoolMask) const
 {
     if (schoolMask == SPELL_SCHOOL_MASK_NONE)
-    {
         return false;
-    }
 
     return IsImmunedToDamage(schoolMask) || IsImmunedToSchool(schoolMask);
 }
@@ -10559,27 +10559,8 @@ bool Unit::IsImmunedToSpell(SpellInfo const* spellInfo, Unit const* caster, Spel
 
     if (!spellInfo->HasAttribute(SPELL_ATTR2_NO_SCHOOL_IMMUNITIES))
     {
-        if (spellSchoolMask != SPELL_SCHOOL_MASK_NONE)
-        {
-            SpellImmuneContainer const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
-            for (auto itr = schoolList.begin(); itr != schoolList.end(); ++itr)
-            {
-                if (itr->second == spellInfo->Id)
-                    continue;
-
-                SpellInfo const* immuneSpellInfo = sSpellMgr->GetSpellInfo(itr->second);
-                if (!(itr->first & spellSchoolMask))
-                    continue;
-
-                if (IgnoresSchoolImmunityFromFriendlyCaster(caster, itr->second, immuneSpellInfo))
-                    continue;
-
-                if (spellInfo->CanPierceImmuneAura(immuneSpellInfo))
-                    continue;
-
-                return true;
-            }
-        }
+        if (HasSchoolImmunityForMask(spellSchoolMask, caster, spellInfo))
+            return true;
     }
 
     return false;
@@ -15409,7 +15390,7 @@ void Unit::SetRooted(bool apply, bool stun, bool logout)
 
 void Unit::SendMoveRoot(bool apply)
 {
-    const Player* client = GetClientControlling();
+    Player const* client = GetClientControlling();
 
     // Apply flags in-place when unit currently is not controlled by a player
     if (!client)
@@ -15428,7 +15409,7 @@ void Unit::SendMoveRoot(bool apply)
     if (!IsInWorld())
         return;
 
-    const PackedGuid& guid = GetPackGUID();
+    PackedGuid const& guid = GetPackGUID();
     // Wrath+ spline root: when unit is currently not controlled by a player
     if (!client)
     {
@@ -16471,183 +16452,6 @@ uint32 Unit::GetModelForForm(ShapeshiftForm form, uint32 spellId)
         if (uint32 ModelId = sObjectMgr->GetModelForShapeshift(form, ToPlayer()))
             return ModelId;
     }
-    else if (ToCreature() && ToCreature()->GetBotOwner() && ToCreature()->GetBotOwner()->ToPlayer())
-    {
-        //this has to be modified after implementation of bots' appearances which will include player bytes emulation
-        Player const* player = ToCreature()->GetBotOwner();
-        //let's make druids look according to player but base model must be selected based on our race
-        switch (form)
-        {
-            case FORM_CAT:
-                // Based on master's Hair color
-                if (GetRace() == RACE_NIGHTELF)
-                {
-                    uint8 hairColor = player->GetByteValue(PLAYER_BYTES, 3);
-                    switch (hairColor)
-                    {
-                        case 7: // Violet
-                        case 8:
-                            return 29405;
-                        case 3: // Light Blue
-                            return 29406;
-                        case 0: // Green
-                        case 1: // Light Green
-                        case 2: // Dark Green
-                            return 29407;
-                        case 4: // White
-                            return 29408;
-                        default: // original - Dark Blue
-                            return 892;
-                    }
-                }
-                // Based on master's Skin color
-                else if (GetRace() == RACE_TAUREN)
-                {
-                    uint8 skinColor = player->GetByteValue(PLAYER_BYTES, 0);
-                    // Male master
-                    if (GetGender() == GENDER_MALE)
-                    {
-                        switch (skinColor)
-                        {
-                            case 12: // White
-                            case 13:
-                            case 14:
-                            case 18: // Completly White
-                                return 29409;
-                            case 9: // Light Brown
-                            case 10:
-                            case 11:
-                                return 29410;
-                            case 6: // Brown
-                            case 7:
-                            case 8:
-                                return 29411;
-                            case 0: // Dark
-                            case 1:
-                            case 2:
-                            case 3: // Dark Grey
-                            case 4:
-                            case 5:
-                                return 29412;
-                            default: // original - Grey
-                                return 8571;
-                        }
-                    }
-                    // Female master
-                    else switch (skinColor)
-                    {
-                        case 10: // White
-                            return 29409;
-                        case 6: // Light Brown
-                        case 7:
-                            return 29410;
-                        case 4: // Brown
-                        case 5:
-                            return 29411;
-                        case 0: // Dark
-                        case 1:
-                        case 2:
-                        case 3:
-                            return 29412;
-                        default: // original - Grey
-                            return 8571;
-                    }
-                }
-                else if (Player::TeamIdForRace(GetRace()) == TEAM_ALLIANCE)
-                    return 892;
-                else
-                    return 8571;
-            case FORM_DIREBEAR:
-            case FORM_BEAR:
-                // Based on Hair color
-                if (GetRace() == RACE_NIGHTELF)
-                {
-                    uint8 hairColor = player->GetByteValue(PLAYER_BYTES, 3);
-                    switch (hairColor)
-                    {
-                        case 0: // Green
-                        case 1: // Light Green
-                        case 2: // Dark Green
-                            return 29413; // 29415?
-                        case 6: // Dark Blue
-                            return 29414;
-                        case 4: // White
-                            return 29416;
-                        case 3: // Light Blue
-                            return 29417;
-                        default: // original - Violet
-                            return 2281;
-                    }
-                }
-                // Based on Skin color
-                else if (GetRace() == RACE_TAUREN)
-                {
-                    uint8 skinColor = player->GetByteValue(PLAYER_BYTES, 0);
-                    // Male
-                    if (GetGender() == GENDER_MALE)
-                    {
-                        switch (skinColor)
-                        {
-                            case 0: // Dark (Black)
-                            case 1:
-                            case 2:
-                                return 29418;
-                            case 3: // White
-                            case 4:
-                            case 5:
-                            case 12:
-                            case 13:
-                            case 14:
-                                return 29419;
-                            case 9: // Light Brown/Grey
-                            case 10:
-                            case 11:
-                            case 15:
-                            case 16:
-                            case 17:
-                                return 29420;
-                            case 18: // Completly White
-                                return 29421;
-                            default: // original - Brown
-                                return 2289;
-                        }
-                    }
-                    // Female
-                    else switch (skinColor)
-                    {
-                        case 0: // Dark (Black)
-                        case 1:
-                            return 29418;
-                        case 2: // White
-                        case 3:
-                            return 29419;
-                        case 6: // Light Brown/Grey
-                        case 7:
-                        case 8:
-                        case 9:
-                            return 29420;
-                        case 10: // Completly White
-                            return 29421;
-                        default: // original - Brown
-                            return 2289;
-                    }
-                }
-                else if (Player::TeamIdForRace(GetRace()) == TEAM_ALLIANCE)
-                    return 2281;
-                else
-                    return 2289;
-            case FORM_FLIGHT:
-                if (Player::TeamIdForRace(GetRace()) == TEAM_ALLIANCE)
-                    return 20857;
-                return 20872;
-            case FORM_FLIGHT_EPIC:
-                if (Player::TeamIdForRace(GetRace()) == TEAM_ALLIANCE)
-                    return 21243;
-                return 21244;
-            default:
-                break;
-        }
-    }
 
     uint32 modelid = 0;
     SpellShapeshiftFormEntry const* formEntry = sSpellShapeshiftFormStore.LookupEntry(form);
@@ -17020,7 +16824,6 @@ void Unit::_ExitVehicle(Position const* exitPosition)
         init.Launch();
         DisableSpline();
         KnockbackFrom(pos.GetPositionX(), pos.GetPositionY(), 10.0f, 20.0f);
-        CastSpell(this, VEHICLE_SPELL_PARACHUTE, true);
     }
 
     // xinef: move fall, should we support all creatures that exited vehicle in air? Currently Quest Drag and Drop only, Air Assault quest
