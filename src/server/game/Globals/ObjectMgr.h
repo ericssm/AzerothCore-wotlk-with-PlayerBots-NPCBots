@@ -1147,8 +1147,6 @@ public:
         return itr != _fishingBaseForAreaStore.end() ? itr->second : 0;
     }
 
-    void ReturnOrDeleteOldMails(bool serverUp);
-
     CreatureBaseStats const* GetCreatureBaseStats(uint8 level, uint8 unitClass);
 
     void SetHighestGuids();
