@@ -544,6 +544,8 @@ enum CharacterDatabaseStatements : uint32
     CHAR_SEL_WORLD_STATE,
     CHAR_REP_WORLD_STATE,
 
+    CHAR_NO_OP_PROVIDE_REALM_CONTEXT,
+
     // NPCBot
     CHAR_UPD_NPCBOT_OWNER,
     CHAR_UPD_NPCBOT_OWNER_ALL,
