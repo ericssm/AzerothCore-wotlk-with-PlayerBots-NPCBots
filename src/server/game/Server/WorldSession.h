@@ -1231,10 +1231,6 @@ public:                                                 // opcodes handlers
     {
         return _isBot;
     }
-#ifdef DIY_ADEN2008
-    void SendTrainerList(ObjectGuid guid, uint32 npcspelli);
-    void SendTrainerList(ObjectGuid guid, std::string const& strTitle, uint32 npcspelli);
-#endif
 
 private:
     void ProcessQueryCallbacks();
