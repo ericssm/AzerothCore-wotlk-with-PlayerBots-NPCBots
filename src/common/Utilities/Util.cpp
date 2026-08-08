@@ -168,7 +168,7 @@ uint32 TimeStringToSecs(std::string const& timestring)
 
     for (std::string::const_iterator itr = timestring.begin(); itr != timestring.end(); ++itr)
     {
-        if (isdigit(*itr))
+        if (isdigit(static_cast<unsigned char>(*itr)))
         {
             buffer *= 10;
             buffer += (*itr) - '0';
@@ -291,7 +291,7 @@ bool Utf8toWStr(char const* utf8str, std::size_t csize, wchar_t* wstr, std::size
     {
         // Replace the converted string with an error message if there is enough space
         // Otherwise just return an empty string
-        wchar_t const* errorMessage = L"An error occurred converting string from UTF-8 to WStr";
+        wchar_t const* errorMessage = L"An error occurred converting string from UTF-8 to WStr\n";
         std::size_t errorMessageLength = std::char_traits<wchar_t>::length(errorMessage);
         if (wsize >= errorMessageLength)
         {
@@ -599,18 +599,18 @@ void Acore::Impl::HexStrToByteArray(std::string_view str, uint8* out, std::size_
 
 bool StringEqualI(std::string_view a, std::string_view b)
 {
-    return std::equal(a.begin(), a.end(), b.begin(), b.end(), [](char c1, char c2) { return std::tolower(c1) == std::tolower(c2); });
+    return std::equal(a.begin(), a.end(), b.begin(), b.end(), [](char c1, char c2) { return std::tolower(static_cast<unsigned char>(c1)) == std::tolower(static_cast<unsigned char>(c2)); });
 }
 
 bool StringContainsStringI(std::string_view haystack, std::string_view needle)
 {
     return haystack.end() !=
-        std::search(haystack.begin(), haystack.end(), needle.begin(), needle.end(), [](char c1, char c2) { return std::tolower(c1) == std::tolower(c2); });
+        std::search(haystack.begin(), haystack.end(), needle.begin(), needle.end(), [](char c1, char c2) { return std::tolower(static_cast<unsigned char>(c1)) == std::tolower(static_cast<unsigned char>(c2)); });
 }
 
 bool StringCompareLessI(std::string_view a, std::string_view b)
 {
-    return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](char c1, char c2) { return std::tolower(c1) < std::tolower(c2); });
+    return std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end(), [](char c1, char c2) { return std::tolower(static_cast<unsigned char>(c1)) < std::tolower(static_cast<unsigned char>(c2)); });
 }
 
 std::string GetTypeName(std::type_info const& info)

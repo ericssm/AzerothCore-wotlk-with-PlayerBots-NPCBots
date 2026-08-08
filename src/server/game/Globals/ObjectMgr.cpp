@@ -57,11 +57,9 @@
 
 #include "ItemEnchantmentMgr.h"
 
-#ifdef MOD_NPCERBOTS
 //npcbot
 #include "botdatamgr.h"
 //end npcbot
-#endif
 
 ScriptMapMap sSpellScripts;
 ScriptMapMap sEventScripts;
@@ -1213,12 +1211,10 @@ void ObjectMgr::CheckCreatureTemplate(CreatureTemplate const* cInfo)
         const_cast<CreatureTemplate*>(cInfo)->expansion = 0;
     }
 
-#ifdef MOD_NPCERBOTS
     //npcbot: skip flags check and damage multiplier
     if (cInfo->IsNPCBotOrPet())
         return;
     //end npcbot
-#endif
 
     if (uint32 badFlags = (cInfo->flags_extra & ~CREATURE_FLAG_EXTRA_DB_ALLOWED))
     {
@@ -2395,7 +2391,7 @@ void ObjectMgr::LoadCreatures()
         data.spawnMask          = fields[14].Get<uint8>();
         data.phaseMask          = fields[15].Get<uint32>();
         int16 gameEvent         = fields[16].Get<int16>();
-        uint32 PoolId           = fields[17].Get<uint32>();
+        data.poolId             = fields[17].Get<uint32>();
         data.npcflag            = fields[18].Get<uint32>();
         data.unit_flags         = fields[19].Get<uint32>();
         data.dynamicflags       = fields[20].Get<uint32>();
@@ -2503,8 +2499,9 @@ void ObjectMgr::LoadCreatures()
             WorldDatabase.Execute(stmt);
         }
 
-        // Add to grid if not managed by the game event or pool system
-        if (gameEvent == 0 && PoolId == 0)
+        // Add to grid if not managed by the game event. Pooled spawns are in
+        // the grid data too; the grid loader filters them by pool state.
+        if (gameEvent == 0)
             AddCreatureToGrid(spawnId, &data);
 
         ++count;
@@ -3048,7 +3045,7 @@ void ObjectMgr::LoadGameobjects()
 
         data.phaseMask      = fields[15].Get<uint32>();
         int16 gameEvent     = fields[16].Get<int16>();
-        uint32 PoolId        = fields[17].Get<uint32>();
+        data.poolId         = fields[17].Get<uint32>();
 
         if (data.rotation.x < -1.0f || data.rotation.x > 1.0f)
         {
@@ -3107,7 +3104,7 @@ void ObjectMgr::LoadGameobjects()
             WorldDatabase.Execute(stmt);
         }
 
-        if (gameEvent == 0 && PoolId == 0)                      // if not this is to be managed by GameEvent System or Pool system
+        if (gameEvent == 0)                      // if not this is to be managed by GameEvent System
             AddGameobjectToGrid(guid, &data);
     } while (result->NextRow());
 
@@ -9750,7 +9747,7 @@ SkillRangeType GetSkillRangeType(SkillRaceClassInfoEntry const* rcEntry)
     return SKILL_RANGE_LEVEL;
 }
 
-#ifdef MOD_NPCERBOTS
+//npcbot
 void ObjectMgr::LoadCreatureOutfits()
 {
     uint32 oldMSTime = getMSTime();
@@ -9825,7 +9822,7 @@ void ObjectMgr::LoadCreatureOutfits()
 
     LOG_INFO("server.loading", ">> Loaded {} creature outfits in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
 }
-#endif
+//end npcbot
 
 void ObjectMgr::LoadGameTele()
 {
@@ -11104,7 +11101,6 @@ GameObjectTemplateAddon const* ObjectMgr::GetGameObjectTemplateAddon(uint32 entr
 
 CreatureTemplate const* ObjectMgr::GetCreatureTemplate(uint32 entry)
 {
-#ifdef MOD_NPCERBOTS
     //npcbot: try fetch custom creature template
     if (entry >= BOT_ENTRY_CREATE_BEGIN)
     {
@@ -11116,7 +11112,6 @@ CreatureTemplate const* ObjectMgr::GetCreatureTemplate(uint32 entry)
         }
     }
     //end npcbot
-#endif
 
     return entry < _creatureTemplateStoreFast.size() ? _creatureTemplateStoreFast[entry] : nullptr;
 }

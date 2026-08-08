@@ -159,6 +159,9 @@ public:
     bool IsInBotParty(ObjectGuid guid) const;
     bool CanBotAttack(Unit const* target, int8 byspell = 0, bool secondary = false) const;
     bool CanBotAttackOnVehicle() const;
+
+    void OnOwnerDamagedBy(Unit* attacker);
+
     void ApplyBotDamageMultiplierMelee(uint32& damage, CalcDamageInfo& damageinfo) const;
     void ApplyBotDamageMultiplierMelee(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType attackType, bool iscrit) const;
     void ApplyBotDamageMultiplierSpell(int32& damage, SpellNonMeleeDamage& damageinfo, SpellInfo const* spellInfo, WeaponAttackType attackType, bool iscrit) const;
@@ -389,8 +392,6 @@ protected:
     void SetStats(bool force);
     void DefaultInit();
     void InitUnitFlags(); // call only in constructor
-
-    void OnOwnerDamagedBy(Unit* attacker);
 
     static uint32 InitSpell(Unit const* caster, uint32 spell);
     void InitSpellMap(uint32 basespell, bool forceadd = false, bool forwardRank = true);
@@ -697,6 +698,19 @@ private:
     Position homepos{}, movepos{}, attackpos{}, sendlastpos{};
     Position sendpos[MAX_SEND_POINTS]{};
     AoeSpotsVec _aoeSpots;
+
+//DIY_ADEN2008
+    mutable time_t _followChaosTimer{};
+    mutable float _followChaosDx{};
+    mutable float _followChaosDy{};
+    mutable float _followChaosAngle{};
+    mutable float _followChaosTargetDx{};
+    mutable float _followChaosTargetDy{};
+    mutable float _followChaosTargetAngle{};
+    mutable uint32 _avoidPetCheckTimer{};
+    mutable float _avoidPetDx{};
+    mutable float _avoidPetDy{};
+//end DIY_ADEN2008
 
     uint32 _botCommandState{};
     uint8 _botAwaitState{};

@@ -121,7 +121,11 @@ struct AccountFlagName
 
 AC_COMMON_API extern AccountFlagName const accountFlagNames[MAX_ACCOUNT_FLAG];
 
+#ifdef MOD_NPCERBOTS
+enum LocaleConstant : uint8
+#else
 enum LocaleConstant
+#endif
 {
     LOCALE_enUS = 0,
     LOCALE_koKR = 1,

@@ -53,7 +53,7 @@ std::string Acore::String::TrimRightInPlace(std::string& str)
 {
     int pos = int(str.size()) - 1;
 
-    while (pos >= 0 && std::isspace(str[pos]))
+    while (pos >= 0 && std::isspace(static_cast<unsigned char>(str[pos])))
     {
         --pos;
     }
