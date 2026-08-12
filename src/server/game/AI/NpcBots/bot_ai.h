@@ -710,6 +710,12 @@ private:
     mutable uint32 _avoidPetCheckTimer{};
     mutable float _avoidPetDx{};
     mutable float _avoidPetDy{};
+
+    // 坦克赶路跟随过渡因子：[0, 1]
+    //   0 = 原始战斗阵型（前方 ±30°，接怪位置）
+    //   1 = 侧后方 ±135°（不挡主人视线）
+    // 赶路时 factor → 1（0.4s 到位），停止/战斗时 factor → 0（0.2s 回前方接怪）
+    mutable float _tankLaneFactor{};
 //end DIY_ADEN2008
 
     uint32 _botCommandState{};
