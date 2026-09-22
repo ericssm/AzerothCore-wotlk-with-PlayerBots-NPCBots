@@ -76,9 +76,9 @@ namespace Trainer
             [[nodiscard]] Type GetTrainerType() const { return _type; }
             [[nodiscard]] uint32 GetTrainerRequirement() const { return _requirement; }
             bool IsTrainerValidForPlayer(Player const* player) const;
-            SpellState GetSpellState(Player const* player, Spell const* trainerSpell) const;
 
-        private:
+            private:
+            SpellState GetSpellState(Player const* player, Spell const* trainerSpell) const;
             SpellState GetDefaultSpellState(Player const* player, Spell const* trainerSpell) const;
             void SendTeachFailure(Creature const* npc, Player const* player, uint32 spellId, FailReason reason) const;
             void SendTeachSucceeded(Creature const* npc, Player const* player, uint32 spellId) const;

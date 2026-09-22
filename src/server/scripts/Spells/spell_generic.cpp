@@ -2595,6 +2595,36 @@ class spell_gen_vehicle_scaling_aura: public AuraScript
 
     void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
     {
+        //npcbot
+        if (!GetCaster()->IsPlayer())
+        {
+            if (GetCaster()->IsNPCBot())
+            {
+                switch (GetId())
+                {
+                    case SPELL_GEAR_SCALING:
+                    {
+                        float avgILvl = GetCaster()->ToCreature()->GetBotAverageItemLevel();
+                        if (avgILvl < 205.0f)
+                            return;
+
+                        amount = static_cast<int32>(avgILvl - 205.0f);
+                        break;
+                    }
+                    default:
+                    {
+                        float totalILvl = GetCaster()->ToCreature()->GetBotAverageItemLevel() * static_cast<float>(EQUIPMENT_SLOT_END); // TODO: GetBotTotalItemLevel
+                        float result = (totalILvl - 2500.0f) / 5.0f / 100.0f;
+                        amount = static_cast<int32>(std::max(0.1f, result));
+                        break;
+                    }
+                }
+            }
+
+            return;
+        }
+        //end npcbot
+
         Player* player = GetCaster()->ToPlayer();
 
         float factor;

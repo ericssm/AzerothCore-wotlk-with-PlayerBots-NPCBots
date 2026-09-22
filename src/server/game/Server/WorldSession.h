@@ -1226,7 +1226,7 @@ public:                                                 // opcodes handlers
 
     void SetPacketLogging(bool state);
 
-    LockedQueue<WorldPacket*>& GetPacketQueue(){ return _recvQueue;};
+    LockedQueue<WorldPacket*>& GetPacketQueue();
 
     [[nodiscard]] bool IsBot() const
     {

@@ -2508,12 +2508,10 @@ void Player::GiveXP(uint32 xp, Unit* victim, float group_rate, bool isLFGReward)
         return;
 
     if (victim && victim->IsCreature() && !victim->ToCreature()->hasLootRecipient())
-    {
     //npcbot
         if (!(victim->IsNPCBot() && victim->FindMap() && victim->GetMap()->IsBattleground()))
     //end npcbot
         return;
-    }
 
     uint8 level = GetLevel();
     sScriptMgr->OnPlayerBeforeGetLevelForXPGain(this, level);
@@ -3334,8 +3332,8 @@ bool Player::CheckSkillLearnedBySpell(uint32 spellId)
 
     if (errorSkill)
     {
-        //LOG_ERROR("entities.player", "Player {} (GUID: {}), has spell ({}) that teach skill ({}) which is invalid for the race/class combination (Race: {}, Class: {}). Will be deleted.",
-        //    GetName(), GetGUID().GetCounter(), spellId, errorSkill, getRace(), getClass());
+        LOG_ERROR("entities.player", "Player {} (GUID: {}), has spell ({}) that teach skill ({}) which is invalid for the race/class combination (Race: {}, Class: {}). Will be deleted.",
+            GetName(), GetGUID().GetCounter(), spellId, errorSkill, getRace(), getClass());
 
         return false;
     }
@@ -10250,7 +10248,7 @@ void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell* s
         calculateSpellMod(mod);
     }
 
-    if (op == SPELLMOD_CASTING_TIME || op == SPELLMOD_DURATION)
+    if (op == SPELLMOD_CASTING_TIME || op == SPELLMOD_DURATION || op == SPELLMOD_COST)
         basevalue = (basevalue + totalflat) > 0 ? (basevalue + totalflat) * totalmul : 0;
     else
         basevalue = (basevalue * totalmul) + totalflat;
@@ -11710,15 +11708,6 @@ void Player::LeaveBattleground(Battleground* bg)
     GetMotionMaster()->MovementExpired();
     StopMoving();
     TeleportToEntryPoint();
-}
-
-bool Player::CanJoinToBattleground() const
-{
-    // check Deserter debuff
-    if (HasAura(26013))
-        return false;
-
-    return true;
 }
 
 bool Player::CanJoinToBattleground(Battleground const* bg) const

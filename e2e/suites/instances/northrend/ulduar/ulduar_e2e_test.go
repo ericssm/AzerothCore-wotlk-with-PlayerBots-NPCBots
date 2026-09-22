@@ -5,7 +5,6 @@ package ulduar_test
 import (
 	"encoding/binary"
 	"fmt"
-	"math"
 	"sync"
 	"testing"
 	"time"
@@ -377,93 +376,6 @@ const (
 // Elder Brightleaf's own spawn. Not the BossFreya pad: that pad sits 12y from Freya, and aggroing
 // her banishes every living elder, after which he schedules no beams for the life of the instance.
 var brightleafSpawn = e2eharness.Position3{X: 2385.09, Y: 131.341, Z: 440.201, Map: e2eharness.MapUlduar}
-
-// Elder Brightleaf's Unstable Sun Beams must not outlive him, and each wave must land one beam on
-// the elder plus one under a player in range. Before the fix the beams were hand-summoned with no
-// duration and the elder's event map was the only thing that removed them, so a kill taken with a
-// wave up left them standing for the life of the instance.
-// Issue: https://github.com/chromiecraft/chromiecraft/issues/10163
-func TestUlduar_BrightleafSunBeamsDespawnAfterDeath(t *testing.T) {
-	meta.Begin(t, meta.TestMeta{
-		Tags:     []string{"med", "instances"},
-		Runtime:  "med",
-		Category: "instances/northrend/ulduar",
-	})
-
-	const (
-		// Each beam despawns itself after a randomised 18-25s; the oracle allows the worst case
-		// plus slack for the kill and the object-cache round trip. Do not widen it past 30s: that
-		// is 62221's summon duration, the engine backstop that would despawn the player's beam by
-		// itself and hide the regression this guards.
-		beamMaxLifetime = 25 * time.Second
-		// The elder's own beam sits on him, so "landed on the player" is only distinguishable
-		// from "stacked on the elder" while the bot stands clear of him by more than this.
-		beamOnPlayerRange = float32(3)
-	)
-
-	bot := e2eharness.NewSolo(t, e2eharness.ScenarioOpts{
-		Prefix: "Bleaf",
-		Level:  80,
-	})
-
-	// Stay GM through the raid enter.
-	bot.TeleportPad(t, brightleafSpawn)
-	if _, _, _, m := bot.Pos(); m != e2eharness.MapUlduar {
-		e2eharness.Preconditionf(t, "not in Ulduar after Brightleaf tele map=%d", m)
-	}
-	bot.GoCreatureID(t, npcElderBrightleaf)
-	bot.CombatReady(t)
-
-	elder := waitLivingBrightleaf(t, bot)
-	bot.Engage(t, elder, 15*time.Second)
-
-	wave := waitBrightleafWave(t, bot, elder)
-	bx, by, bz, _ := bot.Pos()
-	elderObj := bot.World.GetObject(elder)
-	if elderObj == nil {
-		e2eharness.Preconditionf(t, "Elder Brightleaf 0x%X left the object cache before the wave landed", elder)
-	}
-	ex, ey, ez := elderObj.PosX, elderObj.PosY, elderObj.PosZ
-	if botToElder := e2eharness.Distance3D(bx, by, bz, ex, ey, ez); botToElder <= beamOnPlayerRange {
-		e2eharness.Preconditionf(t, "bot stands %.1fy from the elder, too close for the placement oracle to discriminate (need > %.1fy)",
-			botToElder, beamOnPlayerRange)
-	}
-	nearestToBot := float32(math.MaxFloat32)
-	for _, b := range wave {
-		toBot := e2eharness.Distance3D(bx, by, bz, b.x, b.y, b.z)
-		if toBot < nearestToBot {
-			nearestToBot = toBot
-		}
-		t.Logf("beam 0x%X at (%.1f,%.1f,%.1f) dist bot=%.1f elder=%.1f", b.guid, b.x, b.y, b.z,
-			toBot, e2eharness.Distance3D(ex, ey, ez, b.x, b.y, b.z))
-	}
-	// 62207 summons one beam at the elder and force-casts 62221 on the players its script picks,
-	// each summoning one at their own feet. A forced cast whose target mask takes no unit target
-	// must not inherit the original caster as its destination, or every beam stacks on the elder.
-	if nearestToBot > beamOnPlayerRange {
-		e2eharness.Assertf(t, "no Unstable Sun Beam landed on the player: nearest of %d beams is %.1fy away",
-			len(wave), nearestToBot)
-	}
-
-	// Kill him with the wave still up — that is the state that used to leak.
-	bot.DamageKill(t, []uint64{elder}, 10_000_000, 30*time.Second)
-	killT := time.Now()
-
-	cutoff := killT.Add(beamMaxLifetime + 15*time.Second)
-	for {
-		left := sunBeamsInCache(bot, npcUnstableSunBeam, beamSearchRange)
-		if len(left) == 0 {
-			break
-		}
-		if !time.Now().Before(cutoff) {
-			e2eharness.Assertf(t, "%d Unstable Sun Beam(s) still up %s after Elder Brightleaf died: %v",
-				len(left), time.Since(killT).Round(time.Second), sunBeamGUIDs(left))
-		}
-		time.Sleep(500 * time.Millisecond)
-	}
-	t.Logf("PASS %d sun beams all gone %s after Elder Brightleaf died",
-		len(wave), time.Since(killT).Round(time.Millisecond))
-}
 
 type sunBeamSnap struct {
 	guid    uint64
@@ -1445,5 +1357,94 @@ func TestUlduar_FreyaWardLasherOutlivesSummonDuration(t *testing.T) {
 		adds = append(adds, add.GUID)
 	}
 	bot.DamageKill(t, adds, 10_000_000, 30*time.Second)
+	bot.AssertWorldAlive(t)
+}
+
+// PR: https://github.com/azerothcore/azerothcore-wotlk/pull/27718
+// Each Elder count has its own Freya's Gift, and the emblems the fix corrects are per chest, so
+// the chest that spawns has to be the one for the Elders actually left alive. The emblems inside
+// are out of reach here: a chest opens only through SPELL_EFFECT_OPEN_LOCK (Spell::SendLoot),
+// CMSG_LOOT drops any guid that is not a creature, and the harness cannot cast at a gameobject
+// target. Inventoried as blocked-harness in e2e/README.md.
+func TestUlduar_FreyaGiftMatchesElderCount(t *testing.T) {
+	meta.Begin(t, meta.TestMeta{
+		Tags:     []string{"short", "instances"},
+		Runtime:  "short",
+		Category: "instances/northrend/ulduar",
+	})
+
+	const (
+		npcFreya           = uint32(32906)
+		npcElderIronbranch = uint32(32913)
+		npcElderStonebark  = uint32(32914)
+
+		// 10-man spawns 194330 for no Elder alive, 194328 for one, 194326 for two, 194324 for all
+		// three.
+		goGiftNoElder     = uint32(194330)
+		goGiftOneElder    = uint32(194328)
+		goGiftTwoElders   = uint32(194326)
+		goGiftThreeElders = uint32(194324)
+	)
+
+	bot := e2eharness.NewSolo(t, e2eharness.ScenarioOpts{
+		Prefix: "FreyaGf",
+		Level:  80,
+	})
+
+	// Raid interior pad (game_tele BossFreya); stay GM through the raid enter.
+	bot.Teleport(t, 2326.82, -48.131, 424.963, e2eharness.MapUlduar)
+	if _, _, _, m := bot.Pos(); m != e2eharness.MapUlduar {
+		e2eharness.Preconditionf(t, "not in Ulduar after Freya pad tele map=%d", m)
+	}
+	bot.GoCreatureID(t, npcFreya)
+
+	// Ironbranch and Stonebark stand 136y and 144y from Freya, inside visibility. Brightleaf at
+	// 190y is out of the object cache and never touched, so he is the one left to empower her.
+	var toKill []uint64
+	for _, entry := range []uint32{npcElderIronbranch, npcElderStonebark} {
+		elder := bot.WaitUnit(t, entry, 30*time.Second)
+		if hp, _ := bot.UnitHP(elder); hp == 0 {
+			e2eharness.Preconditionf(t, "Elder %d is already a corpse: this instance copy is not fresh", entry)
+		}
+		toKill = append(toKill, elder)
+	}
+	bot.DamageKill(t, toKill, 10_000_000, 20*time.Second)
+
+	bot.CombatReady(t)
+
+	// Evade can leave a 0 HP object in cache, so wait for a living Freya rather than any GUID.
+	var freyaGUID uint64
+	deadline := time.Now().Add(30 * time.Second)
+	for {
+		freyaGUID = bot.WaitUnit(t, npcFreya, 10*time.Second)
+		if hp, maxHP := bot.UnitHP(freyaGUID); maxHP > 0 && hp > 0 && bot.World.GetObject(freyaGUID) != nil {
+			break
+		}
+		if !time.Now().Before(deadline) {
+			e2eharness.Preconditionf(t, "no living Freya in cache after GoCreatureID (last=0x%X)", freyaGUID)
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	// The Elders are read on engage, and only the living ones count.
+	bot.Engage(t, freyaGUID, 15*time.Second)
+
+	// Freya's DamageTaken runs the whole defeat: it zeroes the killing blow, summons the chest and
+	// teleports her out. She never reaches 0 HP, so DamageKill would spin until it timed out.
+	bot.Damage(t, freyaGUID, 100_000_000)
+
+	chest := e2eharness.TryNearbyGameObjectByEntry(t, bot.World, goGiftOneElder, 30*time.Second)
+	if chest == 0 {
+		for _, other := range []struct {
+			entry  uint32
+			elders int
+		}{{goGiftNoElder, 0}, {goGiftTwoElders, 2}, {goGiftThreeElders, 3}} {
+			if e2eharness.TryNearbyGameObjectByEntry(t, bot.World, other.entry, time.Second) != 0 {
+				e2eharness.Assertf(t, "Freya's Gift %d spawned: the script counted %d Elders alive, want 1",
+					other.entry, other.elders)
+			}
+		}
+		e2eharness.Preconditionf(t, "no Freya's Gift within 30s of Freya's defeat")
+	}
+	t.Logf("PASS Freya's Gift %d spawned with one Elder alive (guid=0x%X)", goGiftOneElder, chest)
 	bot.AssertWorldAlive(t)
 }

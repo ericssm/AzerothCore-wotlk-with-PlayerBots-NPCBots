@@ -1325,7 +1325,7 @@ void World::Update(uint32 diff)
         CharacterDatabase.KeepAlive();
         LoginDatabase.KeepAlive();
         WorldDatabase.KeepAlive();
-        sScriptMgr->OnDatabasesKeepAlive();
+        sScriptMgr->OnModuleDatabasesKeepAlive();
     }
 
     {
@@ -1547,6 +1547,7 @@ bool World::RescheduleShutdownForWintergrasp()
 void World::ShutdownServ(uint32 time, uint32 options, uint8 exitcode, std::string const& reason)
 {
     // ignore if server shutdown at next tick
+
     if (IsStopped())
         return;
 

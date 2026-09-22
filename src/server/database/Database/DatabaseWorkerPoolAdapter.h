@@ -15,25 +15,35 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASEENV_H
-#define DATABASEENV_H
+#ifndef DATABASE_WORKER_POOL_ADAPTER_H
+#define DATABASE_WORKER_POOL_ADAPTER_H
 
+#include "DatabaseUpdatePool.h"
 #include "DatabaseWorkerPool.h"
-#include "Define.h"
 
-#include "Implementation/CharacterDatabase.h"
-#include "Implementation/LoginDatabase.h"
-#include "Implementation/WorldDatabase.h"
+template <class T>
+class DatabaseWorkerPoolAdapter : public DatabaseUpdatePool
+{
+public:
+    DatabaseWorkerPoolAdapter(DatabaseWorkerPool<T>& pool) : _pool(pool) {}
 
-#include "PreparedStatement.h"
-#include "QueryCallback.h"
-#include "Transaction.h"
+    void DirectExecute(std::string_view query) override
+    {
+        _pool.DirectExecute(query);
+    }
 
-/// Accessor to the world database
-AC_DATABASE_API extern DatabaseWorkerPool<WorldDatabaseConnection> WorldDatabase;
-/// Accessor to the character database
-AC_DATABASE_API extern DatabaseWorkerPool<CharacterDatabaseConnection> CharacterDatabase;
-/// Accessor to the realm/login database
-AC_DATABASE_API extern DatabaseWorkerPool<LoginDatabaseConnection> LoginDatabase;
+    QueryResult Query(std::string_view query) override
+    {
+        return _pool.Query(query);
+    }
+
+    MySQLConnectionInfo const* GetConnectionInfo() const override
+    {
+        return _pool.GetConnectionInfo();
+    }
+
+private:
+    DatabaseWorkerPool<T>& _pool;
+};
 
 #endif
