@@ -280,9 +280,7 @@ public:
     void SetTargetIcon(uint8 id, ObjectGuid whoGuid, ObjectGuid targetGuid);
     void SetGroupMemberFlag(ObjectGuid guid, bool apply, GroupMemberFlags flag);
     void RemoveUniqueGroupMemberFlag(GroupMemberFlags flag);
-
-    //mod_playerbots
-    ObjectGuid const GetTargetIcon(uint8 id) const { return m_targetIcons[id]; }
+    [[nodiscard]] ObjectGuid GetTargetIcon(uint8 id) const { return id < TARGETICONCOUNT ? m_targetIcons[id] : ObjectGuid::Empty; }
 
     Difficulty GetDifficulty(bool isRaid) const;
     Difficulty GetDungeonDifficulty() const;
@@ -323,7 +321,9 @@ public:
     bool CountRollVote(ObjectGuid playerGUID, ObjectGuid Guid, uint8 Choise);
     void EndRoll(Loot* loot);
     void RemovePlayerFromRolls(ObjectGuid guid);
-    Rolls GetRolls() const { return RollId; }
+
+    // Snapshot of the active rolls, roll is deleted after a roll finishes. Do not cache the pointers across ticks.
+    [[nodiscard]] std::vector<Roll*> GetRolls() const { return { RollId.begin(), RollId.end() }; }
 
     // related to disenchant rolls
     void ResetMaxEnchantingLevel();

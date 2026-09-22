@@ -7347,6 +7347,8 @@ ReputationRank Unit::GetFactionReactionTo(FactionTemplateEntry const* factionTem
 
 ReputationRank Unit::GetFactionReactionTo(FactionTemplateEntry const* factionTemplateEntry, FactionTemplateEntry const* targetFactionTemplateEntry)
 {
+    if (!factionTemplateEntry || !targetFactionTemplateEntry)
+        return REP_NEUTRAL;
     // common faction based check
     if (factionTemplateEntry->IsHostileTo(*targetFactionTemplateEntry))
         return REP_HOSTILE;
@@ -14646,7 +14648,8 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
             }
         }
 
-        sScriptMgr->OnPlayerbotCheckKillTask(player, victim);
+        if (player)
+            sScriptMgr->OnPlayerCreatureKillCredit(player, creature);
 
         // Dungeon specific stuff, only applies to players killing creatures
         if (creature->GetInstanceId())

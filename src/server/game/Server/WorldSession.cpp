@@ -311,13 +311,7 @@ ObjectGuid::LowType WorldSession::GetGuidLow() const
 /// Send a packet to the client
 void WorldSession::SendPacket(WorldPacket const* packet)
 {
-    if (packet->GetOpcode() == NULL_OPCODE)
-    {
-        LOG_ERROR("network.opcode", "{} send NULL_OPCODE", GetPlayerInfo());
-        return;
-    }
-
-    sScriptMgr->OnPlayerbotPacketSent(GetPlayer(), packet);
+    sScriptMgr->OnPacketSent(this, *packet);
 
     if (!m_Socket)
         return;
@@ -617,7 +611,7 @@ bool WorldSession::Update(uint32 diff, PacketFilter& updater)
     //logout procedure should happen only in World::UpdateSessions() method!!!
     if (updater.ProcessUnsafe())
     {
-        sScriptMgr->OnPlayerbotUpdateSessions(GetPlayer());
+        sScriptMgr->OnSessionUpdate(this, diff);
 
         if (m_Socket && m_Socket->IsOpen() && _warden)
         {
