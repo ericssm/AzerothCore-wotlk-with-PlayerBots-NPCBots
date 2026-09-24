@@ -53,7 +53,6 @@ void PointMovementGenerator<T>::DoInitialize(T* unit)
     i_recalculateSpeed = false;
     Movement::MoveSplineInit init(unit);
 
-    // mod-playerbots
     if (_reverseOrientation)
         init.SetOrientationInversed();
 
@@ -159,6 +158,10 @@ bool PointMovementGenerator<T>::DoUpdate(T* unit, uint32 diff)
     {
         i_recalculateSpeed = false;
         Movement::MoveSplineInit init(unit);
+
+        if (_reverseOrientation)
+            init.SetOrientationInversed();
+
         auto rebasePrecomputedPath = [this, unit](std::optional<uint32> offset = std::nullopt)
         {
             Movement::PointsArray rebasedPath;

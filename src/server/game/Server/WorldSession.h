@@ -30,8 +30,8 @@
 #include "DatabaseEnv.h"
 #include "Duration.h"
 #include "GossipDef.h"
-#include "QueryHolder.h"
 #include "Packet.h"
+#include "QueryHolder.h"
 #include "SharedDefines.h"
 #include "World.h"
 #include <map>
@@ -290,6 +290,20 @@ enum CharterTypes
     ARENA_TEAM_CHARTER_5v5_TYPE                   = 5
 };
 
+class LoginQueryHolder : public CharacterDatabaseQueryHolder
+{
+public:
+    LoginQueryHolder(uint32 accountId, ObjectGuid guid);
+
+    ObjectGuid GetGuid() const { return _guid; }
+    uint32 GetAccountId() const { return _accountId; }
+    bool Initialize();
+
+private:
+    uint32 _accountId;
+    ObjectGuid _guid;
+};
+
 constexpr Seconds PLAY_TIME_LIMIT_APPROACHING_PARTIAL = Hours(2) + Minutes(30);
 constexpr Seconds PLAY_TIME_LIMIT_PARTIAL             = Hours(3);
 constexpr Seconds PLAY_TIME_LIMIT_APPROACHING_FULL    = Hours(4) + Minutes(30);
@@ -302,20 +316,6 @@ enum PlayTimeFlag : uint32
     PTF_UNK_1                         = 0x20000000,
     PTF_UNK_2                         = 0x40000000,
     PTF_UNHEALTHY_TIME                = 0x80000000,
-};
-
-class LoginQueryHolder : public CharacterDatabaseQueryHolder
-{
-    private:
-        uint32 m_accountId;
-        ObjectGuid m_guid;
-
-    public:
-        LoginQueryHolder(uint32 accountId, ObjectGuid guid);
-
-        ObjectGuid GetGuid() const { return m_guid; }
-        uint32 GetAccountId() const { return m_accountId; }
-        bool Initialize();
 };
 
 //class to deal with packet processing
@@ -363,9 +363,11 @@ class CharacterCreateInfo
     friend class Player;
 
 public:
-    CharacterCreateInfo(std::string const name = "", uint8 _race = 0, uint8 _class = 0, uint8 gender = 0, uint8 skin = 0, uint8 face = 0,
-        uint8 hairStyle = 0, uint8 hairColor = 0, uint8 facialHair = 0)
-        : Name(name), Race(_race), Class(_class), Gender(gender), Skin(skin), Face(face), HairStyle(hairStyle), HairColor(hairColor), FacialHair(facialHair) { }
+    explicit CharacterCreateInfo(std::string name = "", uint8 race = 0, uint8 playerClass = 0,
+        uint8 gender = GENDER_NONE, uint8 skin = 0, uint8 face = 0, uint8 hairStyle = 0, uint8 hairColor = 0,
+        uint8 facialHair = 0)
+        : Name(std::move(name)), Race(race), Class(playerClass), Gender(gender), Skin(skin), Face(face),
+        HairStyle(hairStyle), HairColor(hairColor), FacialHair(facialHair) { }
 
 protected:
     /// User specified variables
@@ -1220,12 +1222,17 @@ public:                                                 // opcodes handlers
     QueryCallbackProcessor& GetQueryProcessor() { return _queryProcessor; }
     TransactionCallback& AddTransactionCallback(TransactionCallback&& callback);
     SQLQueryHolderCallback& AddQueryHolderCallback(SQLQueryHolderCallback&& callback);
+    void ProcessQueryCallbacks();
 
     void InitializeSession();
     void InitializeSessionCallback(CharacterDatabaseQueryHolder const& realmHolder, uint32 clientCacheVersion);
 
     void SetPacketLogging(bool state);
 
+    std::unique_ptr<WorldPacket> NextQueuedPacket();
+
+    [[nodiscard]] bool IsHeadless() const { return _headless; }
+    
     LockedQueue<WorldPacket*>& GetPacketQueue();
 
     [[nodiscard]] bool IsBot() const
@@ -1234,8 +1241,6 @@ public:                                                 // opcodes handlers
     }
 
 private:
-    void ProcessQueryCallbacks();
-
     QueryCallbackProcessor _queryProcessor;
     AsyncCallbackProcessor<TransactionCallback> _transactionCallbacks;
     AsyncCallbackProcessor<SQLQueryHolderCallback> _queryHolderProcessor;
@@ -1349,6 +1354,7 @@ private:
 
     uint32 _orderCounter;
 
+    bool const _headless;
     bool _isBot;
 
     WorldSession(WorldSession const& right) = delete;
