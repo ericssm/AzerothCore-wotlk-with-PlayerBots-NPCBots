@@ -72,9 +72,12 @@ public:
      * @param packet Contains information about the WorldPacket
      * @return True if you want to continue receiving the packet, false if you want to disallow receiving the packet
      */
+
     [[nodiscard]] virtual bool CanPacketReceive(WorldSession* /*session*/, WorldPacket const& /*packet*/) { return true; }
 
+//MOD_PLAYERBOTS
     virtual void OnPacketReceived(WorldSession* /*session*/, WorldPacket const& /*packet*/) { }
+//MOD_PLAYERBOTS end
     /**
      * @brief Called for every packet queued for sending to a session, before the socket check.
      * Unlike CanPacketSend this also fires for sessions without a socket, so a module driving

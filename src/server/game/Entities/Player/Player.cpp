@@ -14127,6 +14127,19 @@ LootItem* Player::StoreLootItem(uint8 lootSlot, Loot* loot, InventoryResult& msg
             sLootItemStorage->RemoveStoredLootItem(loot->containerGUID, item->itemid, item->count, loot, item->itemIndex);
 
         sScriptMgr->OnPlayerLootItem(this, newitem, item->count, this->GetLootGUID());
+
+        // PlayerBots: Sync quest item progress to group members with the same quest
+        if (qitem && GetGroup())
+        {
+            for (GroupReference* ref = GetGroup()->GetFirstMember(); ref; ref = ref->next())
+            {
+                Player* member = ref->GetSource();
+                if (member && member != this && member->HasQuestForItem(item->itemid))
+                {
+                    member->ItemAddedQuestCheck(item->itemid, item->count);
+                }
+            }
+        }
     }
     else
     {

@@ -660,7 +660,11 @@ enum PlayerSlots
 
 #define INVENTORY_SLOT_BAG_0    255
 
+#ifdef MOD_PLAYERBOTS
+enum EquipmentSlots : uint32                                // 19 slots
+#else
 enum EquipmentSlots                                         // 19 slots
+#endif
 {
     EQUIPMENT_SLOT_START        = 0,
     EQUIPMENT_SLOT_HEAD         = 0,
@@ -1329,7 +1333,9 @@ public:
     InventoryResult CanUseItem(Item* pItem, bool not_loading = true) const;
     [[nodiscard]] bool HasItemTotemCategory(uint32 TotemCategory) const;
     bool IsTotemCategoryCompatiableWith(ItemTemplate const* pProto, uint32 requiredTotemCategoryId) const;
-    InventoryResult BotCanUseItem(ItemTemplate const* pItem) const;
+#ifdef MOD_PLAYERBOTS
+	InventoryResult BotCanUseItem(ItemTemplate const* pItem) const;
+#endif
     InventoryResult CanUseItem(ItemTemplate const* pItem) const;
     [[nodiscard]] InventoryResult CanUseAmmo(uint32 item) const;
     InventoryResult CanRollForItemInLFG(ItemTemplate const* item, WorldObject const* lootedObject) const;
@@ -2097,13 +2103,17 @@ public:
     }
     bool IsMirrorTimerActive(MirrorTimerType type) { return m_MirrorTimer[type] == getMaxTimer(type); }
 
+#ifdef MOD_PLAYERBOTS
     void SetMovement(PlayerMovementType pType);
+#endif
 
     bool CanJoinConstantChannelInZone(ChatChannelsEntry const* channel, AreaTableEntry const* zone);
 
     void JoinedChannel(Channel* c);
     void LeftChannel(Channel* c);
+#ifdef MOD_PLAYERBOTS
     bool IsInChannel(const Channel* c);
+#endif
     void CleanupChannels();
     void ClearChannelWatch();
     void UpdateLFGChannel();
@@ -2688,7 +2698,9 @@ public:
 
     void SendSystemMessage(std::string_view msg, bool escapeCharacters = false);
 
+#ifdef MOD_PLAYERBOTS
     void ResetSpeakTimers();
+#endif
 
     std::string GetDebugInfo() const override;
 

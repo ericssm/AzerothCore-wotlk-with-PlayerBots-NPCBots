@@ -44,6 +44,7 @@ void ScriptMgr::OnSocketClose(std::shared_ptr<WorldSocket> const& socket)
     CALL_ENABLED_HOOKS(ServerScript, SERVERHOOK_ON_SOCKET_CLOSE, script->OnSocketClose(socket));
 }
 
+//MOD_PLAYERBOTS
 void ScriptMgr::OnPacketReceived(WorldSession* session, WorldPacket const& packet)
 {
     WorldPacket copy(packet);
@@ -52,6 +53,7 @@ void ScriptMgr::OnPacketReceived(WorldSession* session, WorldPacket const& packe
         script->OnPacketReceived(session, copy);
     });
 }
+//MOD_PLAYERBOTS end
 
 bool ScriptMgr::CanPacketSend(WorldSession* session, WorldPacket const& packet)
 {

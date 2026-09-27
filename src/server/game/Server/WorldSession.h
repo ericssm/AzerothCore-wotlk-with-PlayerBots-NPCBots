@@ -30,8 +30,10 @@
 #include "DatabaseEnv.h"
 #include "Duration.h"
 #include "GossipDef.h"
-#include "Packet.h"
+//MOD_PLAYERBOTS
 #include "QueryHolder.h"
+//MOD_PLAYERBOTS end
+#include "Packet.h"
 #include "SharedDefines.h"
 #include "World.h"
 #include <map>
@@ -1213,7 +1215,9 @@ public:                                                 // opcodes handlers
     void SetKicked(bool val) { _kicked = val; }
     bool IsSocketClosed() const;
 
+//MOD_PLAYERBOTS
     void SetAddress(std::string const& address) { m_Address = address; }
+//MOD_PLAYERBOTS end
 
     /*
      * CALLBACKS
@@ -1232,13 +1236,14 @@ public:                                                 // opcodes handlers
     std::unique_ptr<WorldPacket> NextQueuedPacket();
 
     [[nodiscard]] bool IsHeadless() const { return _headless; }
-    
+//MOD_PLAYERBOTS    
     LockedQueue<WorldPacket*>& GetPacketQueue();
 
     [[nodiscard]] bool IsBot() const
     {
         return _isBot;
     }
+//MOD_PLAYERBOTS end
 
 private:
     QueryCallbackProcessor _queryProcessor;
@@ -1355,7 +1360,10 @@ private:
     uint32 _orderCounter;
 
     bool const _headless;
+    
+//MOD_PLAYERBOTS
     bool _isBot;
+//MOD_PLAYERBOTS end 
 
     WorldSession(WorldSession const& right) = delete;
     WorldSession& operator=(WorldSession const& right) = delete;

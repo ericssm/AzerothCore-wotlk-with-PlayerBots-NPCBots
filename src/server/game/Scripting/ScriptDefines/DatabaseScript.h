@@ -32,7 +32,9 @@ enum DatabaseHook
     DATABASEHOOK_ON_MODULE_DATABASES_CLOSING,
     DATABASEHOOK_ON_DATABASE_WARN_ABOUT_SYNC_QUERIES,
     DATABASEHOOK_ON_DATABASE_GET_DB_REVISION,
+//MOD_PLAYERBOTS
     DATABASEHOOK_ON_DATABASE_SELECT_INDEX_LOGOUT,
+//MOD_PLAYERBOTS end
     DATABASEHOOK_END
 };
 
@@ -93,7 +95,9 @@ public:
      */
     virtual void OnDatabaseGetDBRevision(std::map<std::string, std::string>& /*revisions*/) { }
 
+//MOD_PLAYERBOTS
     virtual void OnDatabaseSelectIndexLogout(Player* /*player*/, uint32& /*statementIndex*/, uint32& /*statementParam*/) { }
+//MOD_PLAYERBOTS end
 };
 
 #endif

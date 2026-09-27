@@ -25,7 +25,9 @@
 
 class AuraEffect;
 class Item;
+//MOD_PLAYERBOTS
 struct Position;
+//MOD_PLAYERBOTS end
 class SpellCastTargets;
 class WorldObject;
 
@@ -177,17 +179,6 @@ public:
         push_back(std::make_pair(mod, value));
     }
 };
-
-struct SpellImmune
-{
-    SpellImmune() : spellId(0), type(IMMUNITY_EFFECT), blockType(SPELL_BLOCK_TYPE_ALL) { }
-
-    uint32 spellId;
-    uint32 type;
-    uint32 blockType;
-};
-
-typedef std::vector<SpellImmune> SpellImmuneList;
 
 // AzerothCore note: TC keeps SpellCastTargets in SpellDefines.h, so its
 // CastSpellTargetArg can hold an Optional<SpellCastTargets> by value.

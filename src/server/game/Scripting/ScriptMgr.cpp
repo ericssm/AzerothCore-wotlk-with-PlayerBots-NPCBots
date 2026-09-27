@@ -125,10 +125,12 @@ ScriptMgr* ScriptMgr::instance()
     return &instance;
 }
 
+//MOD_PLAYERBOTS
 PlayerbotScript::PlayerbotScript(const char* name) : ScriptObject(name)
 {
     ScriptRegistry<PlayerbotScript>::AddScript(this);
 }
+//MOD_PLAYERBOTS end
 
 void ScriptMgr::Initialize()
 {
@@ -137,9 +139,11 @@ void ScriptMgr::Initialize()
 
     AddSC_SmartScripts();
 
+//MOD_PLAYERBOTS
     //npcbot: load bot scripts here
     AddNpcBotScripts();
     //end npcbot
+//MOD_PLAYERBOTS end
 
     // LFGScripts
     lfg::AddSC_LFGScripts();

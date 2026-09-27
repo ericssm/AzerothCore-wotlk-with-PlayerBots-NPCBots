@@ -160,7 +160,7 @@ public:
     uint32 itemid;
     int32  itemRandomPropId;
     uint32 itemRandomSuffix;
-    uint8 itemCount;
+    uint32 itemCount;
     typedef std::map<ObjectGuid, RollVote> PlayerVote;
     PlayerVote playerVote;                              //vote position correspond with player position (in group)
     uint8 totalPlayersRolling;
@@ -323,7 +323,7 @@ public:
     void RemovePlayerFromRolls(ObjectGuid guid);
 
     // Snapshot of the active rolls, roll is deleted after a roll finishes. Do not cache the pointers across ticks.
-    [[nodiscard]] std::vector<Roll*> GetRolls() const { return { RollId.begin(), RollId.end() }; }
+    [[nodiscard]] std::vector<Roll const*> GetRolls() const { return { RollId.begin(), RollId.end() }; }
 
     // related to disenchant rolls
     void ResetMaxEnchantingLevel();

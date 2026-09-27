@@ -920,6 +920,7 @@ bool Player::IsTotemCategoryCompatiableWith(ItemTemplate const* pProto, uint32 r
     return true;
 }
 
+#ifdef MOD_PLAYERBOTS
 InventoryResult Player::BotCanUseItem(ItemTemplate const* proto) const
 {
     if (proto->Class == ITEM_CLASS_ARMOR && proto->SubClass == ITEM_SUBCLASS_ARMOR_IDOL && !IsClass(CLASS_DRUID, CLASS_CONTEXT_EQUIP_RELIC))
@@ -944,6 +945,7 @@ InventoryResult Player::BotCanUseItem(ItemTemplate const* proto) const
 
     return CanUseItem(proto);
 }
+#endif
 
 InventoryResult Player::CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, Item* pSrcItem) const
 {

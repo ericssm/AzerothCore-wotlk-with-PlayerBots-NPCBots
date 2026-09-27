@@ -229,9 +229,9 @@ public:
     // used World DB version
     void LoadDBVersion() override;
     [[nodiscard]] char const* GetDBVersion() const override { return _dbVersion.c_str(); }
-#ifdef MOD_PLAYERBOTS
+//MOD_PLAYERBOTS
     [[nodiscard]] char const* GetPlayerbotsDBRevision() const override { return m_PlayerbotsDBRevision.c_str(); }
-#endif
+//MOD_PLAYERBOTS end
 
     void UpdateAreaDependentAuras() override;
 
@@ -262,7 +262,9 @@ protected:
     void CalendarDeleteOldEvents();
     void ResetGuildCap();
 
+//MOD_PLAYERBOTS
     SQLQueryHolderCallback& AddQueryHolderCallback(SQLQueryHolderCallback&& callback) override;
+//MOD_PLAYERBOTS end
 
 private:
     WorldConfig _worldConfig;
@@ -308,13 +310,15 @@ private:
     // used versions
     std::string _dbVersion;
     uint32 _dbClientCacheVersion;
-#ifdef MOD_PLAYERBOTS
+//MOD_PLAYERBOTS
     std::string m_PlayerbotsDBRevision;
-#endif
+//MOD_PLAYERBOTS end
 
     void ProcessQueryCallbacks();
     QueryCallbackProcessor _queryProcessor;
+//MOD_PLAYERBOTS
     AsyncCallbackProcessor<SQLQueryHolderCallback> _queryHolderProcessor;
+//MOD_PLAYERBOTS end
 
     /**
      * @brief Executed when a World Session is being finalized. Be it from a normal login or via queue popping.

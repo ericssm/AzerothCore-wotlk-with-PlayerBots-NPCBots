@@ -21,7 +21,9 @@
 #include "GameTime.h"
 #include "Metric.h"
 #include "Player.h"
+//MOD_PLAYERBOTS
 #include "ScriptMgr.h"
+//MOD_PLAYERBOTS end
 #include "World.h"
 #include "WorldSession.h"
 #include "WorldSessionMgr.h"

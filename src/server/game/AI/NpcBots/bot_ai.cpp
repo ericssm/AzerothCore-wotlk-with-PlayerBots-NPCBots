@@ -8372,6 +8372,18 @@ bool bot_ai::OnGossipHello(Player* player, uint32 /*option*/)
         AddGossipItemFor(player, GOSSIP_ICON_CHAT, LocalizedNpcText(player, BOT_TEXT_STUDY_CREATURE), GOSSIP_SENDER_SCAN, GOSSIP_ACTION_INFO_DEF + 1);
     }
 
+//NBEM Start
+    // 第三方（非拥有者、非共享拥有者）可通过对话查看 NPCBot 装备
+    // 复用 GOSSIP_SENDER_EQUIPMENT_LIST：该 handler 只读 bot 自身装备，
+    // 通过 BotWhisper(LANG_UNIVERSAL) 与 SendSysMessage 发送，无归属/阵营限制
+    if (player != master && !shared_owner)
+    {
+        AddGossipItemFor(player, GOSSIP_ICON_TALK, LocalizedNpcText(player, BOT_TEXT_SHOW_INVENTORY),
+            GOSSIP_SENDER_EQUIPMENT_LIST, GOSSIP_ACTION_INFO_DEF + 1);
+        menus = true;
+    }
+//NBEM End
+
     if (!menus)
     {
         player->PlayerTalkClass->SendCloseGossip();
@@ -9245,6 +9257,10 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
             //发送扫描开始消息
             std::ostringstream beginMsg;
             beginMsg << "NBEM_SCAN_BEGIN " << me->GetName();
+            // 第三方查看（非主人且非共享主人）追加 GUEST 标志，
+            // 客户端据此隐藏管理按钮（刷新/背包/扫描）
+            if (player != master && !shared_owner)
+                beginMsg << " GUEST";
             nbemChat.SendSysMessage(beginMsg.view());
 
             //发送职业、种族、等级信息
