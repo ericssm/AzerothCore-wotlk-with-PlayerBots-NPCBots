@@ -754,15 +754,13 @@ void PathGenerator::CreateFilter()
 {
     uint16 includeFlags = 0;
     uint16 excludeFlags = 0;
-//MOD_PLAYERBOTS
-    bool isBot = false;
-//MOD_PLAYERBOTS end
+    bool isHeadless = false;
 
     if (_source->IsCreature())
     {
         Creature* creature = (Creature*)_source;
         if (creature->CanWalk())
-            includeFlags |= NAV_GROUND;
+            includeFlags |= (NAV_GROUND | NAV_GROUND_STEEP);
 
         // creatures don't take environmental damage
         if (creature->CanEnterWater())
@@ -776,16 +774,16 @@ void PathGenerator::CreateFilter()
         // they keep off steep mountainsides and follow gentle ground/roads. Real players are unchanged and
         // may still path across steep terrain.
         Player const* player = _source->ToPlayer();
-        if (player && player->GetSession() && player->GetSession()->IsBot())
+        if (player && player->GetSession() && player->GetSession()->IsHeadless())
         {
             includeFlags |= (NAV_GROUND | NAV_WATER);
-            excludeFlags |= (NAV_MAGMA | NAV_SLIME);
-            isBot = true;
+            excludeFlags |= (NAV_MAGMA | NAV_SLIME | NAV_GROUND_STEEP);
+            isHeadless = true;
         }
         else
         {
-            // Perfect support not possible, just stay 'safe'
-            includeFlags |= (NAV_GROUND | NAV_WATER | NAV_MAGMA);
+            // perfect support not possible, just stay 'safe'
+            includeFlags |= (NAV_GROUND | NAV_GROUND_STEEP | NAV_WATER | NAV_MAGMA);
         }
 //MOD_PLAYERBOTS end
         //// perfect support not possible, just stay 'safe'
@@ -798,7 +796,7 @@ void PathGenerator::CreateFilter()
 //MOD_PLAYERBOTS
     // Bots bias their routes away from deep water (swim only when necessary). poly.area == poly.flags ==
     // NavTerrain, so NAV_WATER doubles as the water area index. Real players and creatures assign no cost.
-    if (isBot)
+    if (isHeadless)
         _filter.setAreaCost(NAV_WATER, 20.0f);
 //MOD_PLAYERBOTS end
 
