@@ -1377,10 +1377,7 @@ inline constexpr uint64 IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK =
     (1ULL << MECHANIC_SAPPED);
 
 // Spell dispel type
-//MOD_PLAYERBOTS
-enum DispelType : uint8
-//MOD_PLAYERBOTS end
-//enum DispelType
+enum DispelType
 {
     DISPEL_NONE         = 0,
     DISPEL_MAGIC        = 1,
@@ -1645,10 +1642,7 @@ enum GameObjectDestructibleState
 };
 
 // EmotesText.dbc
-//MOD_PLAYERBOTS
-enum TextEmotes : uint32
-//MOD_PLAYERBOTS end
-//enum TextEmotes
+enum TextEmotes
 {
     TEXT_EMOTE_AGREE                = 1,
     TEXT_EMOTE_AMAZE                = 2,
@@ -3392,10 +3386,7 @@ enum WeatherType
 #define MAX_WEATHER_TYPE 4
 
 // EnumUtils: DESCRIBE THIS
-//MOD_PLAYERBOTS
-enum ChatMsg : uint32
-//MOD_PLAYERBOTS end
-//enum ChatMsg
+enum ChatMsg
 {
     CHAT_MSG_ADDON                  = 0xFFFFFFFF,
     CHAT_MSG_SYSTEM                 = 0x00,
