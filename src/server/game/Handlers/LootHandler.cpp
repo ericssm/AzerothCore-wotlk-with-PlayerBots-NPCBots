@@ -266,27 +266,59 @@ void WorldSession::HandleLootMoneyOpcode(WorldPacket& /*recvData*/)
 
             for (std::vector<Player*>::const_iterator i = playersNear.begin(); i != playersNear.end(); ++i)
             {
-                (*i)->ModifyMoney(goldPerPlayer);
-                (*i)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, goldPerPlayer);
+                uint32 finalGold = goldPerPlayer;
+
+                if ((*i)->HasPlayerFlag(PLAYER_FLAGS_NO_PLAY_TIME))
+                    continue;
+
+                if ((*i)->HasPlayerFlag(PLAYER_FLAGS_PARTIAL_PLAY_TIME))
+                {
+                    finalGold /= 2;
+
+                    // a halved share that rounds down to nothing is not worth announcing
+                    if (!finalGold)
+                        continue;
+                }
+
+                (*i)->ModifyMoney(finalGold);
+                (*i)->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, finalGold);
 
                 WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
-                data << uint32(goldPerPlayer);
+                data << uint32(finalGold);
                 data << uint8(playersNear.size() > 1 ? 0 : 1);     // Controls the text displayed in chat. 0 is "Your share is..." and 1 is "You loot..."
                 (*i)->SendDirectMessage(&data);
             }
         }
         else
         {
-            sScriptMgr->OnPlayerAfterCreatureLootMoney(player);
-            player->ModifyMoney(loot->gold);
-            player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, loot->gold);
+            uint32 finalGold = loot->gold;
+            bool award = true; // full restriction already returned above
 
-            WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
-            data << uint32(loot->gold);
-            data << uint8(1);   // "You loot..."
-            SendPacket(&data);
+            if (player->HasPlayerFlag(PLAYER_FLAGS_PARTIAL_PLAY_TIME))
+            {
+                finalGold /= 2;
+
+                // a halved amount that rounds down to nothing is not worth announcing
+                award = finalGold != 0;
+            }
+
+            // fire the hook regardless of the CAIS reduction, matching OnLootMoney below
+            sScriptMgr->OnPlayerAfterCreatureLootMoney(player);
+
+            if (award)
+            {
+                player->ModifyMoney(finalGold);
+                player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_LOOT_MONEY, finalGold);
+
+                WorldPacket data(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
+                data << uint32(finalGold);
+                data << uint8(1);   // "You loot..."
+                SendPacket(&data);
+            }
         }
 
+        // reports the amount that dropped, not the CAIS-reduced amount actually awarded;
+        // a script that grants money from this hook bypasses the play time restriction
         sScriptMgr->OnLootMoney(player, loot->gold);
 
         loot->gold = 0;

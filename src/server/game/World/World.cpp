@@ -69,9 +69,6 @@
 #include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "OutdoorPvPMgr.h"
-//MOD_PLAYERBOTS
-#include "QueryHolder.h"
-//MOD_PLAYERBOTS end
 #include "PetitionMgr.h"
 #include "Player.h"
 #include "PlayerDump.h"
@@ -1213,10 +1210,6 @@ void World::Update(uint32 diff)
         ResetGuildCap();
     }
 
-//MOD_PLAYERBOTS
-    sScriptMgr->OnPlayerbotUpdate(diff);
-//MOD_PLAYERBOTS end
-
     {
         // pussywizard: handle expired auctions, auctions expired when realm was offline are also handled here (not during loading when many required things aren't loaded yet)
         METRIC_TIMER("world_update_time", METRIC_TAG("type", "Update expired auctions"));
@@ -1993,17 +1986,7 @@ void World::UpdateAreaDependentAuras()
 void World::ProcessQueryCallbacks()
 {
     _queryProcessor.ProcessReadyCallbacks();
-#ifdef MOD_PLAYERBOTS
-    _queryHolderProcessor.ProcessReadyCallbacks();
-#endif
 }
-
-#ifdef MOD_PLAYERBOTS
-SQLQueryHolderCallback& World::AddQueryHolderCallback(SQLQueryHolderCallback&& callback)
-{
-    return _queryHolderProcessor.AddCallback(std::move(callback));
-}
-#endif
 
 bool World::IsPvPRealm() const
 {

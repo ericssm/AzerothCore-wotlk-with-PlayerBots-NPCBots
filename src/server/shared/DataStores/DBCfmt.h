@@ -23,18 +23,13 @@ char constexpr AchievementCategoryfmt[] = "nixxxxxxxxxxxxxxxxxx";
 char constexpr AchievementCriteriafmt[] = "niiiiiiiixxxxxxxxxxxxxxxxxiiiix";
 char constexpr AreaTableEntryfmt[] = "niiiixxxxxissssssssssssssssxiiiiixxx";
 char constexpr AreaGroupEntryfmt[] = "niiiiiii";
-//npcbot
 char constexpr AreaPOIEntryfmt[] = "niiiiiiiiiiifffixisxxxxxxxxxxxxxxxxsxxxxxxxxxxxxxxxxix";
-//npcbot end
-//char constexpr AreaPOIEntryfmt[] = "niiiiiiiiiiifffixixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxix";
 char constexpr AuctionHouseEntryfmt[] = "niiixxxxxxxxxxxxxxxxx";
 char constexpr BankBagSlotPricesEntryfmt[] = "ni";
 char constexpr BarberShopStyleEntryfmt[] = "nixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiii";
 char constexpr BattlemasterListEntryfmt[] = "niiiiiiiiixssssssssssssssssxiixx";
 char constexpr CharStartOutfitEntryfmt[] = "dbbbXiiiiiiiiiiiiiiiiiiiiiiiixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-//MOD_PLAYERBOTS
 char constexpr CharSectionsEntryfmt[] = "diiixxxiii";
-//MOD_PLAYERBOTS end
 char constexpr CharTitlesEntryfmt[] = "nxssssssssssssssssxssssssssssssssssxi";
 char constexpr ChatChannelsEntryfmt[] = "nixssssssssssssssssxxxxxxxxxxxxxxxxxx"; // ChatChannelsEntryfmt, index not used (more compact store)
 char constexpr ChrClassesEntryfmt[] = "nxixssssssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxixii";
@@ -54,9 +49,7 @@ char constexpr DurabilityCostsfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiiiiiii";
 char constexpr DurabilityQualityfmt[] = "nf";
 char constexpr EmotesEntryfmt[] = "nxxiiix";
 char constexpr EmotesTextEntryfmt[] = "nxixxxxxxxxxxxxxxxx";
-//MOD_PLAYERBOTS
 char constexpr EmotesTextSoundEntryfmt[] = "niiii";
-//MOD_PLAYERBOTS end
 char constexpr FactionEntryfmt[] = "niiiiiiiiiiiiiiiiiiffixssssssssssssssssxxxxxxxxxxxxxxxxxx";
 char constexpr FactionTemplateEntryfmt[] = "niiiiiiiiiiiii";
 char constexpr GameObjectArtKitfmt[] = "nxxxxxxx";

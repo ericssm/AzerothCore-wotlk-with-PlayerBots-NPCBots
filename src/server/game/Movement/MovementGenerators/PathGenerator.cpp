@@ -23,10 +23,8 @@
 #include "MMapMgr.h"
 #include "Map.h"
 #include "Metric.h"
-//MOD_PLAYERBOTS
 #include "Player.h"
 #include "WorldSession.h"
-//MOD_PLAYERBOTS end
 
 // Blades Edge Arena Ropes normalization
 namespace
@@ -768,7 +766,6 @@ void PathGenerator::CreateFilter()
     }
     else // assume Player
     {
-//MOD_PLAYERBOTS
         // Bots navigate with a stricter filter: include ground + water but exclude lava/slime and
         // NAV_GROUND_STEEP (the 50-60deg slopes the extractor tags via modAlmostUnwalkableTriangles), so
         // they keep off steep mountainsides and follow gentle ground/roads. Real players are unchanged and
@@ -785,20 +782,15 @@ void PathGenerator::CreateFilter()
             // perfect support not possible, just stay 'safe'
             includeFlags |= (NAV_GROUND | NAV_GROUND_STEEP | NAV_WATER | NAV_MAGMA);
         }
-//MOD_PLAYERBOTS end
-        //// perfect support not possible, just stay 'safe'
-        //includeFlags |= (NAV_GROUND | NAV_WATER | NAV_MAGMA);
     }
 
     _filter.setIncludeFlags(includeFlags);
     _filter.setExcludeFlags(excludeFlags);
 
-//MOD_PLAYERBOTS
     // Bots bias their routes away from deep water (swim only when necessary). poly.area == poly.flags ==
     // NavTerrain, so NAV_WATER doubles as the water area index. Real players and creatures assign no cost.
     if (isHeadless)
         _filter.setAreaCost(NAV_WATER, 20.0f);
-//MOD_PLAYERBOTS end
 
     UpdateFilter();
 }

@@ -10669,6 +10669,16 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* attacker, uint32 pdamage, WeaponAttackT
     return uint32(std::max(tmpDamage, 0.0f));
 }
 
+class spellIdImmunityPredicate
+{
+public:
+    spellIdImmunityPredicate(uint32 type) : _type(type) {}
+    bool operator()(SpellImmune const& spellImmune) { return spellImmune.spellId == 0 && spellImmune.type == _type; }
+
+private:
+    uint32 _type;
+};
+
 void Unit::ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply, SpellImmuneBlockType /*blockType*/)
 {
     if (apply)
@@ -15719,14 +15729,6 @@ void Unit::SendPlaySpellVisual(uint32 id)
 {
     WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 8 + 4);
     data << GetGUID();
-    data << uint32(id); // SpellVisualKit.dbc index
-    SendMessageToSet(&data, true);
-}
-
-void Unit::SendPlaySpellVisual(ObjectGuid guid, uint32 id)
-{
-    WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 8 + 4);
-    data << guid;
     data << uint32(id); // SpellVisualKit.dbc index
     SendMessageToSet(&data, true);
 }
