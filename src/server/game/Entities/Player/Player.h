@@ -660,11 +660,7 @@ enum PlayerSlots
 
 #define INVENTORY_SLOT_BAG_0    255
 
-#ifdef MOD_PLAYERBOTS
-enum EquipmentSlots : uint32                                // 19 slots
-#else
 enum EquipmentSlots                                         // 19 slots
-#endif
 {
     EQUIPMENT_SLOT_START        = 0,
     EQUIPMENT_SLOT_HEAD         = 0,
@@ -1333,9 +1329,6 @@ public:
     InventoryResult CanUseItem(Item* pItem, bool not_loading = true) const;
     [[nodiscard]] bool HasItemTotemCategory(uint32 TotemCategory) const;
     bool IsTotemCategoryCompatiableWith(ItemTemplate const* pProto, uint32 requiredTotemCategoryId) const;
-#ifdef MOD_PLAYERBOTS
-	InventoryResult BotCanUseItem(ItemTemplate const* pItem) const;
-#endif
     InventoryResult CanUseItem(ItemTemplate const* pItem) const;
     [[nodiscard]] InventoryResult CanUseAmmo(uint32 item) const;
     InventoryResult CanRollForItemInLFG(ItemTemplate const* item, WorldObject const* lootedObject) const;
@@ -1734,9 +1727,10 @@ public:
     void SendInitialSpells();
     void SendLearnPacket(uint32 spellId, bool learn);
     bool addSpell(uint32 spellId, uint8 addSpecMask, bool updateActive, bool temporary = false, bool learnFromSkill = false);
-    bool _addSpell(uint32 spellId, uint8 addSpecMask, bool temporary, bool learnFromSkill = false);
+    bool _addSpell(uint32 spellId, uint8 addSpecMask, bool temporary, bool learnFromSkill = false,
+        bool sendPacket = true);
     void learnSpell(uint32 spellId, bool temporary = false, bool learnFromSkill = false);
-    void removeSpell(uint32 spellId, uint8 removeSpecMask, bool onlyTemporary);
+    void removeSpell(uint32 spellId, uint8 removeSpecMask, bool onlyTemporary, bool sendPacket = true);
     void resetSpells();
     void LearnCustomSpells();
     void LearnDefaultSkills();
@@ -2103,17 +2097,10 @@ public:
     }
     bool IsMirrorTimerActive(MirrorTimerType type) { return m_MirrorTimer[type] == getMaxTimer(type); }
 
-#ifdef MOD_PLAYERBOTS
-    void SetMovement(PlayerMovementType pType);
-#endif
-
     bool CanJoinConstantChannelInZone(ChatChannelsEntry const* channel, AreaTableEntry const* zone);
 
     void JoinedChannel(Channel* c);
     void LeftChannel(Channel* c);
-#ifdef MOD_PLAYERBOTS
-    bool IsInChannel(const Channel* c);
-#endif
     void CleanupChannels();
     void ClearChannelWatch();
     void UpdateLFGChannel();
@@ -2697,10 +2684,6 @@ public:
     void UpdatePlayerSetting(std::string const& source, uint32 index, uint32 value);
 
     void SendSystemMessage(std::string_view msg, bool escapeCharacters = false);
-
-#ifdef MOD_PLAYERBOTS
-    void ResetSpeakTimers();
-#endif
 
     std::string GetDebugInfo() const override;
 

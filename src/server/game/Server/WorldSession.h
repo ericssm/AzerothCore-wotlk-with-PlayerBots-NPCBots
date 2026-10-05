@@ -1215,10 +1215,6 @@ public:                                                 // opcodes handlers
     void SetKicked(bool val) { _kicked = val; }
     bool IsSocketClosed() const;
 
-//MOD_PLAYERBOTS
-    void SetAddress(std::string const& address) { m_Address = address; }
-//MOD_PLAYERBOTS end
-
     /*
      * CALLBACKS
      */
@@ -1237,7 +1233,6 @@ public:                                                 // opcodes handlers
 
     [[nodiscard]] bool IsHeadless() const { return _headless; }
 //MOD_PLAYERBOTS    
-    LockedQueue<WorldPacket*>& GetPacketQueue();
 
     [[nodiscard]] bool IsBot() const
     {

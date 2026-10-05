@@ -23,9 +23,6 @@
 #include "Duration.h"
 #include "ObjectGuid.h"
 #include "Optional.h"
-//MOD_PLAYERBOTS
-#include "QueryHolder.h"
-//MOD_PLAYERBOTS end
 #include "SharedDefines.h"
 #include "WorldConfig.h"
 #include <unordered_map>
@@ -129,18 +126,12 @@ public:
     [[nodiscard]] virtual LocaleConstant GetAvailableDbcLocale(LocaleConstant locale) const = 0;
     virtual void LoadDBVersion() = 0;
     [[nodiscard]] virtual char const* GetDBVersion() const = 0;
-//MOD_PLAYERBOTS
-    [[nodiscard]] virtual char const* GetPlayerbotsDBRevision() const = 0;
-//MOD_PLAYERBOTS end
     virtual void UpdateAreaDependentAuras() = 0;
     [[nodiscard]] virtual uint32 GetCleaningFlags() const = 0;
     virtual void   SetCleaningFlags(uint32 flags) = 0;
     virtual void   ResetEventSeasonalQuests(uint16 event_id) = 0;
     [[nodiscard]] virtual std::string const& GetRealmName() const = 0;
     virtual void SetRealmName(std::string name) = 0;
-//MOD_PLAYERBOTS
-    virtual SQLQueryHolderCallback& AddQueryHolderCallback(SQLQueryHolderCallback&& callback) = 0;
-//MOD_PLAYERBOTS end
     virtual void ReloadRBAC() = 0;
 };
 
