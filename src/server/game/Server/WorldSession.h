@@ -30,10 +30,8 @@
 #include "DatabaseEnv.h"
 #include "Duration.h"
 #include "GossipDef.h"
-//MOD_PLAYERBOTS
-#include "QueryHolder.h"
-//MOD_PLAYERBOTS end
 #include "Packet.h"
+#include "QueryHolder.h"
 #include "SharedDefines.h"
 #include "World.h"
 #include <map>
@@ -431,7 +429,9 @@ struct PacketCounter
 class WorldSession
 {
 public:
-    WorldSession(uint32 id, std::string&& name, uint32 accountFlags, std::shared_ptr<WorldSocket> sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter, bool skipQueue, uint32 TotalTime, bool is_bot = false);
+    WorldSession(uint32 id, std::string&& name, uint32 accountFlags, std::shared_ptr<WorldSocket> sock,
+        AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruiter, bool isARecruiter,
+        bool skipQueue, uint32 TotalTime);
     ~WorldSession();
 
     uint32 GetAccountFlags() const { return _accountFlags; }
@@ -1232,13 +1232,6 @@ public:                                                 // opcodes handlers
     std::unique_ptr<WorldPacket> NextQueuedPacket();
 
     [[nodiscard]] bool IsHeadless() const { return _headless; }
-//MOD_PLAYERBOTS    
-
-    [[nodiscard]] bool IsBot() const
-    {
-        return _isBot;
-    }
-//MOD_PLAYERBOTS end
 
 private:
     QueryCallbackProcessor _queryProcessor;
@@ -1355,10 +1348,6 @@ private:
     uint32 _orderCounter;
 
     bool const _headless;
-    
-//MOD_PLAYERBOTS
-    bool _isBot;
-//MOD_PLAYERBOTS end 
 
     WorldSession(WorldSession const& right) = delete;
     WorldSession& operator=(WorldSession const& right) = delete;
