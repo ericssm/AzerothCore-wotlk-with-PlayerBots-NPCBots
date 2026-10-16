@@ -368,6 +368,9 @@ public:
             uint8 locale = 0;
             for (; locale < TOTAL_LOCALES; ++locale)
             {
+                if (!IsLocaleRegistered(LocaleConstant(locale)))
+                    continue;
+
                 name = skillInfo->name[locale];
                 if (!name || !*name)
                     continue;

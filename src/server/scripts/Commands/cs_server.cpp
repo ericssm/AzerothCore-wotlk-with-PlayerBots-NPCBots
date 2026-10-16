@@ -196,6 +196,9 @@ public:
 
         for (uint8 i = 0; i < TOTAL_LOCALES; ++i)
         {
+            if (!IsLocaleRegistered(LocaleConstant(i)))
+                continue;
+
             LocaleConstant locale = static_cast<LocaleConstant>(i);
             if (locale == defaultLocale)
                 continue;
@@ -207,6 +210,9 @@ public:
         std::string availableLocales;
         for (uint8 i = 0; i < TOTAL_LOCALES; ++i)
         {
+            if (!IsLocaleRegistered(LocaleConstant(i)))
+                continue;
+
             if (!(availableLocalesMask & (1 << i)))
                 continue;
 
