@@ -1790,7 +1790,6 @@ public:
 
     GraveyardStruct const* GetClosestGraveyard(Player* player) override;
 
-#ifdef MOD_NPCERBOTS
     //npcbot
     GraveyardStruct const* GetClosestGraveyardForBot(Creature* bot) const override;
     void AddBot(Creature* bot) override;
@@ -1805,9 +1804,7 @@ public:
     void EventBotDefendsPoint(Creature* bot, uint32 object);
     BG_AV_NodeInfo const (&GetNodes() const)[BG_AV_NODES_MAX] { return m_Nodes; }
     uint32 GetObjectThroughNodeForBot(BG_AV_Nodes node, bool log = false) { return GetObjectThroughNode(node, log); }
-    //TeamId GetMineOwner(uint8 mine_idx) const { return m_Mine_Owner[mine_idx]; }
     //end npcbot
-#endif
 
     /* achievement req. */
     bool IsBothMinesControlledByTeam(TeamId teamId) const;
@@ -1840,13 +1837,14 @@ private:
     void DePopulateNode(BG_AV_Nodes node, bool ignoreSpiritGuid = false);
 
     BG_AV_Nodes GetNodeThroughObject(uint32 object);
-#ifdef MOD_NPCERBOTS    //npcbot
-    uint32 GetObjectThroughNode(BG_AV_Nodes node, bool log = true) const;
-#else    //npcbot
-
+    //npcbot
+    /*
+    //end npcbot
     uint32 GetObjectThroughNode(BG_AV_Nodes node);
-
-#endif    //end npcbot
+    //npcbot
+    */
+    uint32 GetObjectThroughNode(BG_AV_Nodes node, bool log = true) const;
+    //end npcbot
     bool IsTower(BG_AV_Nodes node) { return m_Nodes[node].Tower; }
 
     uint8 GetAttackString(BG_AV_Nodes node, TeamId teamId);

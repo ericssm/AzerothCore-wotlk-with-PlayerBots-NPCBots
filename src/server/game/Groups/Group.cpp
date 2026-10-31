@@ -2288,7 +2288,7 @@ void Group::UpdatePlayerOutOfRange(Player* player)
 
     for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
     {
-        Player* member = itr->GetSource();
+        Player const* member = itr->GetSource();
         if (member && (!member->IsInMap(player) || !member->IsWithinDist(player, member->GetSightRange(player), false)))
             member->SendDirectMessage(&data);
     }

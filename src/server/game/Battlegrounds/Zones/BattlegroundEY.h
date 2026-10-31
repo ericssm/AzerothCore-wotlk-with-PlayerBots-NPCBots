@@ -348,29 +348,6 @@ protected:
     uint32 FlagCaptures = 0;
 };
 
-struct CaptureEYPointInfo
-{
-    CaptureEYPointInfo() : _ownerTeamId(TEAM_NEUTRAL), _barStatus(BG_EY_PROGRESS_BAR_STATE_MIDDLE), _areaTrigger(0)
-    {
-        _playersCount[TEAM_ALLIANCE] = 0;
-        _playersCount[TEAM_HORDE] = 0;
-    }
-
-    Player* player = nullptr;
-#ifdef MOD_NPCERBOTS    //npcbot
-    Creature* bot = nullptr;
-#endif    //end npcbot
-
-    TeamId _ownerTeamId;
-    int8 _barStatus;
-    uint32 _areaTrigger;
-    int8 _playersCount[PVP_TEAMS_COUNT];
-
-    bool IsUnderControl(TeamId teamId) const { return _ownerTeamId == teamId; }
-    bool IsUnderControl() const { return _ownerTeamId != TEAM_NEUTRAL; }
-    bool IsUncontrolled() const { return _ownerTeamId == TEAM_NEUTRAL; }
-};
-
 class AC_GAME_API BattlegroundEY : public Battleground
 {
 public:
@@ -402,7 +379,6 @@ public:
     void SetDroppedFlagGUID(ObjectGuid guid, TeamId /*teamId*/ = TEAM_NEUTRAL) override  { _droppedFlagGUID = guid; }
     ObjectGuid GetDroppedFlagGUID() const { return _droppedFlagGUID; }
 
-#ifdef MOD_NPCERBOTS
     //npcbot
     void AddBot(Creature* bot) override;
     GraveyardStruct const* GetClosestGraveyardForBot(Creature* bot) const override;
@@ -420,7 +396,6 @@ public:
     int8 GetPlayersCountNearPoint(uint8 point, TeamId teamId) const { return _capturePointInfo[point]._playersCount[teamId]; }
     TeamId GetPointOwner(uint8 point) const { return _capturePointInfo[point]._ownerTeamId; }
     //end npcbot
-#endif
 
     /* Battleground Events */
     void EventPlayerClickedOnFlag(Player* player, GameObject* gameObject) override;
@@ -429,8 +404,6 @@ public:
     /* achievement req. */
     bool AllNodesConrolledByTeam(TeamId teamId) const override;
     TeamId GetPrematureWinner() override;
-
-    [[nodiscard]] CaptureEYPointInfo const& GetCapturePointInfo(uint32 node) const { return _capturePointInfo[node]; }
 
 private:
     void PostUpdateImpl(uint32 diff) override;
@@ -447,7 +420,37 @@ private:
     /* Scorekeeping */
     void AddPoints(TeamId teamId, uint32 points);
 
-    CaptureEYPointInfo _capturePointInfo[EY_POINTS_MAX];
+public:
+    struct CapturePointInfo
+    {
+        CapturePointInfo() : _ownerTeamId(TEAM_NEUTRAL), _barStatus(BG_EY_PROGRESS_BAR_STATE_MIDDLE), _areaTrigger(0)
+        {
+            _playersCount[TEAM_ALLIANCE] = 0;
+            _playersCount[TEAM_HORDE] = 0;
+        }
+
+        TeamId _ownerTeamId;
+        int8 _barStatus;
+        uint32 _areaTrigger;
+        int8 _playersCount[PVP_TEAMS_COUNT];
+        ObjectGuid _playerGuid;
+        //npcbot
+        Creature* bot = nullptr;
+        //end npcbot
+
+        bool IsUnderControl(TeamId teamId) const { return _ownerTeamId == teamId; }
+        bool IsUnderControl() const { return _ownerTeamId != TEAM_NEUTRAL; }
+        bool IsUncontrolled() const { return _ownerTeamId == TEAM_NEUTRAL; }
+    };
+
+    [[nodiscard]] CapturePointInfo const& GetCapturePointInfo(uint32 node) const
+    {
+        ASSERT(node < EY_POINTS_MAX);
+        return _capturePointInfo[node];
+    }
+
+private:
+    CapturePointInfo _capturePointInfo[EY_POINTS_MAX];
     EventMap _bgEvents;
     uint32 _honorTics;
     uint8 _ownedPointsCount[PVP_TEAMS_COUNT];
