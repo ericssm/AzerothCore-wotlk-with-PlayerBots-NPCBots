@@ -3298,6 +3298,7 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
         }
 
         item_owner->RemoveTradeableItem(itemTarget);
+        itemTarget->SetNotRefundable(item_owner);
         itemTarget->ClearSoulboundTradeable(item_owner);
     }
 }
@@ -3366,6 +3367,7 @@ void Spell::EffectEnchantItemPrismatic(SpellEffIndex effIndex)
     item_owner->ApplyEnchantment(itemTarget, PRISMATIC_ENCHANTMENT_SLOT, true);
 
     item_owner->RemoveTradeableItem(itemTarget);
+    itemTarget->SetNotRefundable(item_owner);
     itemTarget->ClearSoulboundTradeable(item_owner);
 }
 
@@ -3533,6 +3535,7 @@ void Spell::EffectEnchantItemTmp(SpellEffIndex effIndex)
     }
 
     item_owner->RemoveTradeableItem(itemTarget);
+    itemTarget->SetNotRefundable(item_owner);
     itemTarget->ClearSoulboundTradeable(item_owner);
 }
 
